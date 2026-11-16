@@ -2,7 +2,6 @@ using Animanager.Core;
 using Animanager.Core.Models;
 using Animanager.Core.Pipeline;
 using Animanager.Core.Storage;
-using Animanager.UI.Workspace;
 using Godot;
 using static Animanager.UI.Controls.AppControls;
 
@@ -30,8 +29,12 @@ public partial class MainShell
     private AssetCollection[] _collections = [];
     private string? _assetAnchor;
     private MenuButton _assetActions = null!;
+    private PopupMenu _assetContextMenu = null!;
     private int _selectionEpoch, _mouseEpoch = -1;
     private Label _selectionCount = null!;
+
+    private const int RestoreAssetsAction = 2, PurgeAssetsAction = 3, TrashAssetsAction = 9;
+    private const string TrashAssetsLabel = "删除（移入回收站）…";
 
     internal LibraryManager Libraries => _libraries;
     internal string[] SelectedAssetIds => _assetSelection.ToArray();
@@ -47,6 +50,7 @@ public partial class MainShell
         var registry = test
             ? Path.Combine(Path.GetTempPath(), "Animanager-test-registries", Guid.NewGuid().ToString("N"), "libraries.json")
             : ProjectSettings.GlobalizePath("user://libraries.json");
+        _preferencesPath = Path.Combine(Path.GetDirectoryName(registry)!, "workspace.json");
         _libraries = new(registry, new BlenderPipeline(RuntimePaths.Bundled("BuiltinAssets/Scripts/blender_convert.py")));
         if (uniqueTests) explicitRoot = Path.Combine(explicitRoot ?? defaultRoot, Guid.NewGuid().ToString("N"));
         var startup = _libraries.OpenStartup(explicitRoot, defaultRoot, ProjectSettings.GlobalizePath("user://Library"));
@@ -63,8 +67,6 @@ public partial class MainShell
     private void BeforeLibrarySwitch()
     {
         if (_closing) throw new InvalidOperationException("应用正在关闭。");
-        _saveLayout.Stop();
-        SaveWorkspace();
     }
 
     private void SwitchLibrary(Func<LibrarySession> open)
@@ -88,22 +90,18 @@ public partial class MainShell
         _page = 0;
         _searchTimer.Stop();
         _search.Text = "";
+        _assetContextMenu.Hide();
         ClearAssetPreview();
         _api = session.Api;
         _database = session.Api.Database;
         _dataRoot = session.Root;
         _commands.ChangeLibrary(_api);
         _api.Jobs.Changed += OnWorkspaceJob;
-        _preferencesPath = Path.Combine(_dataRoot, "workspace.json");
-        _preferences = WorkspacePreferences.Load(_preferencesPath, out _workspaceError);
-        _display.SetScale(_preferences.Scale);
-        Theme = StudioTheme.Create(_preferences.Comfortable);
         _workspace.CancelDrag();
-        _workspace.Restore(_preferences.Layout);
         _libraryDialog.Hide();
         Refresh();
         RefreshJobs();
-        SetStatus("已打开 " + session.Identity.Name + " · " + session.Root + "\n" + _workspaceError);
+        SetStatus("已打开 " + session.Identity.Name + " · " + session.Root);
     }
 
     private void BuildLibraryDialogs()
@@ -157,7 +155,7 @@ public partial class MainShell
         _entryFolder = Dialog(FileDialog.FileModeEnum.OpenDir, "选择目录");
         _entryFolder.DirSelected += path => _entryFirst.Text = path;
         _entryDialog.Confirmed += () => LibraryAction(() => _submitEntry?.Invoke(_entryFirst.Text, _entrySecond.Text));
-        _approvalDialog = new ConfirmationDialog { OkButtonText = "确认", CancelButtonText = "取消" };
+        _approvalDialog = new ConfirmationDialog { Name = "OperationApproval", OkButtonText = "确认", CancelButtonText = "取消" };
         AddChild(_approvalDialog);
         _approvalText = new RichTextLabel { CustomMinimumSize = new(220, 96), SelectionEnabled = true };
         _approvalDialog.AddChild(_approvalText);
@@ -338,6 +336,11 @@ public partial class MainShell
 
     private void HandleAssetInput(InputEvent input)
     {
+        if (input is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: false } context)
+        {
+            ShowAssetContextMenu(context.Position);
+            return;
+        }
         if (input is not InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true } mouse) return;
         var index = _list.GetItemAtPosition(mouse.Position, false);
         if (index < 0 || index >= _items.Count) return;
@@ -351,6 +354,26 @@ public partial class MainShell
             ApplyAssetGesture((int)index, control, shift);
             _mouseEpoch = -1;
         }).CallDeferred();
+    }
+
+    private void ShowAssetContextMenu(Vector2 localPosition)
+    {
+        var index = _list.GetItemAtPosition(localPosition, false);
+        if (index < 0 || index >= _items.Count) return;
+        _list.AcceptEvent();
+        if (!_assetSelection.Contains(_items[index].Id)) SelectOnly(index);
+
+        _assetContextMenu.Clear();
+        if (_category == "Trash")
+        {
+            _assetContextMenu.AddItem("恢复所选…", RestoreAssetsAction);
+            _assetContextMenu.AddItem("永久删除所选…", PurgeAssetsAction);
+        }
+        else _assetContextMenu.AddItem(TrashAssetsLabel, TrashAssetsAction);
+
+        var parentPosition = GetWindow().GetFinalTransform() * (_list.GetGlobalTransformWithCanvas() * localPosition);
+        _assetContextMenu.ResetSize();
+        _assetContextMenu.PopupOnParent(new Rect2I((Vector2I)parentPosition, Vector2I.One));
     }
 
     private void ApplyAssetGesture(int index, bool control, bool shift)
@@ -453,6 +476,9 @@ public partial class MainShell
         parent.AddChild(_assetActions);
         _assetActions.AboutToPopup += FillAssetMenu;
         _assetActions.GetPopup().IdPressed += id => LibraryAction(() => AssetAction((int)id));
+        _assetContextMenu = new PopupMenu { Name = "AssetContextMenu" };
+        AddChild(_assetContextMenu);
+        _assetContextMenu.IdPressed += id => LibraryAction(() => AssetAction((int)id));
     }
 
     private void FillAssetMenu()
@@ -465,8 +491,8 @@ public partial class MainShell
         Add("选择当前页", 1, _items.Count > 0);
         if (_category == "Trash")
         {
-            Add("恢复所选", 2, selected);
-            Add("永久删除所选…", 3, selected);
+            Add("恢复所选…", RestoreAssetsAction, selected);
+            Add("永久删除所选…", PurgeAssetsAction, selected);
             return;
         }
         Add("重命名…", 4, _assetSelection.Count == 1);
@@ -474,7 +500,7 @@ public partial class MainShell
         Add("批量移除标签…", 6, selected);
         Add("收藏所选…", 7, selected);
         Add("取消所选收藏…", 8, selected);
-        Add("移入回收站…", 9, selected);
+        Add(TrashAssetsLabel, TrashAssetsAction, selected);
         menu.AddSeparator();
         Add("新建集合…", 10, _api != null);
         Add("重命名当前集合…", 11, _collections.Any(c => c.Id == _category));
@@ -503,8 +529,8 @@ public partial class MainShell
         {
             case 0: ClearAssetSelection(); SyncAssetSelection(); ClearAssetPreview(); break;
             case 1: _assetSelection.UnionWith(_items.Select(a => a.Id)); SyncAssetSelection(); break;
-            case 2: ShowApproval("恢复资产", scope, () => Apply(() => api.SetTrash(ids, false), true)); break;
-            case 3:
+            case RestoreAssetsAction: ShowApproval("恢复资产", scope, () => Apply(() => api.SetTrash(ids, false), true)); break;
+            case PurgeAssetsAction:
                 ShowApproval("永久删除资产", scope + "\n此操作无法从回收站恢复。共享对象及保留修订继续保存。",
                     () => StartLibraryTask(async () =>
                     {
@@ -525,7 +551,7 @@ public partial class MainShell
             case 8:
                 ShowApproval(action == 7 ? "收藏所选" : "取消所选收藏", scope, () => Apply(() => api.SetFavorites(ids, action == 7)));
                 break;
-            case 9: ShowApproval("移入回收站", scope, () => Apply(() => api.SetTrash(ids, true), true)); break;
+            case TrashAssetsAction: ShowApproval("移入回收站", scope, () => Apply(() => api.SetTrash(ids, true), true)); break;
             case 10:
                 ShowEntry("新建集合", "集合名称", "", null, "", false, (name, _) => Apply(() => api.CreateCollection(name)));
                 break;

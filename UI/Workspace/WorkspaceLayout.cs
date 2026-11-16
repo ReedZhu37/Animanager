@@ -134,6 +134,20 @@ public sealed class WorkspacePreferences
     public int Y { get; set; }
     public bool HasPosition { get; set; }
     public bool Maximized { get; set; }
+
+    public static WorkspacePreferences LoadForApp(string appPath, string? legacyPath, out string error)
+    {
+        if (File.Exists(appPath) || legacyPath == null || !File.Exists(legacyPath)) return Load(appPath, out error);
+        var preferences = Load(legacyPath, out error);
+        if (error.Length == 0)
+        {
+            try { preferences.Save(appPath); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            { error = "工作区布局无法迁移到应用设置：" + ex.Message; }
+        }
+        return preferences;
+    }
+
     public static WorkspacePreferences Load(string path,out string error)
     {
         error="";
@@ -152,7 +166,7 @@ public sealed class WorkspacePreferences
     }
     public void Save(string path)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);var temp=path+".tmp";
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);var temp=path+"."+Guid.NewGuid().ToString("N")+".tmp";
         try{File.WriteAllText(temp,JsonSerializer.Serialize(this,new JsonSerializerOptions{WriteIndented=true}));File.Move(temp,path,true);}
         finally{if(File.Exists(temp))File.Delete(temp);}
     }

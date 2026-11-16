@@ -112,6 +112,7 @@ public partial class MainShell : Control
             }
             else if(_items.Count>0)SelectOnly(0);
             if(startup.Error.Length>0)SetStatus(startup.Error);
+            else if(_workspaceError.Length>0)SetStatus(_workspaceError);
             else if(!startup.Bootstrap)SetStatus("本地资产库已就绪 · 拖入文件或文件夹开始导入");
             var previewAsset=OS.GetCmdlineUserArgs().FirstOrDefault(a=>a.StartsWith("--preview-asset="));
             if(previewAsset!=null){_commands.Load(previewAsset[16..]);await _commands.PendingTask;}

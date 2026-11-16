@@ -33,8 +33,8 @@ public partial class MainShell
 
     private void InitializeDisplay()
     {
-        _preferencesPath=_dataRoot.Length==0?"":Path.Combine(_dataRoot,"workspace.json");
-        _preferences=WorkspacePreferences.Load(_preferencesPath,out _workspaceError);
+        var legacyPath=_dataRoot.Length==0?null:Path.Combine(_dataRoot,"workspace.json");
+        _preferences=WorkspacePreferences.LoadForApp(_preferencesPath,legacyPath,out _workspaceError);
         _display=new DisplayScaleController();AddChild(_display);_display.SetScale(_preferences.Scale);
         Theme=StudioTheme.Create(_preferences.Comfortable);GetWindow().Title="Animanager";
         if(DisplayServer.GetName()!="headless"&&!OS.GetCmdlineUserArgs().Contains("--interface-test"))
@@ -187,7 +187,7 @@ public partial class MainShell
         _preferences.Layout=_workspace.Layout;
         if(GetWindow().Mode==Window.ModeEnum.Windowed){_preferences.Width=GetWindow().Size.X;_preferences.Height=GetWindow().Size.Y;_preferences.X=GetWindow().Position.X;_preferences.Y=GetWindow().Position.Y;_preferences.HasPosition=true;}
         _preferences.Maximized=GetWindow().Mode==Window.ModeEnum.Maximized;
-        try{using var activity=_api?.BeginActivity();_preferences.Save(_preferencesPath);}catch(Exception ex){if(!_closing&&_api?.LibraryBusy!=true)SetStatus("布局无法保存："+ex.Message);}
+        try{_preferences.Save(_preferencesPath);}catch(Exception ex){if(!_closing)SetStatus("布局无法保存："+ex.Message);}
     }
     private void ConnectWorkspace()
     {

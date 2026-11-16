@@ -31,6 +31,11 @@ public static class InterfaceTests
             var preferences=new WorkspacePreferences{Layout=layout,Scale=1.5,SavedLayouts=new(){{"中文布局",layout.Clone()}}};var saved=Path.Combine(root,"workspace.json");preferences.Save(saved);
             var reloaded=WorkspacePreferences.Load(saved,out var error);
             Check(error.Length==0&&reloaded.Scale==1.5&&reloaded.SavedLayouts.ContainsKey("中文布局"),"named layout and scale survive a filesystem round trip");
+            var appPreferences=Path.Combine(root,"app-settings","workspace.json");
+            var migrated=WorkspacePreferences.LoadForApp(appPreferences,saved,out error);
+            Check(error.Length==0&&migrated.SavedLayouts.ContainsKey("中文布局")&&File.Exists(appPreferences),"existing library layout is imported into app preferences");
+            new WorkspacePreferences{Scale=2}.Save(saved);
+            Check(WorkspacePreferences.LoadForApp(appPreferences,saved,out error).Scale==1.5&&error.Length==0,"app layout takes precedence over a different library's legacy preferences");
             File.WriteAllText(saved,"{broken");var fallback=WorkspacePreferences.Load(saved,out error);
             Check(error.Length>0&&fallback.Layout.GroupFor("assets")!=null,"damaged configuration recovers to usable defaults");
             var clamped=DisplayScaleController.ClampRect(new(new(4000,2000),new(2000,1200)),new(new(0,0),new(1280,720)));
@@ -72,6 +77,60 @@ public static class InterfaceTests
             owner._UnhandledKeyInput(new InputEventKey{Keycode=Key.Space,Pressed=true});
             Check(!preview.Playing&&search.Text=="中文名称 空格","typing context does not trigger viewport playback");
             owner.DisplayScale.SetScale(1);window.Size=new(1440,900);host.UsePreset("browse");await Frames(30);
+
+            search.Text="";
+            await api.ImportAsync([RuntimePaths.Bundled("BuiltinAssets/Samples")]);
+            commands.Load("StudioBot_Walk");await commands.PendingTask;
+            host.ShowPanel("assets");await Frames(30);
+            var rows=(ItemList)host.Panel("assets").FindChild("AssetRows",true,false)!;
+            var context=(PopupMenu)owner.FindChild("AssetContextMenu",true,false)!;
+            var approval=(ConfirmationDialog)owner.FindChild("OperationApproval",true,false)!;
+            var viewport=owner.GetViewport();
+            if(DisplayServer.GetName()=="headless")viewport.NotifyMouseEntered();
+            async Task ClickRow(int index,MouseButton button,bool ctrl=false)
+            {
+                var point=rows.GetGlobalTransformWithCanvas()*new Vector2(36,rows.GetItemRect(index).GetCenter().Y);
+                if(DisplayServer.GetName()!="headless")
+                {
+                    Input.WarpMouse(point*window.ContentScaleFactor);await Frames(4);Input.FlushBufferedEvents();
+                }
+                using var motion=new InputEventMouseMotion{Position=point,GlobalPosition=point,CtrlPressed=ctrl};
+                using var click=new InputEventMouseButton{Position=point,GlobalPosition=point,ButtonIndex=button,Pressed=true,CtrlPressed=ctrl};
+                using var release=(InputEventMouseButton)click.Duplicate();release.Pressed=false;
+                viewport.PushInput(motion,true);viewport.PushInput(click,true);viewport.PushInput(release,true);
+                await Frames(8);
+            }
+
+            await ClickRow(0,MouseButton.Left);
+            await ClickRow(1,MouseButton.Left,ctrl:true);
+            var selected=api.Search().Items.Take(2).Select(a=>a.Id).ToHashSet();
+            await ClickRow(1,MouseButton.Right);
+            Check(context.Visible&&context.GetItemText(0).Contains("移入回收站")&&selected.SetEquals(owner.SelectedAssetIds),
+                "right-click on a selected row shows Delete and keeps the entire selection");
+            context.Hide();context.EmitSignal(PopupMenu.SignalName.IdPressed,context.GetItemId(0));await Frames(8);
+            Check(approval.Visible&&api.Search(category:"Trash").Total==0,"Delete asks for confirmation before changing assets");
+            approval.Hide();approval.EmitSignal(AcceptDialog.SignalName.Confirmed);await Frames(8);
+            Check(api.Search(category:"Trash").Items.Select(a=>a.Id).ToHashSet().SetEquals(selected),"right-click Delete moves exactly the selected assets to Trash");
+
+            var trash=Preview3DViewport.Descendants(host.Panel("navigation")).OfType<Button>().Single(b=>b.Text=="回收站");
+            trash.EmitSignal(BaseButton.SignalName.Pressed);await Frames(8);
+            await ClickRow(0,MouseButton.Right);
+            Check(context.Visible&&context.GetItemText(0).Contains("恢复")&&owner.SelectedAssetIds.Length==1,"right-click on an unselected Trash row selects it and offers Restore");
+            var restoredId=owner.SelectedAssetIds.Single();
+            context.Hide();context.EmitSignal(PopupMenu.SignalName.IdPressed,context.GetItemId(0));
+            approval.Hide();approval.EmitSignal(AcceptDialog.SignalName.Confirmed);await Frames(8);
+            Check(api.Database.Find(restoredId)!=null&&api.Search(category:"Trash").Total==1,"right-click Restore applies to the selected Trash row");
+
+            var separateRoot=Path.Combine(Path.GetDirectoryName(api.Storage.Root)!,"interface-switch-"+Guid.NewGuid().ToString("N"));
+            var separate=owner.Libraries.Create(separateRoot,"Layout switch check");
+            new WorkspacePreferences{Scale=2}.Save(Path.Combine(separateRoot,"workspace.json"));
+            host.UsePreset("animation");host.Maximize("bones");owner.DisplayScale.SetScale(1.25);await Frames();
+            var activeLayout=host.Layout;
+            var activeSize=window.Size;
+            commands.LibraryOpen(separate.Id);await Frames();
+            Check(owner.Libraries.Active?.Identity.Id==separate.Id&&ReferenceEquals(activeLayout,host.Layout)&&host.MaximizedPanel=="bones"&&
+                owner.DisplayScale.RequestedScale==1.25&&window.Size==activeSize,"switching libraries preserves dock layout, maximized panel, window size and scale");
+
             var report=$"PASS: {checks.Count} interface checks\n"+string.Join("\n",checks)+"\nDisplay server: "+DisplayServer.GetName()+"\nDPI source: "+owner.DisplayScale.Source;
             File.WriteAllText(Path.Combine(root,"results.txt"),report);GD.Print(report);owner.GetTree().Quit(0);
         }
