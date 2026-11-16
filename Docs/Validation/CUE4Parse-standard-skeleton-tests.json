@@ -1,0 +1,27 @@
+{
+  "checks": [
+    "shuffled tracks identify ue4-mannequin without a fixed directory",
+    "unknown missing Skeleton is not inferred solely from names: ue4-mannequin",
+    "partial tracks without a Skeleton are rejected: ue4-mannequin",
+    "explicit wrong family is rejected: ue4-mannequin",
+    "source hierarchy and bind pose match: ue4-mannequin",
+    "same bone names with custom proportions are rejected: ue4-mannequin",
+    "reparented standard bone is rejected: ue4-mannequin",
+    "additional source bones are retained in the skin: ue4-mannequin",
+    "animation channels map by bone name, including extra tracks: ue4-mannequin",
+    "inverse bind matrices cover every appended joint: ue4-mannequin",
+    "partial animation is accepted with a validated full source Skeleton: ue4-mannequin",
+    "shuffled tracks identify ue5-mannequin without a fixed directory",
+    "unknown missing Skeleton is not inferred solely from names: ue5-mannequin",
+    "partial tracks without a Skeleton are rejected: ue5-mannequin",
+    "explicit wrong family is rejected: ue5-mannequin",
+    "source hierarchy and bind pose match: ue5-mannequin",
+    "same bone names with custom proportions are rejected: ue5-mannequin",
+    "reparented standard bone is rejected: ue5-mannequin",
+    "additional source bones are retained in the skin: ue5-mannequin",
+    "animation channels map by bone name, including extra tracks: ue5-mannequin",
+    "inverse bind matrices cover every appended joint: ue5-mannequin",
+    "partial animation is accepted with a validated full source Skeleton: ue5-mannequin"
+  ],
+  "error": ""
+}

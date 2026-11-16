@@ -1,0 +1,5182 @@
+[
+  {
+    "id": "a18bae1a5d7d4a0ea3acb1445f91d65b",
+    "name": "Nodachi__Animations__Sequence__09_Turn__03_Turn_Block__AS_Turn_Block_90_R_Seq",
+    "position": 2.107342389479072e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f21a19968f414bbd9d83903acc9d7f4a",
+    "name": "Nodachi__Animations__Sequence__09_Turn__03_Turn_Block__AS_Turn_Block_90_L_Seq",
+    "position": 3.4659716874330115e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6ed902a2043b48feb0c16d9d26c67778",
+    "name": "Nodachi__Animations__Sequence__09_Turn__03_Turn_Block__AS_Turn_Block_180_R_Seq",
+    "position": 2.356080486265455e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "6699766994c24b678b70f49ca9481174",
+    "name": "Nodachi__Animations__Sequence__09_Turn__03_Turn_Block__AS_Turn_Block_180_L_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a0011d28b8a94583b2a0236125e9cb44",
+    "name": "Nodachi__Animations__Sequence__09_Turn__02_Turn_Combat__AS_Turn_Combat_90_R_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "12a5ff905f0f4c68b73417c7cf9b8977",
+    "name": "Nodachi__Animations__Sequence__09_Turn__02_Turn_Combat__AS_Turn_Combat_90_L_Seq",
+    "position": 2.7939677238464355e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "44f530656fd3498b85385f8146de416d",
+    "name": "Nodachi__Animations__Sequence__09_Turn__02_Turn_Combat__AS_Turn_Combat_180_R_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "07700b474b7641ee81a1101ca32569bb",
+    "name": "Nodachi__Animations__Sequence__09_Turn__02_Turn_Combat__AS_Turn_Combat_180_L_Seq",
+    "position": 3.3527612686157227e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "89a313ca755d48ffa57a203121a14608",
+    "name": "Nodachi__Animations__Sequence__09_Turn__01_Turn__AS_Turn_90_R_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "a5696a38ac334951946bf90b8758a185",
+    "name": "Nodachi__Animations__Sequence__09_Turn__01_Turn__AS_Turn_90_L_Seq",
+    "position": 2.107342389479072e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "50db59e47a7745509882d873a26f7a23",
+    "name": "Nodachi__Animations__Sequence__09_Turn__01_Turn__AS_Turn_180_R_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "30bdbd11e30a48d1b2a7aad91d3f282f",
+    "name": "Nodachi__Animations__Sequence__09_Turn__01_Turn__AS_Turn_180_L_Seq",
+    "position": 3.3527612686157227e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d294ebea72334794a19079d25b6a1f36",
+    "name": "Nodachi__Animations__Sequence__08_Hit__14_Block__AS_Parry_R_Seq",
+    "position": 1.2013700256829907e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "0d36fbe240244da29632bbb1b883697f",
+    "name": "Nodachi__Animations__Sequence__08_Hit__14_Block__AS_Parry_L_Seq",
+    "position": 1.6858739115832577e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d8319300842744b69fcee684853c722b",
+    "name": "Nodachi__Animations__Sequence__08_Hit__14_Block__AS_Block_Start_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "b1182661dffa4e2ca415b8586fa9bea9",
+    "name": "Nodachi__Animations__Sequence__08_Hit__14_Block__AS_Block_Loop_Seq",
+    "position": 2.356080486265455e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7a314810e55e41b9bd5ff533e09975fb",
+    "name": "Nodachi__Animations__Sequence__08_Hit__14_Block__AS_Block_Hit_Seq",
+    "position": 3.4142850324769825e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "972d3b9d575147d6be23ebb1f2007eb8",
+    "name": "Nodachi__Animations__Sequence__08_Hit__14_Block__AS_Block_Hit_Break_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "a06f7502faee492aab73d154ad54554e",
+    "name": "Nodachi__Animations__Sequence__08_Hit__14_Block__AS_Block_End_Seq",
+    "position": 8.56006536764653e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "c71f5399e29e4b94afecfbc001e06521",
+    "name": "Nodachi__Animations__Sequence__08_Hit__13_Knock_Down_Combat__AS_Knock_Down_Combat_Start_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0e745bcb793e4effa09040c5324e1abe",
+    "name": "Nodachi__Animations__Sequence__08_Hit__13_Knock_Down_Combat__AS_Knock_Down_Combat_Loop_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a24c04282ced4a939e976779f3716ab4",
+    "name": "Nodachi__Animations__Sequence__08_Hit__13_Knock_Down_Combat__AS_Knock_Down_Combat_End_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "315656d3685e499781e70a67b30ed66d",
+    "name": "Nodachi__Animations__Sequence__08_Hit__13_Knock_Down_Combat__AS_Knock_Down_Combat_Death_F_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d2f9fb056e164b10928dab0c74120a89",
+    "name": "Nodachi__Animations__Sequence__08_Hit__13_Knock_Down_Combat__AS_Knock_Down_Combat_Death_B_Seq",
+    "position": 6.365778659755961e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "dcd863b36a5147ba95d4b942e6df43e2",
+    "name": "Nodachi__Animations__Sequence__08_Hit__12_Knock_Down__AS_Knock_Down_Start_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f1cf889f91514da5aa44c98da52db456",
+    "name": "Nodachi__Animations__Sequence__08_Hit__12_Knock_Down__AS_Knock_Down_Loop_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "83f76be3d6ee42a581d402bea632b239",
+    "name": "Nodachi__Animations__Sequence__08_Hit__12_Knock_Down__AS_Knock_Down_End_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "69be3f7d2a2c49949b5d4d59738f2fd6",
+    "name": "Nodachi__Animations__Sequence__08_Hit__12_Knock_Down__AS_Knock_Down_Death_F_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c04cc1c3f84743f69f33c6a366e10673",
+    "name": "Nodachi__Animations__Sequence__08_Hit__12_Knock_Down__AS_Knock_Down_Death_B_Seq",
+    "position": 6.365778659755961e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "453219fcccb348c3b5321d6eb3b40d01",
+    "name": "Nodachi__Animations__Sequence__08_Hit__11_Get_Up__AS_Get_Up_F_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9aa6b08942c842d8b968ccf7208eea5b",
+    "name": "Nodachi__Animations__Sequence__08_Hit__11_Get_Up__AS_Get_Up_Combat_F_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "eaa1386ae7374391a98fa5053758b9dc",
+    "name": "Nodachi__Animations__Sequence__08_Hit__11_Get_Up__AS_Get_Up_Combat_B_Seq",
+    "position": 1.8431718729061686e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "48c6d9a2d88b43acbe631729f435d4f9",
+    "name": "Nodachi__Animations__Sequence__08_Hit__11_Get_Up__AS_Get_Up_B_Seq",
+    "position": 1.7441361421788315e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "618f10f9d950491ab884cd3ed2ac4ba6",
+    "name": "Nodachi__Animations__Sequence__08_Hit__10_Hit_Combat_Air_Large_To_Floor__AS_Hit_Combat_Air_Large_To_Floor_Start_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "616d29388bf54dc392b70649d5e3bafb",
+    "name": "Nodachi__Animations__Sequence__08_Hit__10_Hit_Combat_Air_Large_To_Floor__AS_Hit_Combat_Air_Large_To_Floor_Loop_Seq",
+    "position": 7.450580596923828e-09,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "31c3328945e74deab5c2e8c8af3f5fe1",
+    "name": "Nodachi__Animations__Sequence__08_Hit__10_Hit_Combat_Air_Large_To_Floor__AS_Hit_Combat_Air_Large_To_Floor_End_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0,
+    "state": "animated"
+  },
+  {
+    "id": "fceaeefc571d436d8f3bd3ab69309577",
+    "name": "Nodachi__Animations__Sequence__08_Hit__09_Hit_Air_Large_To_Floor__AS_Hit_Air_Large_To_Floor_Start_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "522f5764cb7341d182f1fded22de3c05",
+    "name": "Nodachi__Animations__Sequence__08_Hit__09_Hit_Air_Large_To_Floor__AS_Hit_Air_Large_To_Floor_Loop_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7c099ab295f1483587d163b06b1fce09",
+    "name": "Nodachi__Animations__Sequence__08_Hit__09_Hit_Air_Large_To_Floor__AS_Hit_Air_Large_To_Floor_End_Seq",
+    "position": 2.60770320892334e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "3e3732547e944a7c8875966fb9e5c9d9",
+    "name": "Nodachi__Animations__Sequence__08_Hit__08_Hit_Combat_Large_To_Air__AS_Hit_Combat_Air_Large_To_Air_Seq",
+    "position": 1.4901161193847656e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f0ce850080144a9599f6d9e15aa84b74",
+    "name": "Nodachi__Animations__Sequence__08_Hit__07_Hit_Large_To_Air__AS_Hit_Air_Large_To_Air_Seq",
+    "position": 1.4901161193847656e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "752e42d3941a42f99ae24bded716d925",
+    "name": "Nodachi__Animations__Sequence__08_Hit__06_Hit_Large_Combat__AS_Hit_Combat_Large_R_Seq",
+    "position": 6.365778659755961e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6561bad562da4248b05b212b9d67e182",
+    "name": "Nodachi__Animations__Sequence__08_Hit__06_Hit_Large_Combat__AS_Hit_Combat_Large_L_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "2cc72eebea0549c08aeeded1cee9a2d7",
+    "name": "Nodachi__Animations__Sequence__08_Hit__06_Hit_Large_Combat__AS_Hit_Combat_Large_F_Seq",
+    "position": 6.505939609269262e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "215300db60de44ffa8e60dcc53b9a934",
+    "name": "Nodachi__Animations__Sequence__08_Hit__06_Hit_Large_Combat__AS_Hit_Combat_Large_Death_Seq",
+    "position": 2.5981063345170696e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a22a8403a94b49b0b6b717f1bb27dd05",
+    "name": "Nodachi__Animations__Sequence__08_Hit__06_Hit_Large_Combat__AS_Hit_Combat_Large_B_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5db8b967a9644cbd8d35574f59745788",
+    "name": "Nodachi__Animations__Sequence__08_Hit__05_Hit_Large__AS_Hit_Large_R_Seq",
+    "position": 2.2351741790771484e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "1c442311e7e24c969fb38d6f1b6d63c2",
+    "name": "Nodachi__Animations__Sequence__08_Hit__05_Hit_Large__AS_Hit_Large_L_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b9fbdb2c1de2459eb258972b40f26f7b",
+    "name": "Nodachi__Animations__Sequence__08_Hit__05_Hit_Large__AS_Hit_Large_F_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "380061bf56c44863a75d1ad69a8ee0a5",
+    "name": "Nodachi__Animations__Sequence__08_Hit__05_Hit_Large__AS_Hit_Large_Death_Seq",
+    "position": 2.98395519848782e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9e219e09275c4ef4a46b2208661219fd",
+    "name": "Nodachi__Animations__Sequence__08_Hit__05_Hit_Large__AS_Hit_Large_B_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "5b2cf9334b3e421087adfdfb120979be",
+    "name": "Nodachi__Animations__Sequence__08_Hit__04_Hit_Combat_Air__AS_Hit_Combat_Air_R_Seq",
+    "position": 9.685754776000977e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "558664878f14494c87c54c87b7c68f3f",
+    "name": "Nodachi__Animations__Sequence__08_Hit__04_Hit_Combat_Air__AS_Hit_Combat_Air_L_Seq",
+    "position": 7.450580596923828e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f167ab9196654106a94cfc2b5432a2a8",
+    "name": "Nodachi__Animations__Sequence__08_Hit__04_Hit_Combat_Air__AS_Hit_Combat_Air_F_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "2ac88191d5d0469f90b23bfa0b437533",
+    "name": "Nodachi__Animations__Sequence__08_Hit__04_Hit_Combat_Air__AS_Hit_Combat_Air_B_Seq",
+    "position": 6.146728992462158e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "47c709d4b1424372ad9dc63b81b61f7f",
+    "name": "Nodachi__Animations__Sequence__08_Hit__03_Hit_Air__AS_Hit_Air_R_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "f55fb80eac1540438eaf23b2c7e245ec",
+    "name": "Nodachi__Animations__Sequence__08_Hit__03_Hit_Air__AS_Hit_Air_L_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c919f80d9e114e51a3c8ff797cf7b522",
+    "name": "Nodachi__Animations__Sequence__08_Hit__03_Hit_Air__AS_Hit_Air_F_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f5f9c5b1395f4a13ae679fde8a59a85f",
+    "name": "Nodachi__Animations__Sequence__08_Hit__03_Hit_Air__AS_Hit_Air_B_Seq",
+    "position": 6.146728992462158e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6c166a579676414991617bf340283017",
+    "name": "Nodachi__Animations__Sequence__08_Hit__02_Hit_Combat__AS_Hit_Combat_R_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "cd09ceb7b4f8478ab6b2a04b3f2373bd",
+    "name": "Nodachi__Animations__Sequence__08_Hit__02_Hit_Combat__AS_Hit_Combat_L_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "be97d65563ea4758adaa4e5bb1953e04",
+    "name": "Nodachi__Animations__Sequence__08_Hit__02_Hit_Combat__AS_Hit_Combat_F_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d5ecab28a0914ff3b90549933ee24ef0",
+    "name": "Nodachi__Animations__Sequence__08_Hit__02_Hit_Combat__AS_Hit_Combat_Death_Seq",
+    "position": 6.505939609269262e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "ce81ac548e0448b3a05189baf18d89a0",
+    "name": "Nodachi__Animations__Sequence__08_Hit__02_Hit_Combat__AS_Hit_Combat_B_Seq",
+    "position": 3.514431767825954e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e978fe582dbb4662b31dc962e9c8be8d",
+    "name": "Nodachi__Animations__Sequence__08_Hit__01_Hit__AS_Hit_R_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "2cb9ff4e9aed4806be589cbf92b5dea7",
+    "name": "Nodachi__Animations__Sequence__08_Hit__01_Hit__AS_Hit_L_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e9b795ae91f84cd1a27d69742af50025",
+    "name": "Nodachi__Animations__Sequence__08_Hit__01_Hit__AS_Hit_F_Seq",
+    "position": 4.214684778958144e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "99849e48a896480d8b59b9d973bf0b9b",
+    "name": "Nodachi__Animations__Sequence__08_Hit__01_Hit__AS_Hit_Death_Seq",
+    "position": 6.505939609269262e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4e8b8e172a3c4bca8b277bb6e7ebb3db",
+    "name": "Nodachi__Animations__Sequence__08_Hit__01_Hit__AS_Hit_B_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a76f342cb00e4c0da04743dd808fa738",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__02_IP__AS_Roll_Combat_to_Run_R_90_Seq",
+    "position": 6.302790467316299e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "0bc84a357a2840249758855d13852acb",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__02_IP__AS_Roll_Combat_to_Run_L_90_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "88bb4fdebeee4bd897aa595a1855254c",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__02_IP__AS_Roll_Combat_to_Run_Fast_F_0_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "6b08cac064f54a97b0549ce27132521f",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__02_IP__AS_Roll_Combat_to_Run_F_R_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "12f777684c494b32944c89c8d3da1b89",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__02_IP__AS_Roll_Combat_to_Run_F_L_45_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "a7ce0682c5b94d4688c4c898ce57bae9",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__02_IP__AS_Roll_Combat_to_Run_F_0_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "1d415db4261a4188ad932a857176de24",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__02_IP__AS_Roll_Combat_to_Run_B_R_45_Seq",
+    "position": 5.981629414009149e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d5854de8be594b89b021450ef858e4cf",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__02_IP__AS_Roll_Combat_to_Run_B_L_45_Seq",
+    "position": 5.981629414009149e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9f4c43cfc6574579b6001819161fb9b3",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__02_IP__AS_Roll_Combat_to_Run_B_180_Seq",
+    "position": 6.302790467316299e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "c73806a603ea4878b669b439922aea45",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__01_RM__AS_Roll_Combat_to_Run_R_90_Seq",
+    "position": 1.1920928955078125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5545a37cf1f04930b23c9ef0bd1bc312",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__01_RM__AS_Roll_Combat_to_Run_L_90_Seq",
+    "position": 1.1920928955078125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "402defdb24464e72a9c9cdcfdb941cae",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__01_RM__AS_Roll_Combat_to_Run_Fast_F_0_Seq",
+    "position": 1.1920928955078125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "1d39b07c246142ec9ad1ec7d8fd4cd0e",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__01_RM__AS_Roll_Combat_to_Run_F_R_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "83add510c8984ea680b811354055f55e",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__01_RM__AS_Roll_Combat_to_Run_F_L_45_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "8e12a8482d7843e980d77bd9438b4670",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__01_RM__AS_Roll_Combat_to_Run_F_0_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4268990b380647d385346a2394929a2b",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__01_RM__AS_Roll_Combat_to_Run_B_R_45_Seq",
+    "position": 5.981629414009149e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "baf26f66fc7c41deba84606148bc7333",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__01_RM__AS_Roll_Combat_to_Run_B_L_45_Seq",
+    "position": 5.981629414009149e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "6870c936dd6f4e028315e1516ff76439",
+    "name": "Nodachi__Animations__Sequence__07_Roll__04_Roll_Combat_to_Run__01_RM__AS_Roll_Combat_to_Run_B_180_Seq",
+    "position": 1.1920928955078125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d4f93b0bb8574d8493bd0e09639d4cba",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__02_IP__AS_Roll_to_Run_R_90_Seq",
+    "position": 6.302790467316299e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "dae161e7784e47939647e9c95704be32",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__02_IP__AS_Roll_to_Run_L_90_Seq",
+    "position": 6.244724204407248e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "b9d1423ea84a48a0ac717f50f5d8ede4",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__02_IP__AS_Roll_to_Run_Fast_F_0_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d5d5e777cca64896b8c72929a36eb8d8",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__02_IP__AS_Roll_to_Run_F_R_45_Seq",
+    "position": 6.064333035737945e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "74103b67d69849d8af7b16537a982cc1",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__02_IP__AS_Roll_to_Run_F_L_45_Seq",
+    "position": 6.828570064953965e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "7d819fbf64df465a811859bd02523a5f",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__02_IP__AS_Roll_to_Run_F_0_Seq",
+    "position": 6.064333035737945e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d8808539dbda45709114b43fd913f77d",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__02_IP__AS_Roll_to_Run_B_R_45_Seq",
+    "position": 5.981629414009149e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "300f25e5d7dd45b6a7f986ff943c92a1",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__02_IP__AS_Roll_to_Run_B_L_45_Seq",
+    "position": 5.981629414009149e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d2b3d0d78ab74c1aaec6a74862bafc4b",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__02_IP__AS_Roll_to_Run_B_180_Seq",
+    "position": 6.302790467316299e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "ac13b156466f4dcfac55df73b13e9751",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__01_RM__AS_Roll_to_Run_R_90_Seq",
+    "position": 1.1920928955078125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "3e26e44d739f4bd7b7316d2fdca92728",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__01_RM__AS_Roll_to_Run_L_90_Seq",
+    "position": 1.1920928955078125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "812dd783f3544b5083cac062d1e52c6a",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__01_RM__AS_Roll_to_Run_Fast_F_0_Seq",
+    "position": 1.1920928955078125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "243d459ac80a48918d624e2046058445",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__01_RM__AS_Roll_to_Run_F_R_45_Seq",
+    "position": 6.064333035737945e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "fd3fa58d22c44b15a802ca186ae4e6f6",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__01_RM__AS_Roll_to_Run_F_L_45_Seq",
+    "position": 6.828570064953965e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4ea9172df9074a68bb66ae90bd94cc8f",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__01_RM__AS_Roll_to_Run_F_0_Seq",
+    "position": 6.064333035737945e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "f7b0b0681cd74b10b1c9075951757058",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__01_RM__AS_Roll_to_Run_B_R_45_Seq",
+    "position": 5.981629414009149e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "74670daa7f9b4826ae391228e8032d1b",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__01_RM__AS_Roll_to_Run_B_L_45_Seq",
+    "position": 5.981629414009149e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "a4fabde412184171b09bf662e4a26dd5",
+    "name": "Nodachi__Animations__Sequence__07_Roll__03_Roll_to_Run__01_RM__AS_Roll_to_Run_B_180_Seq",
+    "position": 1.1920928955078125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9130d9507b094916aa84a1adcf12845d",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__02_IP__AS_Roll_Combat_R_90_Seq",
+    "position": 5.732591148444044e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "fcba59e226cd4706b9ca2fc714338d9d",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__02_IP__AS_Roll_Combat_L_90_Seq",
+    "position": 2.2351741790771484e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "cc4fe128bfc3466bb62c7bc5b579d92a",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__02_IP__AS_Roll_Combat_F_R_45_Seq",
+    "position": 1.365714012990793e-07,
+    "angle": 0.05595291023658669,
+    "state": "animated"
+  },
+  {
+    "id": "c0f7e1f51f8a4ad29ff8a1ce48ff1f06",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__02_IP__AS_Roll_Combat_F_L_45_Seq",
+    "position": 1.365714012990793e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "a1e6876e76e84d16ad40cf913f455218",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__02_IP__AS_Roll_Combat_F_0_Seq",
+    "position": 1.3374777552144224e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "cf8890d257d5441a995e9930f93d8d65",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__02_IP__AS_Roll_Combat_B_R_45_Seq",
+    "position": 2.4575624024691933e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "62650ecc362d4eaa9013c485f956c32c",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__02_IP__AS_Roll_Combat_B_L_45_Seq",
+    "position": 2.2351741790771484e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "aee0ef93490b42aaaeb7f0fb564b79b0",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__02_IP__AS_Roll_Combat_B_180_Seq",
+    "position": 2.4575624024691933e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "bd1d586b03f2441580f5eaa772f2eca5",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__01_RM__AS_Roll_Combat_R_90_Seq",
+    "position": 5.732591148444044e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "6d04390d7b6d47ec94eaa14a44590af5",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__01_RM__AS_Roll_Combat_L_90_Seq",
+    "position": 2.2351741790771484e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "ce795cf117ef4a31a889530127ffd0ef",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__01_RM__AS_Roll_Combat_F_R_45_Seq",
+    "position": 1.6858739115832577e-07,
+    "angle": 0.05595291023658669,
+    "state": "animated"
+  },
+  {
+    "id": "2d4f7cfa0a5f4a1f80ef0971467bbf88",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__01_RM__AS_Roll_Combat_F_L_45_Seq",
+    "position": 1.6858739115832577e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "a4774c56d2554f62b60f5ba2e9f123a8",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__01_RM__AS_Roll_Combat_F_0_Seq",
+    "position": 1.3374777552144224e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "29cb42166cc44e54be75b3bb153db3ae",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__01_RM__AS_Roll_Combat_B_R_45_Seq",
+    "position": 2.4575624024691933e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "adf8959afcb84916884e68d50d770568",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__01_RM__AS_Roll_Combat_B_L_45_Seq",
+    "position": 2.2351741790771484e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "23c2c374e06d45829bd6bc60aa06e0b8",
+    "name": "Nodachi__Animations__Sequence__07_Roll__02_Roll_Combat__01_RM__AS_Roll_Combat_B_180_Seq",
+    "position": 2.4575624024691933e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "724af9d5e71247d0b30d1b13d65bace0",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__02_IP__AS_Roll_R_90_Seq",
+    "position": 5.732591148444044e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "3129cffaec1e48b591cadd969a301740",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__02_IP__AS_Roll_L_90_Seq",
+    "position": 2.327635826304686e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "317dcb3a45ae4b4aa49ace25a11ae4fb",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__02_IP__AS_Roll_F_R_45_Seq",
+    "position": 1.383883869721103e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "62a8a00973c442b08439200c42e62a64",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__02_IP__AS_Roll_F_L_45_Seq",
+    "position": 1.383883869721103e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9be4ce5b29414674aa4ceba7613ad186",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__02_IP__AS_Roll_F_0_Seq",
+    "position": 1.5269147013441398e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "afcdde6c090f45fba95f6564aa1db5b3",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__02_IP__AS_Roll_B_R_45_Seq",
+    "position": 2.4575624024691933e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "06b16a5e14444ca0b0ecdeb879f645f2",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__02_IP__AS_Roll_B_L_45_Seq",
+    "position": 2.327635826304686e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "aae3e739a26b41afbc0c053a37836dd3",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__02_IP__AS_Roll_B_180_Seq",
+    "position": 2.4575624024691933e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "58bac2869ab4414aa7744bcf8512a23b",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__01_RM__AS_Roll_R_90_Seq",
+    "position": 5.732591148444044e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4dc55fcdcb6347238b327bca17e47f6a",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__01_RM__AS_Roll_L_90_Seq",
+    "position": 2.327635826304686e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4836d3456a7f4013aac2f5e6275c4f60",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__01_RM__AS_Roll_F_R_45_Seq",
+    "position": 1.6858739115832577e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "7b35e06ccfa44b3dae8d9e6f1a989ec3",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__01_RM__AS_Roll_F_L_45_Seq",
+    "position": 1.6858739115832577e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "86cbf34309ca48218c07aa71474e7606",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__01_RM__AS_Roll_F_0_Seq",
+    "position": 1.5269147013441398e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4b6716bbda2c49558d09e826af51171b",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__01_RM__AS_Roll_B_R_45_Seq",
+    "position": 2.4575624024691933e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "28828dd4c9f7403c982a63d64a577b3f",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__01_RM__AS_Roll_B_L_45_Seq",
+    "position": 2.327635826304686e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "264eba8de1094cc8a63b44b56bfc7eb2",
+    "name": "Nodachi__Animations__Sequence__07_Roll__01_Roll__01_RM__AS_Roll_B_180_Seq",
+    "position": 2.4575624024691933e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "32fa7237938d4cdd817cb2ca36106417",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__02_IP__AS_Dodge_Combat_to_Run_R_90_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "79dbdf171d904661912d6e43cac68b25",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__02_IP__AS_Dodge_Combat_to_Run_L_90_Seq",
+    "position": 8.568167686462402e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "45c20d9efd8743a4bc06ea80e03b0a2d",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__02_IP__AS_Dodge_Combat_to_Run_Fast_F_0_Seq",
+    "position": 1.6049041562382627e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "234ee31715054f4db9310bf985f48c37",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__02_IP__AS_Dodge_Combat_to_Run_F_R_45_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "47b2acb270b1477c9c6baab059fdd401",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__02_IP__AS_Dodge_Combat_to_Run_F_L_45_Seq",
+    "position": 8.195638656616211e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "abbcd7a2008248b3887cf33b10bee7a8",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__02_IP__AS_Dodge_Combat_to_Run_F_0_Seq",
+    "position": 8.462232869987929e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "23e7efbb3fd44afaab681e5d18973872",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__02_IP__AS_Dodge_Combat_to_Run_B_R_45_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "a6be072d64404ec9a7f7289661bf9d55",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__02_IP__AS_Dodge_Combat_to_Run_B_L_45_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5dc1f058920c4b99ac9d2d36ce2a1158",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__02_IP__AS_Dodge_Combat_to_Run_B_180_Seq",
+    "position": 6.705522537231445e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "ae81721e7d19485b93d3ae726c0348aa",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__01_RM__AS_Dodge_Combat_to_Run_R_90_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "65b3a2e5ec754eb7b4d58824c1ab9157",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__01_RM__AS_Dodge_Combat_to_Run_L_90_Seq",
+    "position": 8.568167686462402e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "032d62ece3544f198dc440cb7464e812",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__01_RM__AS_Dodge_Combat_to_Run_Fast_F_0_Seq",
+    "position": 1.6049041562382627e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "cab8400b62934aafa8da361d0d446fbc",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__01_RM__AS_Dodge_Combat_to_Run_F_R_45_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "09490aaf8632470a935ad58da060e2bd",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__01_RM__AS_Dodge_Combat_to_Run_F_L_45_Seq",
+    "position": 8.195638656616211e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "05d174b7cbc7450fa40ea37edb5f4c2c",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__01_RM__AS_Dodge_Combat_to_Run_F_0_Seq",
+    "position": 8.462232869987929e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4312ddd078df48eda9a457df3ea7441f",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__01_RM__AS_Dodge_Combat_to_Run_B_R_45_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "e972c97fa90940a09fa545d00f1cf966",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__01_RM__AS_Dodge_Combat_to_Run_B_L_45_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "88e2e3e32aae49afbe771ad409a1f62d",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__06_Dodge_Combat_to_Run__01_RM__AS_Dodge_Combat_to_Run_B_180_Seq",
+    "position": 6.705522537231445e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "0922917ded294a638c3c891c703d7e84",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__02_IP__AS_Dodge_to_Run_R_90_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9c68741f9e454798942f5f9161f9a505",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__02_IP__AS_Dodge_to_Run_L_90_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7a77cd9948884e31a2a8300899de6048",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__02_IP__AS_Dodge_to_Run_Fast_F_0_Seq",
+    "position": 1.5269147013441398e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "00b8999ca2914f4dbf5c75e056fb36b0",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__02_IP__AS_Dodge_to_Run_F_R_45_Seq",
+    "position": 9.396671174499716e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "fbb094631d77438ba861062fca089ce5",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__02_IP__AS_Dodge_to_Run_F_L_45_Seq",
+    "position": 9.396671174499716e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "34120499b0de4a63a98cc155cfe227ba",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__02_IP__AS_Dodge_to_Run_F_0_Seq",
+    "position": 8.462232869987929e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "537640fb24b9435e872659c688a3b50d",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__02_IP__AS_Dodge_to_Run_B_R_45_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "3192b34c2f664e18b0611d2c193a2e38",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__02_IP__AS_Dodge_to_Run_B_L_45_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "c8367199868f45a0ab62ebaa641878e9",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__02_IP__AS_Dodge_to_Run_B_180_Seq",
+    "position": 7.300048565639372e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "f2e3f105a5c047d2a4fb3543b1f78f8b",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__01_RM__AS_Dodge_to_Run_R_90_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d235c108754543fc83eb6a7c4117ab5a",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__01_RM__AS_Dodge_to_Run_L_90_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "35f96de428cf4a2fb7e24714eb32bd9f",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__01_RM__AS_Dodge_to_Run_Fast_F_0_Seq",
+    "position": 1.5269147013441398e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "438b4a69049a40a1a3462a53463449cd",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__01_RM__AS_Dodge_to_Run_F_R_45_Seq",
+    "position": 9.396671174499716e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "e4295518ad33411a8027733dc5c6d4f5",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__01_RM__AS_Dodge_to_Run_F_L_45_Seq",
+    "position": 9.396671174499716e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "59de1c8888644c26b42024d6f0b4e740",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__01_RM__AS_Dodge_to_Run_F_0_Seq",
+    "position": 8.462232869987929e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "5e0af02aa41549259555dc9b9e6095f2",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__01_RM__AS_Dodge_to_Run_B_R_45_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "b3952fcb6c39456eac49ff5de9f364ff",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__01_RM__AS_Dodge_to_Run_B_L_45_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5b3fba2b381846629c7b4cdabbc7bb46",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__05_Dodge_to_Run__01_RM__AS_Dodge_to_Run_B_180_Seq",
+    "position": 7.300048565639372e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "85ffa0bee0d84d718d704756470bb82f",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__02_IP__AS_Dodge_Air_Combat_R_90_Seq",
+    "position": 2.3127573456349637e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "688f886b11284e679200ad64428a4a51",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__02_IP__AS_Dodge_Air_Combat_L_90_Seq",
+    "position": 1.2289224571304658e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "31c167339e31450b9fd5a33fa483c10b",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__02_IP__AS_Dodge_Air_Combat_F_R_45_Seq",
+    "position": 4.308471659442148e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "16b0dac5c0d74b489568044f337feb16",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__02_IP__AS_Dodge_Air_Combat_F_L_45_Seq",
+    "position": 4.308471659442148e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d289695c4ac0445597240158c4a892a0",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__02_IP__AS_Dodge_Air_Combat_F_0_Seq",
+    "position": 4.308471659442148e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "28771e3bb585435881937e12790d7cb5",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__02_IP__AS_Dodge_Air_Combat_B_R_45_Seq",
+    "position": 1.5840151945667458e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "1c32caf2419748188f880bb32d15fbb6",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__02_IP__AS_Dodge_Air_Combat_B_L_45_Seq",
+    "position": 3.264680970005429e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9c0a5f23d63542779835df18d318ff87",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__02_IP__AS_Dodge_Air_Combat_B_180_Seq",
+    "position": 1.6924465739975858e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "c8ad51ab04154d93beba1fa061c0cfef",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__01_RM__AS_Dodge_Air_Combat_R_90_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "79fa93548862468bb9a113cc0bcb400e",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__01_RM__AS_Dodge_Air_Combat_L_90_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "bcd9fdab32ad4ed68786355b8b3e3be5",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__01_RM__AS_Dodge_Air_Combat_F_R_45_Seq",
+    "position": 4.308471659442148e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "3e5f16c3c2ad4fdeb8a729ff3a776058",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__01_RM__AS_Dodge_Air_Combat_F_L_45_Seq",
+    "position": 4.308471659442148e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "3626ae80a01649b2aa94131f436cc7ca",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__01_RM__AS_Dodge_Air_Combat_F_0_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "830b93c769104f5c8e29d72f0da1084f",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__01_RM__AS_Dodge_Air_Combat_B_R_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "0647226ed2da400586214ce0ca0c9f86",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__01_RM__AS_Dodge_Air_Combat_B_L_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "6f41f5b1d0a446d5960af96555c14119",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__04_Dodge_Air_Combat__01_RM__AS_Dodge_Air_Combat_B_180_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "f31085e7fca64f56843e3768988a1502",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__02_IP__AS_Dodge_Air_R_Seq",
+    "position": 1.7881393432617188e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6787df70ff854bca8435830a1736eb41",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__02_IP__AS_Dodge_Air_L_Seq",
+    "position": 1.2289224571304658e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a4e2e390fbbe4e7ba95356dc54b4dd01",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__02_IP__AS_Dodge_Air_F_R_45_Seq",
+    "position": 2.4027400513659813e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4f36fd41683641b4a534467b47a20a78",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__02_IP__AS_Dodge_Air_F_L_45_Seq",
+    "position": 3.2098083124765253e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9a013b42bb864f408ff2e9e42a48f302",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__02_IP__AS_Dodge_Air_F_0_Seq",
+    "position": 2.702825838696299e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "971cc1fb8d43451e8b187eb2ab3c89ed",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__02_IP__AS_Dodge_Air_B_R_45_Seq",
+    "position": 1.4057727071303816e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5ea6b4fd97cd4aa1a08a2ccdc25cfd71",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__02_IP__AS_Dodge_Air_B_L_45_Seq",
+    "position": 2.6656007889869215e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "a3f43fd26f50445e84d030dba5a978c0",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__02_IP__AS_Dodge_Air_B_180_Seq",
+    "position": 1.545434287208991e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9ebeba91e06848a8b95d486f0cb1b638",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__01_RM__AS_Dodge_Air_R_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9e54a4ae1c6e43f4ba6d649c2192ab72",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__01_RM__AS_Dodge_Air_L_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "1e9f4f6bb43d487ea6a7d23cb0df7a92",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__01_RM__AS_Dodge_Air_F_R_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "e3f3b982a79b4293a12d370873422515",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__01_RM__AS_Dodge_Air_F_L_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "5d713684dfce4dc9a9b61d9fce41dbce",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__01_RM__AS_Dodge_Air_F_0_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "527d317e392c4fc7923fdfb21657c98f",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__01_RM__AS_Dodge_Air_B_R_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "44d6356ef4a84eb3b0849f04552c9f3c",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__01_RM__AS_Dodge_Air_B_L_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "8418378f607c41b2ba3487c56e76c492",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__03_Dodge_Air__01_RM__AS_Dodge_Air_B_180_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "f7c6a111ca9f4945a0c0efbab31d2308",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__02_IP__AS_Dodge_Combat_R_90_Seq",
+    "position": 3.264680970005429e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "010368225114479f92fa7a85577bbed3",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__02_IP__AS_Dodge_Combat_L_90_Seq",
+    "position": 2.1126042781816068e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "64c9dd58d58f4736aae1d7ea8cdf8712",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__02_IP__AS_Dodge_Combat_F_R_45_Seq",
+    "position": 1.9992005206859176e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "2f2e6637119949ddb3beb9014ec51db1",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__02_IP__AS_Dodge_Combat_F_L_45_Seq",
+    "position": 1.9992005206859176e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "ff60cfcf85154533b40e83e081d131f8",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__02_IP__AS_Dodge_Combat_F_0_Seq",
+    "position": 1.9992005206859176e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "58180de627f14874b2fb7e8bbdfceaa8",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__02_IP__AS_Dodge_Combat_B_R_45_Seq",
+    "position": 1.9992005206859176e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "dfb7000618194663ac99fb72b9a6f58b",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__02_IP__AS_Dodge_Combat_B_L_45_Seq",
+    "position": 1.9992005206859176e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9c129f1e8c12491abf4ddecbbda2d443",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__02_IP__AS_Dodge_Combat_B_180_Seq",
+    "position": 1.8371385124282824e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "6087b1cd54af470192906085cb700a27",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__01_RM__AS_Dodge_Combat_R_90_Seq",
+    "position": 3.264680970005429e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9f088ab54f524e9093ceb64883764a77",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__01_RM__AS_Dodge_Combat_L_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d91e537743a44f0bbeb8938a09bcf497",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__01_RM__AS_Dodge_Combat_F_R_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "193546a9cab543349a412d7b251437fe",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__01_RM__AS_Dodge_Combat_F_L_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "089ae302a7e94ffdb398970a2183d5f1",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__01_RM__AS_Dodge_Combat_F_0_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "af493bffc80c4d40876ec35eb9fb376e",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__01_RM__AS_Dodge_Combat_B_R_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "11b599e62e944153aa9eed852a4ea594",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__01_RM__AS_Dodge_Combat_B_L_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "1a05119ba97a48679d24ba1ba55ee214",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__02_Dodge_Combat__01_RM__AS_Dodge_Combat_B_180_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "ba9301051077406dae724d4280b722e3",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__02_IP__AS_Dodge_R_90_Seq",
+    "position": 1.6049041562382627e-07,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "3bc3d5e44c1a4f028dbd83d41864e2bc",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__02_IP__AS_Dodge_L_90_Seq",
+    "position": 1.519626238177807e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "52c29212c3614bb3b800a1c6b8d89626",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__02_IP__AS_Dodge_F_R_45_Seq",
+    "position": 2.086162567138672e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "3d19d19fa14b4e1dac485b8ebe81db3b",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__02_IP__AS_Dodge_F_L_45_Seq",
+    "position": 2.086162567138672e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "38e8e53ed607480eb17f6a857dd9c580",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__02_IP__AS_Dodge_F_0_Seq",
+    "position": 2.086162567138672e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "95df1c9eed494388812709d6bafaa99c",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__02_IP__AS_Dodge_B_R_45_Seq",
+    "position": 2.1696418173178245e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "0cd7579d159b4d7d82dee5885ee44c11",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__02_IP__AS_Dodge_B_L_45_Seq",
+    "position": 2.1696418173178245e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "0f8045814c704be3908c5cfd7e6bbedb",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__02_IP__AS_Dodge_B_180_Seq",
+    "position": 2.1696418173178245e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "b4f36ee08a414c54810951972f3002e7",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__01_RM__AS_Dodge_R_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "f1725bd7e43043cdbe9c2bc663884768",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__01_RM__AS_Dodge_L_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "3f0180652099418a83661c7488b16f90",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__01_RM__AS_Dodge_F_R_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "090b50542fe6402ab68afcef3d743a16",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__01_RM__AS_Dodge_F_L_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "54ae4ead70ad4a6da20130398de062b0",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__01_RM__AS_Dodge_F_0_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "18defcb2332b4c5cbd5ef76ae35d2cc6",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__01_RM__AS_Dodge_B_R_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "a371ce87d00d4d11a76d1575f31e4758",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__01_RM__AS_Dodge_B_L_45_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "126e4416753547e3974bef1134505c73",
+    "name": "Nodachi__Animations__Sequence__06_Dodge__01_Dodge__01_RM__AS_Dodge_B_180_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "e5a4b9e6dbcd45908cdee8137f7d2444",
+    "name": "Nodachi__Animations__Sequence__05_Jump__04_Double_Jump_Combat__AS_Double_Jump_Combat_R_90_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "7b0934e881ce4b54b5a2d8af8c02e193",
+    "name": "Nodachi__Animations__Sequence__05_Jump__04_Double_Jump_Combat__AS_Double_Jump_Combat_L_90_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "1c4ec66bd82f45eea6e5205277969494",
+    "name": "Nodachi__Animations__Sequence__05_Jump__04_Double_Jump_Combat__AS_Double_Jump_Combat_F_0_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5a334259e03b4c5293976f9728e7264d",
+    "name": "Nodachi__Animations__Sequence__05_Jump__04_Double_Jump_Combat__AS_Double_Jump_Combat_B_180_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "7bad98f083dc4b8c8913d7ba3e5e8546",
+    "name": "Nodachi__Animations__Sequence__05_Jump__04_Double_Jump_Combat__AS_Double_Jump_Combat_0_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "0192afa38b2b4357ab935ee92cd0b5b3",
+    "name": "Nodachi__Animations__Sequence__05_Jump__03_Double_Jump__AS_Double_Jump_R_90_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5f2efd6e78d24a128e964437cfca4af5",
+    "name": "Nodachi__Animations__Sequence__05_Jump__03_Double_Jump__AS_Double_Jump_L_90_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5067559f6690469794ec539e76659ac1",
+    "name": "Nodachi__Animations__Sequence__05_Jump__03_Double_Jump__AS_Double_Jump_F_0_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "7d8cf007068547d091192e461d1d8280",
+    "name": "Nodachi__Animations__Sequence__05_Jump__03_Double_Jump__AS_Double_Jump_B_180_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9ba379eee68241f583fcdff01f024876",
+    "name": "Nodachi__Animations__Sequence__05_Jump__03_Double_Jump__AS_Double_Jump_0_Seq",
+    "position": 8.940696716308594e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d0cb2a21df794e29b09c2d8ac8814247",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__05_Jump_Combat_R_90__AS_Jump_Combat_to_Run_R_90_Seq",
+    "position": 1.9992005206859176e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "24aff0d9980c4edbb596561fa12dcf96",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__05_Jump_Combat_R_90__AS_Jump_Combat_Start_R_90_Seq",
+    "position": 6.006850128414953e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f4e6f3e9662a4ef19f885a959d28eb54",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__05_Jump_Combat_R_90__AS_Jump_Combat_End_R_90_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "03f619c9605a4499a2b1df136efce9e1",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__04_Jump_Combat_L_90__AS_Jump_Combat_to_Run_L_90_Seq",
+    "position": 1.9371509552001953e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8bf9e9347f664e2a8297181ad63986d5",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__04_Jump_Combat_L_90__AS_Jump_Combat_Start_L_90_Seq",
+    "position": 5.962101568002254e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "cecd48ec9bfc42d4bdb041d6002857a6",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__04_Jump_Combat_L_90__AS_Jump_Combat_End_L_90_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "82362067197e49598d077351478885e5",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__03_Jump_Combat_B_180__AS_Jump_Combat_to_Run_B_180_Seq",
+    "position": 1.8005141555477167e-07,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "7aa8151630984727b52ea416502b4bdb",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__03_Jump_Combat_B_180__AS_Jump_Combat_Start_B_180_Seq",
+    "position": 5.988513152033192e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6d777f013b20464b9b663542b93cc55e",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__03_Jump_Combat_B_180__AS_Jump_Combat_End_B_180_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "fa797b6ef026485aa6a9b262a4f59362",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__02_Jump_Combat_F_0__AS_Jump_Combat_to_Run_Fast_F_0_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d30658eb19804520aa5ef8b00b18f429",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__02_Jump_Combat_F_0__AS_Jump_Combat_to_Run_F_0_Seq",
+    "position": 2.1490760104825313e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "31213994714e409f96ed3cb86d12d235",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__02_Jump_Combat_F_0__AS_Jump_Combat_Start_F_0_Seq",
+    "position": 5.998180085953209e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "31464b0613b041499913446ed6f6becc",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__02_Jump_Combat_F_0__AS_Jump_Combat_End_F_0_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "96f5d896ffa340b9ab82136f6be43b30",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__01_Jump_Combat_0__AS_Jump_Combat_Start_0_Seq",
+    "position": 7.48774056091861e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0d2130080e734f46b7baa7bc9b28e86f",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__01_Jump_Combat_0__AS_Jump_Combat_Loop_0_Seq",
+    "position": 2.986047320518992e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8731803685e243a78a7e05ae414304f2",
+    "name": "Nodachi__Animations__Sequence__05_Jump__02_Jump_Combat__01_Jump_Combat_0__AS_Jump_Combat_End_0_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "62c21a262cdf49ce88417e7aab6987a5",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__05_Jump_R_90__AS_Jump_to_Run_R_90_Seq",
+    "position": 1.9992005206859176e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0dce11938470496283cf2bb3dc0a20c1",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__05_Jump_R_90__AS_Jump_Start_R_90_Seq",
+    "position": 6.006850128414953e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "4caded1b22634e6689b25084deafb9ad",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__05_Jump_R_90__AS_Jump_End_R_90_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ebd08abbe4104f61ab51cd2ad6364cda",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__04_Jump_L_90__AS_Jump_to_Run_L_90_Seq",
+    "position": 1.9371509552001953e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "70b140702bf3436dabae19022ab2b28e",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__04_Jump_L_90__AS_Jump_Start_L_90_Seq",
+    "position": 5.962101568002254e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "277b90846cad4661917c93c0bd86c5fe",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__04_Jump_L_90__AS_Jump_End_L_90_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e3f4c6801f394220ae94cb6b28393105",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__03_Jump_B_180__AS_Jump_to_Run_B_180_Seq",
+    "position": 1.8005141555477167e-07,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "16786f517cdc403a9cf15b05714f7a58",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__03_Jump_B_180__AS_Jump_Start_B_180_Seq",
+    "position": 5.988513152033192e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7b9bd7f388c94ed4830a265d5f4940e3",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__03_Jump_B_180__AS_Jump_End_B_180_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0c8f96e79c2e45158215a4b376fb5a4f",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__02_Jump_F_0__AS_Jump_to_Run_Fast_F_0_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c9814d71e5d94e2f9f5cb89bc5a7c031",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__02_Jump_F_0__AS_Jump_to_Run_F_0_Seq",
+    "position": 2.986047320518992e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d78dafab7c0245a088580660742bb86b",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__02_Jump_F_0__AS_Jump_Start_F_0_Seq",
+    "position": 5.998180085953209e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "cbcaddbd03af4bc0ab09a95287380ef9",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__02_Jump_F_0__AS_Jump_End_F_0_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "22e56d6874454931aa17fa278736722c",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__01_Jump_0__AS_Jump_Start_0_Seq",
+    "position": 7.48774056091861e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ef386a97de1c4d27bdea5a862eef7f8d",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__01_Jump_0__AS_Jump_Loop_0_Seq",
+    "position": 2.986047320518992e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "211a89e4ee784b82a098c19b8bc44a94",
+    "name": "Nodachi__Animations__Sequence__05_Jump__01_Jump__01_Jump_0__AS_Jump_End_0_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "57900d685c0e4f10b347507fc1666dd0",
+    "name": "Nodachi__Animations__Sequence__04_Run__04_Run_Combat_to_Run__02_IP__AS_Run_Combat_to_Run_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "cbf7a8ae2d7f4abb8d0999e9e112d136",
+    "name": "Nodachi__Animations__Sequence__04_Run__04_Run_Combat_to_Run__01_RM__AS_Run_Combat_to_Run_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "f3ed61045ce34092b4371c37175b61b6",
+    "name": "Nodachi__Animations__Sequence__04_Run__03_Run_to_Run_Combat__02_IP__AS_Run_to_Run_Combat_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4fd2c0c7bff947649b4697ffb3662ee7",
+    "name": "Nodachi__Animations__Sequence__04_Run__03_Run_to_Run_Combat__01_RM__AS_Run_to_Run_Combat_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "dc6bedd6939945859e234e9a0d9542d6",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Start_Fast_R_Seq",
+    "position": 1.2611170063792088e-07,
+    "angle": 0.05595291023658669,
+    "state": "animated"
+  },
+  {
+    "id": "d0d8af57ca334c41a21271132ac91b9f",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Start_Fast_L_Seq",
+    "position": 1.2594760789852444e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "de7d94b236194a6d97a39d2936f43800",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Start_Fast_B_R_Seq",
+    "position": 1.2600268917140056e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "0013725943ea4763b40c8178d7a3c9a5",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Start_Fast_B_L_Seq",
+    "position": 1.2594760789852444e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f9ddb849ebcc4b2597aac66e9f63e240",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Fast_Turn_R_Seq",
+    "position": 2.654383592926024e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "ff8b68c6a9a5441aa324025bea1360ae",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Fast_Turn_L_Seq",
+    "position": 2.524485580579494e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "81d9fb92e7ac46f0bc96d472e97bddb4",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Fast_Stop_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e651f0563c364b7c8938a0bf418d1fda",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Fast_Start_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "b3bcdf0e87aa4838bdd08f79c0656e80",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Fast_Loop_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "3e33e712910d4e7d83f97fc8e4002132",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Fast_Loop_R_90_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "3a61d6d6a44c455b8ee52c3e8f491ecf",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Fast_Loop_R_45_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "625a88f906ad416fb62c062bc1455009",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Fast_Loop_L_90_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "522039d908f94fdc833f73500878f15b",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Fast_Loop_L_45_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "acc1476a81d64beb89a775918a1228f8",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Fast_Lean_R_Loop_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "2500e17e6c0643cd9e92517cc53c647d",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__02_IP__AS_Run_Combat_Fast_Lean_L_Loop_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7ee01dc01c6643ce9232cc5654d02a1e",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Start_Fast_R_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.05595291023658669,
+    "state": "animated"
+  },
+  {
+    "id": "15c287d6fdd04d3c90561d7c94056661",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Start_Fast_L_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "4fd0523083864a668461fa22ea72a6db",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Start_Fast_B_R_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "03f503f943ca4e5c95c3160602d69821",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Start_Fast_B_L_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e96bb74b3fc24c53a0563734d0116434",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Fast_Turn_R_Seq",
+    "position": 3.2782554626464844e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "edf848aea2314d5b8385a223d1c06163",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Fast_Turn_L_Seq",
+    "position": 3.2782554626464844e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "951c68986a66483287b34e272aef9bd5",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Fast_Stop_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "64e357c6fab94c7da0466ddc097fb152",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Fast_Start_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "bcaf392fb5a1450c9e15869f4b25bddf",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Fast_Loop_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "fa032751fad64404854cde89d799189b",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Fast_Loop_R_90_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "a570ea5b49894b9db029939dda173627",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Fast_Loop_R_45_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e43bb9873c924ff6baa94fbd29388471",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Fast_Loop_L_90_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a9b796b704904f3aad85555754dd05ba",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Fast_Loop_L_45_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "83ab49173f934f498f6dcafef7639eb4",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Fast_Lean_R_Loop_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "7e004323cd074182a09c4c4f3e79d439",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__11_Run_Combat_Fast__01_RM__AS_Run_Combat_Fast_Lean_L_Loop_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "af0a7b7cab964404a84f7990a7f26e2e",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__10_Run_Combat_B_R_90__02_IP__AS_Run_Combat_Stop_B_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b57011f4ebcd4e439d9c0a8ebdfed70f",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__10_Run_Combat_B_R_90__02_IP__AS_Run_Combat_Start_B_R_90_Seq",
+    "position": 1.7881393432617188e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "1327f64ed54b4cb8a4085e22997dc9db",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__10_Run_Combat_B_R_90__02_IP__AS_Run_Combat_Loop_B_R_90_Seq",
+    "position": 5.424104543294561e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "1e61d72946c84f02ac888e240b89bd16",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__10_Run_Combat_B_R_90__01_RM__AS_Run_Combat_Stop_B_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e662f6848e55472bb16be8da37019388",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__10_Run_Combat_B_R_90__01_RM__AS_Run_Combat_Start_B_R_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7bab1a4cce50417aabe0f346f1a1f787",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__10_Run_Combat_B_R_90__01_RM__AS_Run_Combat_Loop_B_R_90_Seq",
+    "position": 5.424104543294561e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8fe26a02a5124cf494025eadfbbc8eaa",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__09_Run_Combat_B_L_90__02_IP__AS_Run_Combat_Stop_B_L_90_Seq",
+    "position": 2.107342389479072e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9c380d20007e41e5aaf607b736380c9a",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__09_Run_Combat_B_L_90__02_IP__AS_Run_Combat_Start_B_L_90_Seq",
+    "position": 1.794337407545754e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "fd822901394f43089d2fd17d1f5be15b",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__09_Run_Combat_B_L_90__02_IP__AS_Run_Combat_Loop_B_L_90_Seq",
+    "position": 6.828570064953965e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "adb959230e2c4d2cab7c96c0d5672163",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__09_Run_Combat_B_L_90__01_RM__AS_Run_Combat_Stop_B_L_90_Seq",
+    "position": 2.107342389479072e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "075a2c14b8a74318b8001cebcb10c75c",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__09_Run_Combat_B_L_90__01_RM__AS_Run_Combat_Start_B_L_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c9088fe6a1c54d08a81f6be29b94022a",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__09_Run_Combat_B_L_90__01_RM__AS_Run_Combat_Loop_B_L_90_Seq",
+    "position": 6.828570064953965e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f61654a49c184d48af1d96a9ae1638bd",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__08_Run_Combat_B_R_45__02_IP__AS_Run_Combat_Stop_B_R_45_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "3acbbf6798b9477aa5d0a95dca55dffa",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__08_Run_Combat_B_R_45__02_IP__AS_Run_Combat_Start_B_R_45_Seq",
+    "position": 1.6924465739975858e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b7a44059407e4ae5aa104a69fd27f062",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__08_Run_Combat_B_R_45__02_IP__AS_Run_Combat_Loop_B_R_45_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "774778c2761c4c05a2059c7f81b36c81",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__08_Run_Combat_B_R_45__01_RM__AS_Run_Combat_Stop_B_R_45_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8bf8e7dc4b6e4568a45c8c6682e75b73",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__08_Run_Combat_B_R_45__01_RM__AS_Run_Combat_Start_B_R_45_Seq",
+    "position": 1.6924465739975858e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "51725c3559834702ad827a81ea9b8062",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__08_Run_Combat_B_R_45__01_RM__AS_Run_Combat_Loop_B_R_45_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "67bde4d0b10546498817579f672ce3b6",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__07_Run_Combat_B_L_45__02_IP__AS_Run_Combat_Stop_B_L_45_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8acdc170b7ce42e698e9a1f4b2517dea",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__07_Run_Combat_B_L_45__02_IP__AS_Run_Combat_Start_B_L_45_Seq",
+    "position": 1.8005141555477167e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "55fdb09b574d4db19ed19aaf5fbabbd4",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__07_Run_Combat_B_L_45__02_IP__AS_Run_Combat_Loop_B_L_45_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "1e7a092c8ce24c158b5a93a9fc10c11c",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__07_Run_Combat_B_L_45__01_RM__AS_Run_Combat_Stop_B_L_45_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6222f142a2f543ecbfb21c7aea271451",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__07_Run_Combat_B_L_45__01_RM__AS_Run_Combat_Start_B_L_45_Seq",
+    "position": 1.8005141555477167e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "81a667b9d7fd4367a7f60e64645fd482",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__07_Run_Combat_B_L_45__01_RM__AS_Run_Combat_Loop_B_L_45_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "002c4948ba854f8382477ea06cc36ab6",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__06_Run_Combat_B_180__02_IP__AS_Run_Combat_Stop_B_180_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0632859569b744f3999fbc21d7f35c5f",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__06_Run_Combat_B_180__02_IP__AS_Run_Combat_Start_B_180_Seq",
+    "position": 1.8005141555477167e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "620ee9079cc2450bb83539e567543880",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__06_Run_Combat_B_180__02_IP__AS_Run_Combat_Loop_B_180_Seq",
+    "position": 6.674406449747039e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0251bb7cd2764b9baa87595a698b2ea3",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__06_Run_Combat_B_180__01_RM__AS_Run_Combat_Stop_B_180_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6ae6e2561e824eb18a517e4e7a51eb62",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__06_Run_Combat_B_180__01_RM__AS_Run_Combat_Start_B_180_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "933f66bbff944197a8f7f470ec667bef",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__06_Run_Combat_B_180__01_RM__AS_Run_Combat_Loop_B_180_Seq",
+    "position": 6.674406449747039e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7dbb50a7398245a0a70f17a24e66075b",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__05_Run_Combat_F_R_90__02_IP__AS_Run_Combat_Stop_F_R_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "2da8ff946d6a4002a986962b4eb2d02a",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__05_Run_Combat_F_R_90__02_IP__AS_Run_Combat_Start_F_R_90_Seq",
+    "position": 1.9100968984275823e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "956afd0b2e9446528068bacca6c5b484",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__05_Run_Combat_F_R_90__02_IP__AS_Run_Combat_Loop_F_R_90_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "c7d99874220841a09a69d6950d9823f0",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__05_Run_Combat_F_R_90__01_RM__AS_Run_Combat_Stop_F_R_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "78538d3bc5ad4f9783eed172f874d9b9",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__05_Run_Combat_F_R_90__01_RM__AS_Run_Combat_Start_F_R_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "c918ccd0f79d4c9b953eb039d83f3aa4",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__05_Run_Combat_F_R_90__01_RM__AS_Run_Combat_Loop_F_R_90_Seq",
+    "position": 8.429369557916289e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "67f8f36831f847f2921714b76dfea4cb",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__04_Run_Combat_F_L_90__02_IP__AS_Run_Combat_Stop_F_L_90_Seq",
+    "position": 4.470348358154297e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e9281a01316f4d47aa85dc3a366e1d9f",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__04_Run_Combat_F_L_90__02_IP__AS_Run_Combat_Start_F_L_90_Seq",
+    "position": 1.961357440904976e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a9d2553975174b32a3cb2979bd56046f",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__04_Run_Combat_F_L_90__02_IP__AS_Run_Combat_Loop_F_L_90_Seq",
+    "position": 1.1175870895385742e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "bab4826f0cb84a1fa97083e82e416032",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__04_Run_Combat_F_L_90__01_RM__AS_Run_Combat_Stop_F_L_90_Seq",
+    "position": 4.470348358154297e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d84e266bd5c247b79cc75045f2f05841",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__04_Run_Combat_F_L_90__01_RM__AS_Run_Combat_Start_F_L_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "75098c7dd11b483c8e830db1b7487be4",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__04_Run_Combat_F_L_90__01_RM__AS_Run_Combat_Loop_F_L_90_Seq",
+    "position": 1.1175870895385742e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9e968480aa4642d383fae6077f219157",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__03_Run_Combat_F_R_45__02_IP__AS_Run_Combat_Stop_F_R_45_Seq",
+    "position": 4.214684778958144e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "f068617618d042048b85212667045533",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__03_Run_Combat_F_R_45__02_IP__AS_Run_Combat_Start_F_R_45_Seq",
+    "position": 1.8143349223009864e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "b6f8638544bf430aa3f5d5c55deb5961",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__03_Run_Combat_F_R_45__02_IP__AS_Run_Combat_Loop_F_R_45_Seq",
+    "position": 9.094592456904138e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "7129bf5963ac4f51a45f9eda558ec180",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__03_Run_Combat_F_R_45__01_RM__AS_Run_Combat_Stop_F_R_45_Seq",
+    "position": 4.214684778958144e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "28aea0b9737f4fbd9161839dfde667e4",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__03_Run_Combat_F_R_45__01_RM__AS_Run_Combat_Start_F_R_45_Seq",
+    "position": 1.8143349223009864e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "76e9d90dfd2c479198eaa8d6e893d2bc",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__03_Run_Combat_F_R_45__01_RM__AS_Run_Combat_Loop_F_R_45_Seq",
+    "position": 9.094592456904138e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "90c18baeb63249d8ac80ef1fbaa47e68",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__02_Run_Combat_F_L_45__02_IP__AS_Run_Combat_Stop_F_L_45_Seq",
+    "position": 3.7990655954445174e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0b3fad96ae5541ce97d942edcd4511dc",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__02_Run_Combat_F_L_45__02_IP__AS_Run_Combat_Start_F_L_45_Seq",
+    "position": 1.7631292337227933e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b7bc1c51c18e45ed942028c6d805965f",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__02_Run_Combat_F_L_45__02_IP__AS_Run_Combat_Loop_F_L_45_Seq",
+    "position": 9.094592456904138e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "cc6ffced2d664d05b916789d068f1d09",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__02_Run_Combat_F_L_45__01_RM__AS_Run_Combat_Stop_F_L_45_Seq",
+    "position": 3.7990655954445174e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "34bb1b42b030449582407a25945d41aa",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__02_Run_Combat_F_L_45__01_RM__AS_Run_Combat_Start_F_L_45_Seq",
+    "position": 1.7631292337227933e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "36c5b9f74af24d419320239967052748",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__02_Run_Combat_F_L_45__01_RM__AS_Run_Combat_Loop_F_L_45_Seq",
+    "position": 9.094592456904138e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "80db25744a174a6e9f5ef3b582bab280",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__01_Run_Combat_F_0__02_IP__AS_Run_Combat_Stop_F_0_Seq",
+    "position": 3.0719530030864917e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "40b4d39a624d4f209d1129c3676bd7f2",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__01_Run_Combat_F_0__02_IP__AS_Run_Combat_Start_F_0_Seq",
+    "position": 1.7709827204726025e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "4f1bcd737aaf42a688bbb7960a71f31b",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__01_Run_Combat_F_0__02_IP__AS_Run_Combat_Loop_F_0_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "2d3c306fcad544f2a784220bb839be28",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__01_Run_Combat_F_0__01_RM__AS_Run_Combat_Stop_F_0_Seq",
+    "position": 3.0719530030864917e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0250ce91fac649ccb00951a558a4e362",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__01_Run_Combat_F_0__01_RM__AS_Run_Combat_Start_F_0_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "2750e948c07e42aa855c6dd4125e20f2",
+    "name": "Nodachi__Animations__Sequence__04_Run__02_Run_Combat__01_Run_Combat_F_0__01_RM__AS_Run_Combat_Loop_F_0_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "3f5a5713b68d485fa2b2f20549d55356",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Start_Fast_R_Seq",
+    "position": 1.2611170063792088e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "17b5dc66a3fd47d0b491a5c86517f408",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Start_Fast_L_Seq",
+    "position": 1.2594760789852444e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "4d7fefd59b884b6ca0283d06d00a5d01",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Start_Fast_B_R_Seq",
+    "position": 1.2600268917140056e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "a45d78a915c048059d0633ec95612afd",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Start_Fast_B_L_Seq",
+    "position": 1.2594760789852444e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d6ece4ce5a8541d585f5230065c54232",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Fast_Turn_R_Seq",
+    "position": 2.654383592926024e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "46d5c6c67a764e7ea20515fcae77f0f4",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Fast_Turn_L_Seq",
+    "position": 2.524485580579494e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "5454c36eb5584a758af5dec139a120b4",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Fast_Stop_Seq",
+    "position": 3.3527612686157227e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "70756510102a41598b185d1c9e3fcca0",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Fast_Start_Seq",
+    "position": 4.214684778958144e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "c2bb0cc02fc54e05990f276622adb72f",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Fast_Loop_Seq",
+    "position": 5.972094641037984e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "be4ef3fda1d1418fbdef50b927e9ca0c",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Fast_Loop_R_90_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "animated"
+  },
+  {
+    "id": "6fe0eacfb7444dd3881b33468de53b3c",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Fast_Loop_R_45_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "animated"
+  },
+  {
+    "id": "426c602a08ad469c9d9858a0791c1e63",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Fast_Loop_L_90_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "02988c431d584d52a402e44c32476dfa",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Fast_Loop_L_45_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "53f71fdb1d7d479990e252170ef8cb7c",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Fast_Lean_R_Loop_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "376e360d93804057bfec7e8ef936fee8",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__02_IP__AS_Run_Fast_Lean_L_Loop_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "9056cf24a08f4b2697f28ae1f8b09870",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Start_Fast_R_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9f291007af56473a9f5991bc58b46f51",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Start_Fast_L_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "1940da3ad5644e5c9d224946e84d791d",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Start_Fast_B_R_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "04addd85a9754334b1e5b55f53c0be88",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Start_Fast_B_L_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "88cf699e2c654d9688045962a110314f",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Fast_Turn_R_Seq",
+    "position": 3.2782554626464844e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b57a0af02eb54d10a6016e01a8dec822",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Fast_Turn_L_Seq",
+    "position": 3.2782554626464844e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "eadce449c9ef45cc997823f691d55ab3",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Fast_Stop_Seq",
+    "position": 3.3527612686157227e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "321a65736ea54c00956ef5d6f4a0b785",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Fast_Start_Seq",
+    "position": 4.214684778958144e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "fa835082773f461cb2006dbceaea274d",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Fast_Loop_Seq",
+    "position": 5.972094641037984e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "a6405cece6064b9a83584adae22fa85f",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Fast_Loop_R_90_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "animated"
+  },
+  {
+    "id": "b428dbc5eb2f42c2b0d5f804c7f35980",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Fast_Loop_R_45_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "animated"
+  },
+  {
+    "id": "018d104475914230ba1bc4be68fd7b46",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Fast_Loop_L_90_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "2772aa7c43864d5eaa85dfe291628c95",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Fast_Loop_L_45_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "b06549f077144f20bf5579fc7fc6d369",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Fast_Lean_R_Loop_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "152d96a657f34a1f860ae7a4704134c7",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__11_Run_Fast__01_RM__AS_Run_Fast_Lean_L_Loop_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "1b533d919ecc4ff8b367eb8f1e7776c3",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__10_Run_B_R_90__02_IP__AS_Run_Stop_B_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b0154b9077774e3f94dece0e5120a8b5",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__10_Run_B_R_90__02_IP__AS_Run_Start_B_R_90_Seq",
+    "position": 1.7881393432617188e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "1eea22ee843249898243adcc2a25d634",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__10_Run_B_R_90__02_IP__AS_Run_Loop_B_R_90_Seq",
+    "position": 5.424104543294561e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "029e73024cf14c8f80b2ab70ae40520b",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__10_Run_B_R_90__01_RM__AS_Run_Stop_B_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "3242924f0ab840a3983a9e7b9d8fef3a",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__10_Run_B_R_90__01_RM__AS_Run_Start_B_R_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9deee93dba044615b5730302059611c3",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__10_Run_B_R_90__01_RM__AS_Run_Loop_B_R_90_Seq",
+    "position": 5.424104543294561e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8a039f65f11841d1a7e0fbbbb4221e97",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__09_Run_B_L_90__02_IP__AS_Run_Stop_B_L_90_Seq",
+    "position": 2.107342389479072e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0b277c6c9f644e80a48ca56032b82df4",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__09_Run_B_L_90__02_IP__AS_Run_Start_B_L_90_Seq",
+    "position": 1.794337407545754e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "488c18c910f44c068d1f1df2b02b4ad8",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__09_Run_B_L_90__02_IP__AS_Run_Loop_B_L_90_Seq",
+    "position": 6.828570064953965e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "74b461cc535e4223b4db9a88e0117e41",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__09_Run_B_L_90__01_RM__AS_Run_Stop_B_L_90_Seq",
+    "position": 2.107342389479072e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "aa71c90d1df74282bfed214cbe8e2aea",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__09_Run_B_L_90__01_RM__AS_Run_Start_B_L_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ef14b47f272c4a0fac0a430a70759ac6",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__09_Run_B_L_90__01_RM__AS_Run_Loop_B_L_90_Seq",
+    "position": 6.828570064953965e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "d085cfc8f7104028b24fabe54d97dd08",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__08_Run_B_R_45__02_IP__AS_Run_Stop_B_R_45_Seq",
+    "position": 1.862645149230957e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6708e057549445019822d2fdde08ee1f",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__08_Run_B_R_45__02_IP__AS_Run_Start_B_R_45_Seq",
+    "position": 1.6924465739975858e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ec1f631bd7754abfb3c66b5e6884f78e",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__08_Run_B_R_45__02_IP__AS_Run_Loop_B_R_45_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "9542905bdd1e495ab1e010897f9703ac",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__08_Run_B_R_45__01_RM__AS_Run_Stop_B_R_45_Seq",
+    "position": 1.862645149230957e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "cd75f29ad9a04d91823853c69545cc01",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__08_Run_B_R_45__01_RM__AS_Run_Start_B_R_45_Seq",
+    "position": 1.6924465739975858e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "3aab3464f1a74766a9e5d7d78a84cbc2",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__08_Run_B_R_45__01_RM__AS_Run_Loop_B_R_45_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "82d83c97c32e48809a461cfd51d983df",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__07_Run_B_L_45__02_IP__AS_Run_Stop_B_L_45_Seq",
+    "position": 1.862645149230957e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "746d5ead9b5744bdba7d61bfd8bd88cb",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__07_Run_B_L_45__02_IP__AS_Run_Start_B_L_45_Seq",
+    "position": 1.8005141555477167e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c6e1678f2f0f4f2d848e0aa09fb9acc5",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__07_Run_B_L_45__02_IP__AS_Run_Loop_B_L_45_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "3ca12fdc59134d499acf4d7d4ba59e3d",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__07_Run_B_L_45__01_RM__AS_Run_Stop_B_L_45_Seq",
+    "position": 1.862645149230957e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f9bf54f4c0c14716ba7404af193cdff1",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__07_Run_B_L_45__01_RM__AS_Run_Start_B_L_45_Seq",
+    "position": 1.8005141555477167e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9a2d89803c1648c7b4557fe1ce25917d",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__07_Run_B_L_45__01_RM__AS_Run_Loop_B_L_45_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "5cbd4f6011704628ac1ef9da79eaacc6",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__06_Run_B_180__02_IP__AS_Run_Stop_B_180_Seq",
+    "position": 1.862645149230957e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "5c3e92f06d57458bbceb697336d6f19b",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__06_Run_B_180__02_IP__AS_Run_Start_B_180_Seq",
+    "position": 1.8005141555477167e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0edbef7558db4a50a003393ce06c0859",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__06_Run_B_180__02_IP__AS_Run_Loop_B_180_Seq",
+    "position": 6.674406449747039e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "e023aafcde754a988e5f8281326425a5",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__06_Run_B_180__01_RM__AS_Run_Stop_B_180_Seq",
+    "position": 1.862645149230957e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c4b192c3d540413ba7d823d1fdeaab1c",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__06_Run_B_180__01_RM__AS_Run_Start_B_180_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "efd649d59461414b8e46518ef273fa9c",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__06_Run_B_180__01_RM__AS_Run_Loop_B_180_Seq",
+    "position": 6.674406449747039e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "18439699d17645fc82b8dcdedcd4360b",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__05_Run_F_R_90__02_IP__AS_Run_Stop_F_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "cad555404b264499910a66138c294f24",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__05_Run_F_R_90__02_IP__AS_Run_Start_F_R_90_Seq",
+    "position": 1.9100968984275823e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8e5b4eeda97d4801a6a9793c96ee74dc",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__05_Run_F_R_90__02_IP__AS_Run_Loop_F_R_90_Seq",
+    "position": 1.0745380052412656e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a0e79638914a4c168a7fca7d8310966e",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__05_Run_F_R_90__01_RM__AS_Run_Stop_F_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a3bf38d310b84894b5d340fc78f53fa3",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__05_Run_F_R_90__01_RM__AS_Run_Start_F_R_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "400229faca004f8eaa1b8147df7ebfb1",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__05_Run_F_R_90__01_RM__AS_Run_Loop_F_R_90_Seq",
+    "position": 1.0745380052412656e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6daa3ea5d7e0482d80e4f3bf1d3e182b",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__04_Run_F_L_90__02_IP__AS_Run_Stop_F_L_90_Seq",
+    "position": 4.470348358154297e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b071d28941a7494abb552ea626afb418",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__04_Run_F_L_90__02_IP__AS_Run_Start_F_L_90_Seq",
+    "position": 1.961357440904976e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7dbbc4fd3d114164a1f9594e74d7c2dd",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__04_Run_F_L_90__02_IP__AS_Run_Loop_F_L_90_Seq",
+    "position": 1.1175870895385742e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9df280fc51ea49198babd148f8e129b7",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__04_Run_F_L_90__01_RM__AS_Run_Stop_F_L_90_Seq",
+    "position": 4.470348358154297e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0eaed3e3038040ab988f81681940fcf4",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__04_Run_F_L_90__01_RM__AS_Run_Start_F_L_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "49ed974f3efe421084e0582be59ca678",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__04_Run_F_L_90__01_RM__AS_Run_Loop_F_L_90_Seq",
+    "position": 1.1175870895385742e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "79957d82d0ca443c90c0801cfae2f0c3",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__03_Run_F_R_45__02_IP__AS_Run_Stop_F_R_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "27bbe52561434dc7ace78f3c143c69b3",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__03_Run_F_R_45__02_IP__AS_Run_Start_F_R_45_Seq",
+    "position": 1.8143349223009864e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "34fad358379447c1bd6d6750dc77403a",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__03_Run_F_R_45__02_IP__AS_Run_Loop_F_R_45_Seq",
+    "position": 9.094592456904138e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "2bf1b8e6ecec4bba908aadbf979202bd",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__03_Run_F_R_45__01_RM__AS_Run_Stop_F_R_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "50108bc8a3204ef7b30037f3fb64c339",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__03_Run_F_R_45__01_RM__AS_Run_Start_F_R_45_Seq",
+    "position": 1.8143349223009864e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "169c89387c554ef09d80d2ba020ad14c",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__03_Run_F_R_45__01_RM__AS_Run_Loop_F_R_45_Seq",
+    "position": 9.094592456904138e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "94f552de57f74fe483a2431fd4060b20",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__02_Run_F_L_45__02_IP__AS_Run_Stop_F_L_45_Seq",
+    "position": 3.7990655954445174e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ff9634b5dcf84b5a953437f709cfe414",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__02_Run_F_L_45__02_IP__AS_Run_Start_F_L_45_Seq",
+    "position": 1.7631292337227933e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e8caf24d93f6484e9ee4161e0dd5b515",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__02_Run_F_L_45__02_IP__AS_Run_Loop_F_L_45_Seq",
+    "position": 9.094592456904138e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "515a96b9c4ad4cd29fcc79640f916c58",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__02_Run_F_L_45__01_RM__AS_Run_Stop_F_L_45_Seq",
+    "position": 3.7990655954445174e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0012cc3bd070415295a763881751b826",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__02_Run_F_L_45__01_RM__AS_Run_Start_F_L_45_Seq",
+    "position": 1.7631292337227933e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "fcdc7247b3b646c9b3510fe85de2a25f",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__02_Run_F_L_45__01_RM__AS_Run_Loop_F_L_45_Seq",
+    "position": 9.094592456904138e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "1b4f226bc1f94e41835dd3e750122778",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__01_Run_F_0__02_IP__AS_Run_Stop_F_0_Seq",
+    "position": 3.0719530030864917e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "09e8a94db08e42c5a173e0c1d9ffc8bd",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__01_Run_F_0__02_IP__AS_Run_Start_F_0_Seq",
+    "position": 1.7709827204726025e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c988536366574cf09a1ab04c28785bbd",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__01_Run_F_0__02_IP__AS_Run_Loop_F_0_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "06cc61f0ae194ca69015dbc9c5d3d486",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__01_Run_F_0__01_RM__AS_Run_Stop_F_0_Seq",
+    "position": 3.0719530030864917e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b3be5514df064b1b85fc7637fd14e3bd",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__01_Run_F_0__01_RM__AS_Run_Start_F_0_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "60041d0e1bb24f05b5418d4af8bfe96e",
+    "name": "Nodachi__Animations__Sequence__04_Run__01_Run__01_Run_F_0__01_RM__AS_Run_Loop_F_0_Seq",
+    "position": 9.541398782175747e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "7d6caa41224d4df79a15ed295efe73e4",
+    "name": "Nodachi__Animations__Sequence__03_Walk__05_Walk_Combat_to_Walk__02_IP__AS_Walk_Combat_to_Walk_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "344c96bf944f444894ddf9a0db4ff916",
+    "name": "Nodachi__Animations__Sequence__03_Walk__05_Walk_Combat_to_Walk__01_RM__AS_Walk_Combat_to_Walk_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "85f48096f2b54c679fd06278f75078ff",
+    "name": "Nodachi__Animations__Sequence__03_Walk__04_Walk_to_Walk_Combat__02_IP__AS_Walk_to_Walk_Combat_Seq",
+    "position": 2.107342389479072e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "26efe32ba15b44bb8f4e67bf1e981d5d",
+    "name": "Nodachi__Animations__Sequence__03_Walk__04_Walk_to_Walk_Combat__01_RM__AS_Walk_to_Walk_Combat_Seq",
+    "position": 2.107342389479072e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "54fae614cd4a4ef99652692f57e11bb1",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__08_Walk_Block_B_L_90__02_IP__AS_Walk_Blockt_Loop_B_L_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "559337a416e648b88a6a100d5f518eb2",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__08_Walk_Block_B_L_90__02_IP__AS_Walk_Block_Stop_B_L_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d4db72df49394f06bc21ad1987509607",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__08_Walk_Block_B_L_90__02_IP__AS_Walk_Block_Start_B_L_90_Seq",
+    "position": 2.4575624024691933e-07,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "abcca26cd83a4a5cb4fea6aa923fdbf6",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__08_Walk_Block_B_L_90__01_RM__AS_Walk_Block_Stop_B_L_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b704a46cbeb94fe3b2201d140ecf44fe",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__08_Walk_Block_B_L_90__01_RM__AS_Walk_Block_Start_B_L_90_Seq",
+    "position": 2.4575624024691933e-07,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "a7e67da04ddf457ba3b5c8b2850a721c",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__08_Walk_Block_B_L_90__01_RM__AS_Walk_Block_Loop_B_L_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "23e385824e9144f7ac11099960f3cd8b",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__07_Walk_Block_B_R_45__02_IP__AS_Walk_Block_Stop_B_R_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "5f6f5bdb6dd94fdab5ad5a7b74dfaf37",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__07_Walk_Block_B_R_45__02_IP__AS_Walk_Block_Start_B_R_45_Seq",
+    "position": 3.146933238440397e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "60fadb82939e4421818de9d8c542c4e0",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__07_Walk_Block_B_R_45__02_IP__AS_Walk_Block_Loop_B_R_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "94d229c0909243c391a492b2e339c39a",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__07_Walk_Block_B_R_45__01_RM__AS_Walk_Block_Stop_B_R_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8aa0b98f8b86475e920ce13874e95bc0",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__07_Walk_Block_B_R_45__01_RM__AS_Walk_Block_Start_B_R_45_Seq",
+    "position": 3.146933238440397e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7a88c5fc9fa14b94a358e4e74c788ea5",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__07_Walk_Block_B_R_45__01_RM__AS_Walk_Block_Loop_B_R_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "c682e84faebd4c45918dd7f067c3caad",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__06_Walk_Block_B_L_45__02_IP__AS_Walk_Block_Stop_B_L_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "631361caabe245acbf7f7d927f567cbe",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__06_Walk_Block_B_L_45__02_IP__AS_Walk_Block_Start_B_L_45_Seq",
+    "position": 2.3934808268677443e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ee7d9aab837f40539fda1dce249c3072",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__06_Walk_Block_B_L_45__02_IP__AS_Walk_Block_Loop_B_L_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8641f3471552474b9bc35ae2b5ff7537",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__06_Walk_Block_B_L_45__01_RM__AS_Walk_Block_Stop_B_L_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d64a7242997d4e47900cfffe1527bc72",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__06_Walk_Block_B_L_45__01_RM__AS_Walk_Block_Start_B_L_45_Seq",
+    "position": 2.3934808268677443e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9fe78fec9dcd4f63ba311434e90527db",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__06_Walk_Block_B_L_45__01_RM__AS_Walk_Block_Loop_B_L_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c3db870038e14d15a745832e08b0a85d",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__05_Walk_Block_B_180__02_IP__AS_Walk_Block_Stop_B_180_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9c09be48cabd4073bc4006afa90c7d1b",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__05_Walk_Block_B_180__02_IP__AS_Walk_Block_Start_B_180_Seq",
+    "position": 3.0429032449319493e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c02d59a844754366b67d4d280862b35e",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__05_Walk_Block_B_180__02_IP__AS_Walk_Block_Loop_B_180_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ce185b63cabd47f986f3787dec7b4a37",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__05_Walk_Block_B_180__01_RM__AS_Walk_Block_Stop_B_180_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0032688f1fc7496ca7705c8d94787963",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__05_Walk_Block_B_180__01_RM__AS_Walk_Block_Start_B_180_Seq",
+    "position": 3.0429032449319493e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0d5bdebf1abe4fea8780ab48c71b0fca",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__05_Walk_Block_B_180__01_RM__AS_Walk_Block_Loop_B_180_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "5fa7e3abdfb349f9afd42f2da4446c57",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__04_Walk_BLock_F_R_90__02_IP__AS_Walk_Block_Stop_F_R_90_Seq",
+    "position": 4.0122603905956566e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "238bc5a88a3c44388f53b180e201ac5e",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__04_Walk_BLock_F_R_90__02_IP__AS_Walk_Block_Start_F_R_90_Seq",
+    "position": 1.9428736663940072e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "0f04c05e3db64e11b01c626b1d022759",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__04_Walk_BLock_F_R_90__02_IP__AS_Walk_Block_Loop_F_R_90_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "71d90e31d9514f0b9fdedf04dc9398af",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__04_Walk_BLock_F_R_90__01_RM__AS_Walk_Block_Stop_F_R_90_Seq",
+    "position": 4.0122603905956566e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "8a20bb879f99413291acc2587ff3b67e",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__04_Walk_BLock_F_R_90__01_RM__AS_Walk_Block_Start_F_R_90_Seq",
+    "position": 1.9428736663940072e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "befe920d30ff470f9e387d6b9b60aa93",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__04_Walk_BLock_F_R_90__01_RM__AS_Walk_Block_Loop_F_R_90_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "52457e54761048e9b68fb53f6ee061cf",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__03_Walk_BLock_F_R_45__02_IP__AS_Walk_Block_Stop_F_R_45_Seq",
+    "position": 4.0122603905956566e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "2386c8df150e44a3bb475f87bd0006b5",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__03_Walk_BLock_F_R_45__02_IP__AS_Walk_Block_Start_F_R_45_Seq",
+    "position": 2.9394405487437325e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5eb65881f0384b74a9c16c54d2b65dca",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__03_Walk_BLock_F_R_45__02_IP__AS_Walk_Block_Loop_F_R_45_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "17ca5a69a9d140e59d3ec39cf23b750d",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__03_Walk_BLock_F_R_45__01_RM__AS_Walk_Block_Stop_F_R_45_Seq",
+    "position": 4.0122603905956566e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "06919b55275147efbc6876136628137a",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__03_Walk_BLock_F_R_45__01_RM__AS_Walk_Block_Start_F_R_45_Seq",
+    "position": 2.9394405487437325e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "b79fa338aa644237a6a1d26252611cbe",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__03_Walk_BLock_F_R_45__01_RM__AS_Walk_Block_Loop_F_R_45_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "fc4a02086948464085441798bd18e278",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__02_Walk_BLock_F_L_45__02_IP__AS_Walk_Block_Stop_F_L_45_Seq",
+    "position": 4.0122603905956566e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "6ed632c601584705a067844ad666ae8c",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__02_Walk_BLock_F_L_45__02_IP__AS_Walk_Block_Start_F_L_45_Seq",
+    "position": 2.9164527859393274e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5f7c568f838e496e9f1e9eb0dbd95896",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__02_Walk_BLock_F_L_45__02_IP__AS_Walk_Block_Loop_F_L_45_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "11b6907adaff4b0290bd827ff8a15c47",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__02_Walk_BLock_F_L_45__01_RM__AS_Walk_Block_Stop_F_L_45_Seq",
+    "position": 4.0122603905956566e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "0985609035954aa3afbb9589b1857664",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__02_Walk_BLock_F_L_45__01_RM__AS_Walk_Block_Start_F_L_45_Seq",
+    "position": 2.9164527859393274e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "ee8bae61b2da41ae97fb2f79eeecfcf2",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__02_Walk_BLock_F_L_45__01_RM__AS_Walk_Block_Loop_F_L_45_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "236cd2e27710439481bf0de6c64065b8",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__01_Walk_Block_F_0__02_IP__AS_Walk_Block_Stop_F_0_Seq",
+    "position": 4.0122603905956566e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "858b8d52ec6f445298fa1ca27148a25a",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__01_Walk_Block_F_0__02_IP__AS_Walk_Block_Start_F_0_Seq",
+    "position": 2.9342982088564895e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "2edb56d1dc7e47d7b78167b07dbba467",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__01_Walk_Block_F_0__02_IP__AS_Walk_Block_Loop_F_0_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7c2375dbc62543c597c3c7cf82df51d6",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__01_Walk_Block_F_0__01_RM__AS_Walk_Block_Stop_F_0_Seq",
+    "position": 4.0122603905956566e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9b0fd1d76ec64622a4cb9f00575acdda",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__01_Walk_Block_F_0__01_RM__AS_Walk_Block_Start_F_0_Seq",
+    "position": 2.9342982088564895e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "eb4bbe8f00864b1588887a7253710901",
+    "name": "Nodachi__Animations__Sequence__03_Walk__03_Walk_Block__01_Walk_Block_F_0__01_RM__AS_Walk_Block_Loop_F_0_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ecf076c3272442dd9dc6e6e4e4842b35",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__10_Walk_Combat_B_R_90__02_IP__AS_Walk_Combat_Stop_B_R_90_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a8ebf5dbbae14a80a0674c0bb2db0811",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__10_Walk_Combat_B_R_90__02_IP__AS_Walk_Combat_Start_B_R_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8359004570014f27887a62b5a4f75e1b",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__10_Walk_Combat_B_R_90__02_IP__AS_Walk_Combat_Loop_B_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "eea54bd2a2ae45a09574ec3da03f6d4f",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__10_Walk_Combat_B_R_90__01_RM__AS_Walk_Combat_Stop_B_R_90_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6124a07629e74120b9787ce2b1653928",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__10_Walk_Combat_B_R_90__01_RM__AS_Walk_Combat_Start_B_R_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e842cbf7196c46bf9c0ad1b316b76903",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__10_Walk_Combat_B_R_90__01_RM__AS_Walk_Combat_Loop_B_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "fb8f077bbe394a0fb4a157e530af03c4",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__09_Walk_Combat_B_L_90__02_IP__AS_Walk_Combat_Stop_B_L_90_Seq",
+    "position": 3.003425064207477e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "615d1a3f2bc6414dbbfa15346fa6dfaf",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__09_Walk_Combat_B_L_90__02_IP__AS_Walk_Combat_Start_B_L_90_Seq",
+    "position": 2.4978896817628993e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "a350766fa40247b5a3c495308988c6e7",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__09_Walk_Combat_B_L_90__02_IP__AS_Walk_Combat_Loop_B_L_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "1345b7ba03e34fa082d6b781b11ae1a9",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__09_Walk_Combat_B_L_90__01_RM__AS_Walk_Combat_Stop_B_L_90_Seq",
+    "position": 3.003425064207477e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "71fbe3fa642946c8952b24570d7d81f6",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__09_Walk_Combat_B_L_90__01_RM__AS_Walk_Combat_Start_B_L_90_Seq",
+    "position": 2.4978896817628993e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "8a94acf8fc214931be5e3e7d87c441ea",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__09_Walk_Combat_B_L_90__01_RM__AS_Walk_Combat_Loop_B_L_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "23c8e74d60f34299940e051eb6e24aab",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__08_Walk_Combat_B_R_45__02_IP__AS_Walk_Combat_Stop_B_R_45_Seq",
+    "position": 2.686345013103164e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0af575bca5f7402eb4fa5e6782602bef",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__08_Walk_Combat_B_R_45__02_IP__AS_Walk_Combat_Start_B_R_45_Seq",
+    "position": 2.3934808268677443e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "68cfc9b99e554f4daf35ae900de366a2",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__08_Walk_Combat_B_R_45__02_IP__AS_Walk_Combat_Loop_B_R_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "52305643884b4ffb9ef945ee3500536e",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__08_Walk_Combat_B_R_45__01_RM__AS_Walk_Combat_Stop_B_R_45_Seq",
+    "position": 2.686345013103164e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9d8fa3a61eb2450cb8625eecdb560603",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__08_Walk_Combat_B_R_45__01_RM__AS_Walk_Combat_Start_B_R_45_Seq",
+    "position": 2.3934808268677443e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "14a649d259c547e8b7f58dc5f0a3bf62",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__08_Walk_Combat_B_R_45__01_RM__AS_Walk_Combat_Loop_B_R_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "58d900343dae4928a70bf4a6f6100259",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__07_Walk_Combat_B_L_45__02_IP__AS_Walk_Combat_Stop_B_L_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "b83740fbd4da4bcc9f825dee4d8aaf86",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__07_Walk_Combat_B_L_45__02_IP__AS_Walk_Combat_Start_B_L_45_Seq",
+    "position": 2.3934808268677443e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "6e87b3ab43d64323b9d33747e76dd701",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__07_Walk_Combat_B_L_45__02_IP__AS_Walk_Combat_Loop_B_L_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e542eb7b2e0b4cdcb6d64f3403bb0e00",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__07_Walk_Combat_B_L_45__01_RM__AS_Walk_Combat_Stop_B_L_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d8615631ede14a0ea78762cb40d1d195",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__07_Walk_Combat_B_L_45__01_RM__AS_Walk_Combat_Start_B_L_45_Seq",
+    "position": 2.3934808268677443e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "f0656f94d1f94d68ad1fcd7cc8ea98b5",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__07_Walk_Combat_B_L_45__01_RM__AS_Walk_Combat_Loop_B_L_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "40bfd9fb469a4f65b3e6d5144fd8942d",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__06_Walk_Combat_B_180__02_IP__AS_Walk_Combat_Stop_B_180_Seq",
+    "position": 3.003425064207477e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f6b5b544e6404af88e69c0ec6c366d86",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__06_Walk_Combat_B_180__02_IP__AS_Walk_Combat_Start_B_180_Seq",
+    "position": 2.4578449142609315e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "415851c20be84296a965c627ced01a32",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__06_Walk_Combat_B_180__02_IP__AS_Walk_Combat_Loop_B_180_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "46a8da8186234491b4067cc5c89ecda6",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__06_Walk_Combat_B_180__01_RM__AS_Walk_Combat_Stop_B_180_Seq",
+    "position": 3.003425064207477e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "cb3b6a649c9944a898e071d9eee75ae7",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__06_Walk_Combat_B_180__01_RM__AS_Walk_Combat_Start_B_180_Seq",
+    "position": 2.4578449142609315e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "dfff45120780430dbf8918f8e9918056",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__06_Walk_Combat_B_180__01_RM__AS_Walk_Combat_Loop_B_180_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "fa9979c2f9d048648eb754a7fa0e0f4a",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__05_Walk_Combat_F_R_90__02_IP__AS_Walk_Combat_Stop_F_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "81f1a63bc42144d0b3d0558f04f1c166",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__05_Walk_Combat_F_R_90__02_IP__AS_Walk_Combat_Start_F_R_90_Seq",
+    "position": 1.9428736663940072e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d52b44db68d045279c93ef1db894ce15",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__05_Walk_Combat_F_R_90__02_IP__AS_Walk_Combat_Loop_F_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8e6ed37a9eca4c9b89f12ea4928ec354",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__05_Walk_Combat_F_R_90__01_RM__AS_Walk_Combat_Stop_F_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "97754c289f034dd1a8efecf0b59dcb16",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__05_Walk_Combat_F_R_90__01_RM__AS_Walk_Combat_Start_F_R_90_Seq",
+    "position": 1.9428736663940072e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a403cba5bba240da966c85ec72eae0a6",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__05_Walk_Combat_F_R_90__01_RM__AS_Walk_Combat_Loop_F_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "224083d643b24f909514470a937051ff",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__04_Walk_Combat_F_L_90__02_IP__AS_Walk_Combat_Stop_F_L_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6deb72318f2646b1beabe9d98246aa0c",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__04_Walk_Combat_F_L_90__02_IP__AS_Walk_Combat_Start_F_L_90_Seq",
+    "position": 2.2855195425108832e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d7bf2b9c1c224dcf97060d10a7099840",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__04_Walk_Combat_F_L_90__02_IP__AS_Walk_Combat_Loop_F_L_90_Seq",
+    "position": 3.003425064207477e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "740f4d206ae945efb25a8d636fbbb057",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__04_Walk_Combat_F_L_90__01_RM__AS_Walk_Combat_Stop_F_L_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "57a15b71e0034e019a73eb1a0b624722",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__04_Walk_Combat_F_L_90__01_RM__AS_Walk_Combat_Start_F_L_90_Seq",
+    "position": 2.2855195425108832e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ae28a1a922f1490eb90e89006ae5ff7f",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__04_Walk_Combat_F_L_90__01_RM__AS_Walk_Combat_Loop_F_L_90_Seq",
+    "position": 3.003425064207477e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "60269b3931594551b71768e6724cd09a",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__03_Walk_Combat_F_R_45__02_IP__AS_Walk_Combat_Stop_F_R_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "03875b95e7e447d3a6363f639935bdc3",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__03_Walk_Combat_F_R_45__02_IP__AS_Walk_Combat_Start_F_R_45_Seq",
+    "position": 3.0672626394334657e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f0811d3745e84af5a1811ff62684021b",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__03_Walk_Combat_F_R_45__02_IP__AS_Walk_Combat_Loop_F_R_45_Seq",
+    "position": 2.5809567816281742e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "29ea18fcde5c4f9790ec77ddb9d6dda3",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__03_Walk_Combat_F_R_45__01_RM__AS_Walk_Combat_Stop_F_R_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "5f15a271f08b4623bec40f44c1448d9e",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__03_Walk_Combat_F_R_45__01_RM__AS_Walk_Combat_Start_F_R_45_Seq",
+    "position": 3.0672626394334657e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b22c5862fc8540a38358f0cf949d0f2a",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__03_Walk_Combat_F_R_45__01_RM__AS_Walk_Combat_Loop_F_R_45_Seq",
+    "position": 2.5809567816281742e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "79bfd09e0da54cf49315fea350b74365",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__02_Walk_Combat_F_L_45__02_IP__AS_Walk_Combat_Stop_F_L_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "3a07e15455a947c19315f7958abca4b5",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__02_Walk_Combat_F_L_45__02_IP__AS_Walk_Combat_Start_F_L_45_Seq",
+    "position": 3.1045328796608374e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d2b36af724a4492dab41cba2074aabb8",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__02_Walk_Combat_F_L_45__02_IP__AS_Walk_Combat_Loop_F_L_45_Seq",
+    "position": 2.5809567816281742e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "8d28a0bd883b4a34a4cf6cdbcf304cd4",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__02_Walk_Combat_F_L_45__01_RM__AS_Walk_Combat_Stop_F_L_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b0b3f312dc9442908715e0dc61326cf0",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__02_Walk_Combat_F_L_45__01_RM__AS_Walk_Combat_Start_F_L_45_Seq",
+    "position": 3.1045328796608374e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "1775e813c8bc4ec5a99b209c647a3bb5",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__02_Walk_Combat_F_L_45__01_RM__AS_Walk_Combat_Loop_F_L_45_Seq",
+    "position": 2.5809567816281742e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6cfc08e06114404496aabf229d11dc77",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__01_Walk_Combat_F_0__02_IP__AS_Walk_Combat_Stop_F_0_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "fbebef8d35b24dd384d305bdf472b220",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__01_Walk_Combat_F_0__02_IP__AS_Walk_Combat_Start_F_0_Seq",
+    "position": 3.087499464982102e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "29c19312467f4c21852fe407e684d752",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__01_Walk_Combat_F_0__02_IP__AS_Walk_Combat_Loop_F_0_Seq",
+    "position": 2.107342389479072e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b59a07170bb24f0ab50e8c8e7a1ef67a",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__01_Walk_Combat_F_0__01_RM__AS_Walk_Combat_Stop_F_0_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "87fe9008993d4bc6a54165172ab2f7dd",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__01_Walk_Combat_F_0__01_RM__AS_Walk_Combat_Start_F_0_Seq",
+    "position": 3.087499464982102e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ccb1dea326a944db8df48150f2a8aaef",
+    "name": "Nodachi__Animations__Sequence__03_Walk__02_Walk_Combat__01_Walk_Combat_F_0__01_RM__AS_Walk_Combat_Loop_F_0_Seq",
+    "position": 2.107342389479072e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "e32e5876743949d5b0f24ea4d33ea3b8",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__10_Walk_B_R_90__02_IP__AS_Walk_Stop_B_R_90_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "2ee7b0ac28d0475ab3b4448c08358487",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__10_Walk_B_R_90__02_IP__AS_Walk_Start_B_R_90_Seq",
+    "position": 2.0267771105864085e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b5517b645a61415fbfc9e2d3ab49da55",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__10_Walk_B_R_90__02_IP__AS_Walk_Loop_B_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c79d776c9d244cde93380536b6637599",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__10_Walk_B_R_90__01_RM__AS_Walk_Stop_B_R_90_Seq",
+    "position": 3.725290298461914e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "466dd0321c7e41ee91f37f87b9ff5ccc",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__10_Walk_B_R_90__01_RM__AS_Walk_Start_B_R_90_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "143c94ea7ef14fea9927923a5de8c252",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__10_Walk_B_R_90__01_RM__AS_Walk_Loop_B_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "2d3196b9ef8a47ac9cbf4c75cbfd8ea4",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__09_Walk_B_L_90__02_IP__AS_Walk_Stop_B_L_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c6e0ef26908942d2ad578fd9f311bd8f",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__09_Walk_B_L_90__02_IP__AS_Walk_Start_B_L_90_Seq",
+    "position": 2.4978896817628993e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "0eab2b08fe8e41399d523bf3a19455ea",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__09_Walk_B_L_90__02_IP__AS_Walk_Loop_B_L_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7f498b3ef94448bcafb9c64949c4dfae",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__09_Walk_B_L_90__01_RM__AS_Walk_Stop_B_L_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c944884f483e4262b1be46bf42ffc87b",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__09_Walk_B_L_90__01_RM__AS_Walk_Start_B_L_90_Seq",
+    "position": 2.4978896817628993e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "7227862cd6704280891bdfa321feed1b",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__09_Walk_B_L_90__01_RM__AS_Walk_Loop_B_L_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "bde90df5817c4a80bac765a64b2ce012",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__08_Walk_B_R_45__02_IP__AS_Walk_Stop_B_R_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "116903a0d0e1423d94874cdf5694ded4",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__08_Walk_B_R_45__02_IP__AS_Walk_Start_B_R_45_Seq",
+    "position": 2.3934808268677443e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "595c7898e18c4058948604292b62adac",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__08_Walk_B_R_45__02_IP__AS_Walk_Loop_B_R_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "47dfaf0b4eab47e7b0e8ae2ce50b0bcb",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__08_Walk_B_R_45__01_RM__AS_Walk_Stop_B_R_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "030b179a0e5e4cc3ab82548f425da065",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__08_Walk_B_R_45__01_RM__AS_Walk_Start_B_R_45_Seq",
+    "position": 2.3934808268677443e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ffdd0c9ebf5741d4858bad5f6dc93475",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__08_Walk_B_R_45__01_RM__AS_Walk_Loop_B_R_45_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "92d6ea85394a4201a83be982f125a10a",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__07_Walk_B_L_45__02_IP__AS_Walk_Stop_B_L_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6cbc6ef14c334e92bebcc45cf377af12",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__07_Walk_B_L_45__02_IP__AS_Walk_Start_B_L_45_Seq",
+    "position": 2.3934808268677443e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "5c7061cd8efa4b718ecb3b70abda8146",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__07_Walk_B_L_45__02_IP__AS_Walk_Loop_B_L_45_Seq",
+    "position": 2.6927947871513425e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "2dfeabd5310344449a902e7a0923b8bc",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__07_Walk_B_L_45__01_RM__AS_Walk_Stop_B_L_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ec8d0f90e0bb459689c878012ceee83b",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__07_Walk_B_L_45__01_RM__AS_Walk_Start_B_L_45_Seq",
+    "position": 2.3934808268677443e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "870db8c7cf40401fb959f2e3c0f15a87",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__07_Walk_B_L_45__01_RM__AS_Walk_Loop_B_L_45_Seq",
+    "position": 2.6927947871513425e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "429dba16290647c6a6edfb87282fa751",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__06_Walk_B_180__02_IP__AS_Walk_Stop_B_180_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "430e9099a97143c8b2aa14b305564bee",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__06_Walk_B_180__02_IP__AS_Walk_Start_B_180_Seq",
+    "position": 2.4578449142609315e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "234905d4670d47f088ad886acbfe436d",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__06_Walk_B_180__02_IP__AS_Walk_Loop_B_180_Seq",
+    "position": 2.7120522716472806e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f2705c535dbb46cbbea6cbc8da0812a9",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__06_Walk_B_180__01_RM__AS_Walk_Stop_B_180_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "2253614f231e45d993b4ecdae854ea73",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__06_Walk_B_180__01_RM__AS_Walk_Start_B_180_Seq",
+    "position": 2.4578449142609315e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "055579e8aaaf4eea98949b913863a4e4",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__06_Walk_B_180__01_RM__AS_Walk_Loop_B_180_Seq",
+    "position": 2.7120522716472806e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "55a410b208874c16b4341076a26aa7e6",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__05_Walk_F_R_90__02_IP__AS_Walk_Stop_F_R_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "5eaef21b48ed45a89ed5bb9f492cf34b",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__05_Walk_F_R_90__02_IP__AS_Walk_Start_F_R_90_Seq",
+    "position": 1.9428736663940072e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d88088e8c29d4006b19d85a97fc0df10",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__05_Walk_F_R_90__02_IP__AS_Walk_Loop_F_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "fa1920cf8e3c4df1a408b2f8f2003428",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__05_Walk_F_R_90__01_RM__AS_Walk_Stop_F_R_90_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a12dd62d5de3432ea9ad38a2ff68cada",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__05_Walk_F_R_90__01_RM__AS_Walk_Start_F_R_90_Seq",
+    "position": 1.9428736663940072e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "1929eaba4efb46b58ad8357035f8e4d7",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__05_Walk_F_R_90__01_RM__AS_Walk_Loop_F_R_90_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d935a301a6964cecac7858c07a10637c",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__04_Walk_F_L_90__02_IP__AS_Walk_Stop_F_L_90_Seq",
+    "position": 4.214684778958144e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "36f6bccddf204827aafb858f72e889a5",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__04_Walk_F_L_90__02_IP__AS_Walk_Start_F_L_90_Seq",
+    "position": 2.2855195425108832e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6319e26ef1014d019c214698920ed5e8",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__04_Walk_F_L_90__02_IP__AS_Walk_Loop_F_L_90_Seq",
+    "position": 3.003425064207477e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "9b69b0b7769c4397a0b7baffb421a1a6",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__04_Walk_F_L_90__01_RM__AS_Walk_Stop_F_L_90_Seq",
+    "position": 4.214684778958144e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b9520842a7f04e1e98c768a1ab1d7f85",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__04_Walk_F_L_90__01_RM__AS_Walk_Start_F_L_90_Seq",
+    "position": 2.2855195425108832e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d8f00b9038bc42f394a3e4c822ae73a3",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__04_Walk_F_L_90__01_RM__AS_Walk_Loop_F_L_90_Seq",
+    "position": 3.003425064207477e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "400b5d33d7994e2e8d204cb72751ffcb",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__03_Walk_F_R_45__02_IP__AS_Walk_Stop_F_R_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "648506b8b5ca4b70bc7d949444815966",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__03_Walk_F_R_45__02_IP__AS_Walk_Start_F_R_45_Seq",
+    "position": 3.0672626394334657e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "81c480eb70e049fdb958116ae0ef07ec",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__03_Walk_F_R_45__02_IP__AS_Walk_Loop_F_R_45_Seq",
+    "position": 2.5809567816281742e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c5120160820c42e58e6b9bbd30626942",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__03_Walk_F_R_45__01_RM__AS_Walk_Stop_F_R_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "f2fcff11af5f4c34b6e3303671fec89d",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__03_Walk_F_R_45__01_RM__AS_Walk_Start_F_R_45_Seq",
+    "position": 3.0672626394334657e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "69dc567840b14c6288e1f4f09475f498",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__03_Walk_F_R_45__01_RM__AS_Walk_Loop_F_R_45_Seq",
+    "position": 2.5809567816281742e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "caaaae73b4ab4c68b45a54c18eb7886f",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__02_Walk_F_L_45__02_IP__AS_Walk_Stop_F_L_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "53a9d986d71b4fdcb4d959b355b15a2b",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__02_Walk_F_L_45__02_IP__AS_Walk_Start_F_L_45_Seq",
+    "position": 3.1045328796608374e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "eb424be8630743c89660a4a108182652",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__02_Walk_F_L_45__02_IP__AS_Walk_Loop_F_L_45_Seq",
+    "position": 2.5809567816281742e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "012096ee31cd4b2c92b233fc8127acf1",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__02_Walk_F_L_45__01_RM__AS_Walk_Stop_F_L_45_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "33c60a37992c4e21a658f8bebf9bd798",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__02_Walk_F_L_45__01_RM__AS_Walk_Start_F_L_45_Seq",
+    "position": 3.1045328796608374e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "eb4c51f6e3de44e38df80800b18c8871",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__02_Walk_F_L_45__01_RM__AS_Walk_Loop_F_L_45_Seq",
+    "position": 2.5809567816281742e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "46f312880b474f88bd746bc597439d57",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__01_Walk_F_0__02_IP__AS_Walk_Stop_F_0_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "bb1dd2a4f34d4b14a0f4296912fcb74f",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__01_Walk_F_0__02_IP__AS_Walk_Start_F_0_Seq",
+    "position": 3.087499464982102e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b01ec1e5bbd14a57bed2d50379e79402",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__01_Walk_F_0__02_IP__AS_Walk_Loop_F_0_Seq",
+    "position": 2.356080486265455e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "c3ee41ca6aa84332815af5d70b76d793",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__01_Walk_F_0__01_RM__AS_Walk_Stop_F_0_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "be69e71d8b8c47d0ba8795e3940f7428",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__01_Walk_F_0__01_RM__AS_Walk_Start_F_0_Seq",
+    "position": 3.087499464982102e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "a1c5c49194a541289b517776f0d119ba",
+    "name": "Nodachi__Animations__Sequence__03_Walk__01_Walk__01_Walk_F_0__01_RM__AS_Walk_Loop_F_0_Seq",
+    "position": 2.356080486265455e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "fdabc9e2fc9248c2a45cecb90b8e3ee8",
+    "name": "Nodachi__Animations__Sequence__02_Attack__19_Execution__02_Target__AS_Target_03_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "rest-fallback"
+  },
+  {
+    "id": "f74b657954724c15894dac8266db03cb",
+    "name": "Nodachi__Animations__Sequence__02_Attack__19_Execution__02_Target__AS_Target_02_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "rest-fallback"
+  },
+  {
+    "id": "60904a1259ae425799a8df131ce46a13",
+    "name": "Nodachi__Animations__Sequence__02_Attack__19_Execution__02_Target__AS_Target_01_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "rest-fallback"
+  },
+  {
+    "id": "09285add9b2c4eadad3d22a91811d2ad",
+    "name": "Nodachi__Animations__Sequence__02_Attack__19_Execution__01_Execution__AS_Execution_03_Seq",
+    "position": 6.006850128414953e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "59e9006401f9459cbc19ceaf59d2b8cf",
+    "name": "Nodachi__Animations__Sequence__02_Attack__19_Execution__01_Execution__AS_Execution_02_Seq",
+    "position": 3.405330915029481e-07,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "4bc9fcb992a547a1bcb6aeec49f3520c",
+    "name": "Nodachi__Animations__Sequence__02_Attack__19_Execution__01_Execution__AS_Execution_01_Seq",
+    "position": 4.470348358154297e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "42d5aa5afba84899bbcfade3bcd12080",
+    "name": "Nodachi__Animations__Sequence__02_Attack__18_Dash_Air_Attack__AS_Dash_Air_Attack_Seq",
+    "position": 2.384185791015625e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "caaf98f8fc3c4eaaa4530df578c52a62",
+    "name": "Nodachi__Animations__Sequence__02_Attack__17_Parry_Counter_Attack__AS_Parry_Counter_R_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "aadeeebd176d455cab4cc9fa496b2ddd",
+    "name": "Nodachi__Animations__Sequence__02_Attack__17_Parry_Counter_Attack__AS_Parry_Counter_L_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "3b6982aa024842dc82b6f55dbbcfba08",
+    "name": "Nodachi__Animations__Sequence__02_Attack__16_Run_Attack__AS_Run_Attack_02_Seq",
+    "position": 2.6989721391146304e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d6358557dfa34a0d89dc7c9a0c382f78",
+    "name": "Nodachi__Animations__Sequence__02_Attack__16_Run_Attack__AS_Run_Attack_01_Seq",
+    "position": 2.6989721391146304e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "fe43360a1f2b4a58b9633f74270db16e",
+    "name": "Nodachi__Animations__Sequence__02_Attack__15_Attack_Up__AS_Attack_Up_Floor_To_Air_02_Seq",
+    "position": 6.377975410032377e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5cdf085d35fc4acfa946d4e50e74255c",
+    "name": "Nodachi__Animations__Sequence__02_Attack__15_Attack_Up__AS_Attack_Up_Air_To_Air_03_Seq",
+    "position": 6.377975410032377e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "c3791b38b0264c728bf5b9adb17e426d",
+    "name": "Nodachi__Animations__Sequence__02_Attack__15_Attack_Up__AS_Attack_Up_01_Seq",
+    "position": 1.0980700153595535e-06,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "f9b0060fd2994948a6fade3cea833baa",
+    "name": "Nodachi__Animations__Sequence__02_Attack__14_Attack_Air_to_Floor_03__AS_Attack_Air_to_Floor_03_Start_Seq",
+    "position": 2.986047320518992e-08,
+    "angle": 0,
+    "state": "animated"
+  },
+  {
+    "id": "cd374b4b1fb842c88594dd2cb068f431",
+    "name": "Nodachi__Animations__Sequence__02_Attack__14_Attack_Air_to_Floor_03__AS_Attack_Air_to_Floor_03_Loop_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "637cee760eaf45a79a94721926626acb",
+    "name": "Nodachi__Animations__Sequence__02_Attack__14_Attack_Air_to_Floor_03__AS_Attack_Air_to_Floor_03_End_Seq",
+    "position": 7.450580596923828e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "75b74eddcaca4565a960c0a6b7113481",
+    "name": "Nodachi__Animations__Sequence__02_Attack__13_Attack_Air_to_Floor_02__AS_Attack_Air_to_Floor_02_Start_Seq",
+    "position": 2.986047320518992e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "d7db9dd92fad476cba58db4508225f0b",
+    "name": "Nodachi__Animations__Sequence__02_Attack__13_Attack_Air_to_Floor_02__AS_Attack_Air_to_Floor_02_Loop_Seq",
+    "position": 3.7990655954445174e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "ef07837abaa04d8383aa29cae447e2ae",
+    "name": "Nodachi__Animations__Sequence__02_Attack__13_Attack_Air_to_Floor_02__AS_Attack_Air_to_Floor_02_End_Seq",
+    "position": 5.372690026206328e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "ec2a239b0c3645c1b82ae7cb65552f1e",
+    "name": "Nodachi__Animations__Sequence__02_Attack__12_Attack_Air_to_Floor_01__AS_Attack_Air_to_Floor_01_Start_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "24429effe318426683e3a9724792e71a",
+    "name": "Nodachi__Animations__Sequence__02_Attack__12_Attack_Air_to_Floor_01__AS_Attack_Air_to_Floor_01_Loop_Seq",
+    "position": 3.161013495400766e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "b9de69bdd1594585ae92710e50f4fd9a",
+    "name": "Nodachi__Animations__Sequence__02_Attack__12_Attack_Air_to_Floor_01__AS_Attack_Air_to_Floor_01_End_Seq",
+    "position": 4.214684778958144e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "afe4128690324efb968c7b4956cd9567",
+    "name": "Nodachi__Animations__Sequence__02_Attack__11_Ultimate_Attack__02_Ultimate_Attack_Air__AS_Ultimate_Attack_Air_Start_Seq",
+    "position": 2.494554109944147e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "9413a7ef9d0843b2b63d9ee7b35dd1e0",
+    "name": "Nodachi__Animations__Sequence__02_Attack__11_Ultimate_Attack__02_Ultimate_Attack_Air__AS_Ultimate_Attack_Air_Loop_Seq",
+    "position": 1.1445798975273647e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "bc38dfd60e15423aafe2d0ef91170d8d",
+    "name": "Nodachi__Animations__Sequence__02_Attack__11_Ultimate_Attack__02_Ultimate_Attack_Air__AS_Ultimate_Attack_Air_End_Seq",
+    "position": 2.0418703172708774e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "e0ca958d0f184cf4a71d1f85ad1f4864",
+    "name": "Nodachi__Animations__Sequence__02_Attack__11_Ultimate_Attack__02_Ultimate_Attack_Air__AS_Ultimate_Attack_Air_All_Seq",
+    "position": 5.497296911016747e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4008c75dab584dff8bf34b34dcd7f52a",
+    "name": "Nodachi__Animations__Sequence__02_Attack__11_Ultimate_Attack__01_Ultimate_Attack__AS_Ultimate_Attack_Start_Seq",
+    "position": 2.5156055016850587e-07,
+    "angle": 0.05595291023658669,
+    "state": "animated"
+  },
+  {
+    "id": "4ef15d16ee7844ef9b5565cc3eda69ec",
+    "name": "Nodachi__Animations__Sequence__02_Attack__11_Ultimate_Attack__01_Ultimate_Attack__AS_Ultimate_Attack_Loop_Seq",
+    "position": 1.1445798975273647e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "09ab14d151424995926c7f0d8ceef693",
+    "name": "Nodachi__Animations__Sequence__02_Attack__11_Ultimate_Attack__01_Ultimate_Attack__AS_Ultimate_Attack_End_Seq",
+    "position": 4.71216097253091e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4b473234d9ed46ba8567550144000808",
+    "name": "Nodachi__Animations__Sequence__02_Attack__11_Ultimate_Attack__01_Ultimate_Attack__AS_Ultimate_Attack_All_Seq",
+    "position": 5.56753320779535e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "aa5acf0e2b5f43d7a9ba2b2c039224a7",
+    "name": "Nodachi__Animations__Sequence__02_Attack__10_Buff__AS_Buff_Seq",
+    "position": 3.332000986233652e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "e906f6310dec456ba11c355fff7b55be",
+    "name": "Nodachi__Animations__Sequence__02_Attack__10_Buff__AS_Buff_Air_Seq",
+    "position": 4.214684778958144e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5ac8e0971ca34524a402279b4ed5d5e7",
+    "name": "Nodachi__Animations__Sequence__02_Attack__09_Skill_Attack__AS_Skill_06_Stop_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "e75cef22616d4da8bce7544973742c19",
+    "name": "Nodachi__Animations__Sequence__02_Attack__09_Skill_Attack__AS_Skill_06_Start_Seq",
+    "position": 1.0323827126512697e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "77a2c5b542f54ddd9b2db0623832bb21",
+    "name": "Nodachi__Animations__Sequence__02_Attack__09_Skill_Attack__AS_Skill_06_Loop_Seq",
+    "position": 8.97168703772877e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "01e5b20861154792a7dd4682acf79251",
+    "name": "Nodachi__Animations__Sequence__02_Attack__09_Skill_Attack__AS_Skill_05_Start_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "70e7ca03ce6d4085a7d7ddc088229e0c",
+    "name": "Nodachi__Animations__Sequence__02_Attack__09_Skill_Attack__AS_Skill_05_Loop_Seq",
+    "position": 9.087437291555034e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "18c03f8e33584131b564ac19d070fc50",
+    "name": "Nodachi__Animations__Sequence__02_Attack__09_Skill_Attack__AS_Skill_05_End_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "2285f750a7ff4bcf9f652f02e8dd7b20",
+    "name": "Nodachi__Animations__Sequence__02_Attack__09_Skill_Attack__AS_Skill_04_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "da66cb2202874224b0b26d6730b826fc",
+    "name": "Nodachi__Animations__Sequence__02_Attack__09_Skill_Attack__AS_Skill_03_Seq",
+    "position": 7.100783250280074e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "b09f27f7b2434ea2af8e18c101f2c45b",
+    "name": "Nodachi__Animations__Sequence__02_Attack__09_Skill_Attack__AS_Skill_02_Seq",
+    "position": 5.685920996256755e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "83f8f8d8de8c436a8fdbf8aeb1f04e91",
+    "name": "Nodachi__Animations__Sequence__02_Attack__09_Skill_Attack__AS_Skill_01_Seq",
+    "position": 1.0980700153595535e-06,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "263061f876db4b3a8179b9ed0647c792",
+    "name": "Nodachi__Animations__Sequence__02_Attack__08_Combo_Attack_Air_Wave__AS_Combo_Attack_Air_Wave_All_Seq",
+    "position": 8.195638656616211e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "fb316b3af5d440af858b6592b612fa4d",
+    "name": "Nodachi__Animations__Sequence__02_Attack__08_Combo_Attack_Air_Wave__AS_Combo_Attack_Air_Wave_04_Seq",
+    "position": 1.1175870895385742e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "26f434d092ac4f5b8712dc3554a32f85",
+    "name": "Nodachi__Animations__Sequence__02_Attack__08_Combo_Attack_Air_Wave__AS_Combo_Attack_Air_Wave_03_Seq",
+    "position": 5.960464477539063e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d5fdb7659b91461eb578dc55d5183c66",
+    "name": "Nodachi__Animations__Sequence__02_Attack__08_Combo_Attack_Air_Wave__AS_Combo_Attack_Air_Wave_02_Seq",
+    "position": 2.986047320518992e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "7ef3c75bf0ff4bb3855a0b8ecea8af6f",
+    "name": "Nodachi__Animations__Sequence__02_Attack__08_Combo_Attack_Air_Wave__AS_Combo_Attack_Air_Wave_01_Seq",
+    "position": 1.1662003629453466e-07,
+    "angle": 0,
+    "state": "animated"
+  },
+  {
+    "id": "855296211a05407f831c2d887b3f6436",
+    "name": "Nodachi__Animations__Sequence__02_Attack__07_Combo_Attack_Air__AS_Combo_Attack_Air_All_Seq",
+    "position": 4.76837158203125e-07,
+    "angle": 0,
+    "state": "animated"
+  },
+  {
+    "id": "631eb756428b4743a39d3003aa2e9239",
+    "name": "Nodachi__Animations__Sequence__02_Attack__07_Combo_Attack_Air__AS_Combo_Attack_Air_04_Seq",
+    "position": 2.0116567611694336e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "6af9185579bd4431969516a8315e781f",
+    "name": "Nodachi__Animations__Sequence__02_Attack__07_Combo_Attack_Air__AS_Combo_Attack_Air_03_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "1bfa05561f324311be8272c5c467a303",
+    "name": "Nodachi__Animations__Sequence__02_Attack__07_Combo_Attack_Air__AS_Combo_Attack_Air_02_Seq",
+    "position": 1.365714012990793e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "c70821d8d268411eae850ead057f7527",
+    "name": "Nodachi__Animations__Sequence__02_Attack__07_Combo_Attack_Air__AS_Combo_Attack_Air_01_Seq",
+    "position": 3.3717478231665154e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5c60526666914173a17590b41aed14d5",
+    "name": "Nodachi__Animations__Sequence__02_Attack__06_Combo_Attack_Wave__AS_Combo_Attack_Wave_All_Seq",
+    "position": 1.7881393432617188e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "cb742ff041144247a251e6d6d0fbe22a",
+    "name": "Nodachi__Animations__Sequence__02_Attack__06_Combo_Attack_Wave__AS_Combo_Attack_Wave_04_Seq",
+    "position": 6.365778659755961e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "f8568f252fc64c318afa72383a4cb25f",
+    "name": "Nodachi__Animations__Sequence__02_Attack__06_Combo_Attack_Wave__AS_Combo_Attack_Wave_03_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "97bd2b3908ae48938922c9191be532b2",
+    "name": "Nodachi__Animations__Sequence__02_Attack__06_Combo_Attack_Wave__AS_Combo_Attack_Wave_02_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d3d8c414ba8a4792ad2c500748e4be46",
+    "name": "Nodachi__Animations__Sequence__02_Attack__06_Combo_Attack_Wave__AS_Combo_Attack_Wave_01_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "46693c22c80844ffb007da6e8383ad9d",
+    "name": "Nodachi__Animations__Sequence__02_Attack__05_Combo_Attack_05__AS_Combo_Attack_05_All_Seq",
+    "position": 6.006850128414953e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "2954b9556fb145f5b4d4ae9fe9ca07b3",
+    "name": "Nodachi__Animations__Sequence__02_Attack__05_Combo_Attack_05__AS_Combo_Attack_05_04_Seq",
+    "position": 5.685920996256755e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "7381e275511447c78479f6400c9c0fd7",
+    "name": "Nodachi__Animations__Sequence__02_Attack__05_Combo_Attack_05__AS_Combo_Attack_05_03_Seq",
+    "position": 3.406604207611963e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "5dc357d8ec604647b6219ab702cdcea4",
+    "name": "Nodachi__Animations__Sequence__02_Attack__05_Combo_Attack_05__AS_Combo_Attack_05_02_Seq",
+    "position": 6.107658805376559e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "89eaf4903e6e408dbb3f646de65cc3dc",
+    "name": "Nodachi__Animations__Sequence__02_Attack__05_Combo_Attack_05__AS_Combo_Attack_05_01_Seq",
+    "position": 1.0244368695566664e-06,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "8f4818f261054abe808141747d0c3330",
+    "name": "Nodachi__Animations__Sequence__02_Attack__04_Combo_Attack_04__AS_Combo_Attack_04_All_Seq",
+    "position": 9.42432194506182e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "557d3f002079449d8552e4d46af2e38a",
+    "name": "Nodachi__Animations__Sequence__02_Attack__04_Combo_Attack_04__AS_Combo_Attack_04_04_Seq",
+    "position": 5.963374150042e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "de6044a8177f4b32a92ebde32c03b657",
+    "name": "Nodachi__Animations__Sequence__02_Attack__04_Combo_Attack_04__AS_Combo_Attack_04_03_Seq",
+    "position": 6.107658805376559e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "899b1be1ba514797bc9254180201214b",
+    "name": "Nodachi__Animations__Sequence__02_Attack__04_Combo_Attack_04__AS_Combo_Attack_04_02_Seq",
+    "position": 1.1387597851353348e-06,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "2bc6f3b8cf0b406b8b0e5e14598518d5",
+    "name": "Nodachi__Animations__Sequence__02_Attack__04_Combo_Attack_04__AS_Combo_Attack_04_01_Seq",
+    "position": 2.528810796320613e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "477fa209702e40fc875b2839b93c3604",
+    "name": "Nodachi__Animations__Sequence__02_Attack__03_Combo_Attack_03__AS_Combo_Attack_03_All_Seq",
+    "position": 3.194970304321032e-06,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "e6b127f0b0b24d6d8e8b9da133b2146c",
+    "name": "Nodachi__Animations__Sequence__02_Attack__03_Combo_Attack_03__AS_Combo_Attack_03_04_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "8550effa20e84123949c48331cc99361",
+    "name": "Nodachi__Animations__Sequence__02_Attack__03_Combo_Attack_03__AS_Combo_Attack_03_03_Seq",
+    "position": 2.909757085944875e-06,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "45958defd9ab411881b3b1a6d9d56f3e",
+    "name": "Nodachi__Animations__Sequence__02_Attack__03_Combo_Attack_03__AS_Combo_Attack_03_02_Seq",
+    "position": 6.325538493001659e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "6c71ecc2208d41d1a95884111caac44c",
+    "name": "Nodachi__Animations__Sequence__02_Attack__03_Combo_Attack_03__AS_Combo_Attack_03_01_Seq",
+    "position": 6.664001972467304e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "c5445aa18d0544ca82e6f86c49fff12a",
+    "name": "Nodachi__Animations__Sequence__02_Attack__02_Combo_Attack_02__AS_Combo_Attack_02_All_Seq",
+    "position": 9.98384734884894e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "26f49dfc9eea44faa64e19db2cb7371d",
+    "name": "Nodachi__Animations__Sequence__02_Attack__02_Combo_Attack_02__AS_Combo_Attack_02_04_Seq",
+    "position": 4.059711784520914e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "4b8a73385a5340078a3afdda3e565093",
+    "name": "Nodachi__Animations__Sequence__02_Attack__02_Combo_Attack_02__AS_Combo_Attack_02_03_Seq",
+    "position": 2.4586915969848633e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "2a7f23b760c047dbba8c1ca189722f5e",
+    "name": "Nodachi__Animations__Sequence__02_Attack__02_Combo_Attack_02__AS_Combo_Attack_02_02_Seq",
+    "position": 4.342480508512381e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "3a10e018de4444898e49ab630b852394",
+    "name": "Nodachi__Animations__Sequence__02_Attack__02_Combo_Attack_02__AS_Combo_Attack_02_01_Seq",
+    "position": 1.8065017926005567e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "d3d6a8d5067f46238c592e831a23ee06",
+    "name": "Nodachi__Animations__Sequence__02_Attack__01_Combo_Attack_01__AS_Combo_Attack_01_All_Seq",
+    "position": 3.2928530799836153e-06,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "e49480e965b94c378dc7b84c8b8ef6e7",
+    "name": "Nodachi__Animations__Sequence__02_Attack__01_Combo_Attack_01__AS_Combo_Attack_01_04_Seq",
+    "position": 3.2186594012273417e-07,
+    "angle": 0.05595291023658669,
+    "state": "animated"
+  },
+  {
+    "id": "0389eb1aff96457e9cc6101343389817",
+    "name": "Nodachi__Animations__Sequence__02_Attack__01_Combo_Attack_01__AS_Combo_Attack_01_03_Seq",
+    "position": 6.143906006172983e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "b5c2f452132149a39cdc971c1d89ddfa",
+    "name": "Nodachi__Animations__Sequence__02_Attack__01_Combo_Attack_01__AS_Combo_Attack_01_02_Seq",
+    "position": 1.2013700256829907e-07,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "0caf78e53c6744fdafddb5f52d1beef3",
+    "name": "Nodachi__Animations__Sequence__02_Attack__01_Combo_Attack_01__AS_Combo_Attack_01_01_Seq",
+    "position": 7.450580596923828e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "7903467e03b441548e533d9f133cc2bb",
+    "name": "Nodachi__Animations__Sequence__01_Idle__04_Offset_Idle_Combat__AS_Idle_Combat_Up_R_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "3d38dab0cc434772b24d3bcaaa35b948",
+    "name": "Nodachi__Animations__Sequence__01_Idle__04_Offset_Idle_Combat__AS_Idle_Combat_Up_L_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "7d53668e3e014f59ad005feded8cde3b",
+    "name": "Nodachi__Animations__Sequence__01_Idle__04_Offset_Idle_Combat__AS_Idle_Combat_Up_0_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "97ffefe7fb914a069856623797caf3b3",
+    "name": "Nodachi__Animations__Sequence__01_Idle__04_Offset_Idle_Combat__AS_Idle_Combat_R_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "9b26a89ff81f44b3842ef63a0ea757a4",
+    "name": "Nodachi__Animations__Sequence__01_Idle__04_Offset_Idle_Combat__AS_Idle_Combat_L_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "4303a696e8234031bdcad4161ffa68c6",
+    "name": "Nodachi__Animations__Sequence__01_Idle__04_Offset_Idle_Combat__AS_Idle_Combat_Down_R_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "2b29855f343a4260aff4ea80aaad66c6",
+    "name": "Nodachi__Animations__Sequence__01_Idle__04_Offset_Idle_Combat__AS_Idle_Combat_Down_L_Seq",
+    "position": 8.33000246558413e-09,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "0137bc43a15b4c79abfaf462186cf123",
+    "name": "Nodachi__Animations__Sequence__01_Idle__04_Offset_Idle_Combat__AS_Idle_Combat_Down_0_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "962e1bdd48a248de8bc6dc7716806cbc",
+    "name": "Nodachi__Animations__Sequence__01_Idle__04_Offset_Idle_Combat__AS_Idle_Combat_0_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "2b251fbd2d18424db2c5d4f66b66c3d7",
+    "name": "Nodachi__Animations__Sequence__01_Idle__03_Offset_Idle__AS_Idle_Up_R_Seq",
+    "position": 2.60770320892334e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "492dbc4a0cdc4937a39af3ec73fdb32c",
+    "name": "Nodachi__Animations__Sequence__01_Idle__03_Offset_Idle__AS_Idle_Up_L_Seq",
+    "position": 2.2351741790771484e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "bf82f33ed8874d769a97808f3dc31f97",
+    "name": "Nodachi__Animations__Sequence__01_Idle__03_Offset_Idle__AS_Idle_Up_0_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "44d7fdb2168e4ca4b3420e51ca31201a",
+    "name": "Nodachi__Animations__Sequence__01_Idle__03_Offset_Idle__AS_Idle_R_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "4988024122e04a4eae39c950b561c56f",
+    "name": "Nodachi__Animations__Sequence__01_Idle__03_Offset_Idle__AS_Idle_L_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "2956964d35a846b19d4f36814d4b51a4",
+    "name": "Nodachi__Animations__Sequence__01_Idle__03_Offset_Idle__AS_Idle_Down_R_Seq",
+    "position": 2.107342389479072e-08,
+    "angle": 0.05595291023658669,
+    "state": "constant"
+  },
+  {
+    "id": "26b6d1e861124400a1520eeeb6b20f07",
+    "name": "Nodachi__Animations__Sequence__01_Idle__03_Offset_Idle__AS_Idle_Down_L_Seq",
+    "position": 8.33000246558413e-09,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "4046d4520a144e3db214cf7aba413cfa",
+    "name": "Nodachi__Animations__Sequence__01_Idle__03_Offset_Idle__AS_Idle_Down_0_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0,
+    "state": "constant"
+  },
+  {
+    "id": "c2ae7f2476dc46aa918d2e9eea26a858",
+    "name": "Nodachi__Animations__Sequence__01_Idle__03_Offset_Idle__AS_Idle_0_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "6eab7a7515694816a3faace3365a5494",
+    "name": "Nodachi__Animations__Sequence__01_Idle__02_Idle_Combat__AS_Idle_Combat_to_Idle_Seq",
+    "position": 5.372690026206328e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "51f7f89fb454451796644db4c06565c8",
+    "name": "Nodachi__Animations__Sequence__01_Idle__02_Idle_Combat__AS_Idle_Combat_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  },
+  {
+    "id": "95d803832f924f088cd7ca7c92469e3f",
+    "name": "Nodachi__Animations__Sequence__01_Idle__01_Idle__AS_Idle_to_Idle_Combat_Seq",
+    "position": 2.9802322387695312e-08,
+    "angle": 0.03956468205889273,
+    "state": "animated"
+  },
+  {
+    "id": "8056306f413f4ac3ac243f38c08f703f",
+    "name": "Nodachi__Animations__Sequence__01_Idle__01_Idle__AS_Idle_Seq",
+    "position": 1.4901161193847656e-08,
+    "angle": 0.03956468205889273,
+    "state": "constant"
+  }
+]

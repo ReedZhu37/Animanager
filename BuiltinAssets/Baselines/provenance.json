@@ -1,0 +1,50 @@
+{
+  "source": "Epic Games official templates from locally installed Unreal Engine 5.8",
+  "engine_version": "5.8.4-58902052+++UE5+Release-5.8",
+  "ue4_template": "Templates/TemplateResources/High/Mannequin/Content",
+  "ue5_template": "Templates/TemplateResources/High/Characters/Content",
+  "export": "Unreal AssetExportTask / FbxExportOption, LOD0, no skeleton edits or retargeting",
+  "materials": "UE texture/video objects and their connections removed; geometry, skeleton, skin, animation objects structurally verified unchanged. Neutral material appearance only.",
+  "assets": [
+    {
+      "name": "UE4_Mannequin",
+      "asset": "/Game/Mannequin/Character/Mesh/SK_Mannequin",
+      "file": "UE4_Mannequin.fbx",
+      "bytes": 1015932,
+      "sha256": "10dfc2a2235b0105352b96832815470425104b508028c1a812b4c00055e3d595",
+      "raw_export_sha256": "a33a95ceef7a0d381bfdcc866091ca3c24b0bf0e5c6b686abc76c9744d313046",
+      "removed_texture_objects": 0,
+      "core_data_sha256": "7ec638a4db0161570f057e54f08a86fddbf3831ec414094bb2329ea05323b642"
+    },
+    {
+      "name": "UE5_Manny",
+      "asset": "/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple",
+      "file": "UE5_Manny.fbx",
+      "bytes": 2886108,
+      "sha256": "238a831134d8cd4bed0c2e0631c765785a54481a0cb06f9960993c5ed51a2391",
+      "raw_export_sha256": "c07a9bab508ce6b22673b7d7a27ad98bf271444d4e2c85c2b51ceb5f261226ad",
+      "removed_texture_objects": 3,
+      "core_data_sha256": "a25260fb10f6a26239fd2989c5acd1c32e5f3ae687a6c4b50beca3bda3301582"
+    },
+    {
+      "name": "UE5_Quinn",
+      "asset": "/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple",
+      "file": "UE5_Quinn.fbx",
+      "bytes": 2671548,
+      "sha256": "47b6f7566f6f77d0fb407e31dffe23f3cc0ece6977aa73275a8ea66fb91bc7d8",
+      "raw_export_sha256": "2e345fd09e64d88b7620a2304a6a5c078cb067eb328da0d9ab7c7d01672fb1e8",
+      "removed_texture_objects": 2,
+      "core_data_sha256": "004379822dc396dd48461ec88b540c9fa83f27d56c502fd3a3de8a849cf36130"
+    },
+    {
+      "name": "UE5_Manny_Idle",
+      "asset": "/Game/Characters/Mannequins/Anims/Unarmed/MM_Idle",
+      "file": "UE5_Manny_Idle.fbx",
+      "bytes": 4428700,
+      "sha256": "81ddf9bef24859efd613176ac75d5f35a62f3684e7c3c87d65251d9e5a123227",
+      "raw_export_sha256": "01124bde707ffe2f3df10ca90c7dbefe575bd8b37b67b6d5be9c5052fdb45831",
+      "removed_texture_objects": 2,
+      "core_data_sha256": "fc722f1af524f566a53af13a7003798384bea34809ef1838e3009366a35f0933"
+    }
+  ]
+}

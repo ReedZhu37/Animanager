@@ -1,0 +1,20 @@
+{
+  "source": "Official Epic mannequin reference skeletons and existing UE-exported baseline FBXs; no retargeting",
+  "cue4parseRevision": "d05e5859ad240be10c9d5c8344f5de7c072123d0",
+  "profiles": [
+    {
+      "profile": "ue4-mannequin",
+      "profileSha256": "b32e3a035f39f87a6bc73e0553574627fdc010e81286e5203fac4b63e54b063d",
+      "meshGlbSha256": "7b10bcaed60316879cd1fd4f29ee0fac6c92da5495ce94806f87d3626ddab42d",
+      "baselineFbx": "UE4_Mannequin.fbx",
+      "skeletonBones": 68
+    },
+    {
+      "profile": "ue5-mannequin",
+      "profileSha256": "c446abb88114fd8ac54671943dec7f0c10dbcef39d21298b1b3a1a100a893cc4",
+      "meshGlbSha256": "d977a60d74071e519b09d80a15e536e104cb9692f3bdecd9e2f225f5889747b8",
+      "baselineFbx": "UE5_Manny.fbx",
+      "skeletonBones": 161
+    }
+  ]
+}

@@ -1,0 +1,3869 @@
+{
+  "reference": "D:/_Projects/Animanager/.runtime/movement-animset/ConvertedFbx",
+  "referenceMap": null,
+  "bindMap": null,
+  "elapsed": 79.9209963,
+  "failed": 0,
+  "clips": [
+    {
+      "name": "MovementAnimsetPro__AimOffsets__Idle_CC",
+      "maxPosition": 3.842571459244937E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7384688064114862E-09,
+      "worst": "ball_r@0",
+      "samples": 272,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__AimOffsets__Idle_D",
+      "maxPosition": 5.981846697977744E-07,
+      "maxAngle": 0.03956468205889273,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7384688064114862E-09,
+      "worst": "ball_r@0",
+      "samples": 272,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__AimOffsets__Idle_L",
+      "maxPosition": 1.3522342214855598E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7384688064114862E-09,
+      "worst": "ball_r@0",
+      "samples": 272,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__AimOffsets__Idle_LD",
+      "maxPosition": 6.698896299894841E-07,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7384688064114862E-09,
+      "worst": "ring_03_r@0",
+      "samples": 272,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__AimOffsets__Idle_LU",
+      "maxPosition": 1.3862285186405643E-06,
+      "maxAngle": 0.03956468205889273,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7384688064114862E-09,
+      "worst": "pinky_02_l@0",
+      "samples": 272,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__AimOffsets__Idle_R",
+      "maxPosition": 1.815451355469122E-06,
+      "maxAngle": 0.03956468205889273,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7384688064114862E-09,
+      "worst": "ball_r@0",
+      "samples": 272,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__AimOffsets__Idle_RD",
+      "maxPosition": 2.684536411834415E-06,
+      "maxAngle": 0.03956468205889273,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7384688064114862E-09,
+      "worst": "ball_l@0",
+      "samples": 272,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__AimOffsets__Idle_RU",
+      "maxPosition": 1.5516180837948923E-06,
+      "maxAngle": 0.03956468205889273,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7384688064114862E-09,
+      "worst": "ball_r@0",
+      "samples": 272,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__AimOffsets__Idle_U",
+      "maxPosition": 4.691949470725376E-06,
+      "maxAngle": 0.03956468205889273,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7384688064114862E-09,
+      "worst": "ball_r@0",
+      "samples": 272,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ButtonPush_LH_90",
+      "maxPosition": 4.58447493656422E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@157",
+      "samples": 11016,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ButtonPush_LH",
+      "maxPosition": 4.202167019684566E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@141",
+      "samples": 9860,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ButtonPush_RH_90",
+      "maxPosition": 3.014991307281889E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@175",
+      "samples": 12580,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ButtonPush_RH",
+      "maxPosition": 3.6452836411626777E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@179",
+      "samples": 12648,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Climb1m",
+      "maxPosition": 8.87892019818537E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.527428405978526E-09,
+      "worst": "ball_l@3",
+      "samples": 18292,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Climb2m",
+      "maxPosition": 8.615323167759925E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.2402622807126136E-09,
+      "worst": "ball_l@243",
+      "samples": 19788,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_Idle",
+      "maxPosition": 1.6184231981242192E-06,
+      "maxAngle": 0.07912936529690494,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.5894571969710114E-07,
+      "worst": "pinky_03_r@283",
+      "samples": 27404,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_Turn90L_new",
+      "maxPosition": 2.4541266157029895E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "middle_03_r@51",
+      "samples": 7684,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_Turn90R_new",
+      "maxPosition": 6.139856850495562E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ring_03_r@36",
+      "samples": 5440,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkBwd_new",
+      "maxPosition": 1.396760353600257E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.840885581280929E-09,
+      "worst": "ball_r@139",
+      "samples": 9860,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkBwdStart_new",
+      "maxPosition": 2.519001554901479E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.654375690942402E-09,
+      "worst": "ring_03_r@44",
+      "samples": 9180,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkBwdStop_LU_new",
+      "maxPosition": 2.4094883883662988E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.1064003591652067E-09,
+      "worst": "ring_03_r@74",
+      "samples": 6868,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkBwdStop_RU_new",
+      "maxPosition": 0.00012409537157509476,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.132691187157093E-09,
+      "worst": "middle_03_r@71",
+      "samples": 7276,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwd_new",
+      "maxPosition": 3.82623420591699E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ball_r@122",
+      "samples": 8772,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwdLoop",
+      "maxPosition": 1.846888153522741E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ring_03_r@100",
+      "samples": 9588,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwdStart_new",
+      "maxPosition": 1.2814998626708984E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.6017279441958863E-09,
+      "worst": "middle_03_r@27",
+      "samples": 3536,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwdStart",
+      "maxPosition": 1.1957873539358843E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7344852221157225E-09,
+      "worst": "middle_03_r@33",
+      "samples": 7412,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwdStart180_L",
+      "maxPosition": 4.925008397549391E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.672426110578613E-10,
+      "worst": "ball_r@139",
+      "samples": 9928,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwdStart180_R",
+      "maxPosition": 9.096106623474043E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.132691187157093E-09,
+      "worst": "middle_03_r@189",
+      "samples": 13804,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwdStart90_L",
+      "maxPosition": 3.3953726870095124E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "middle_03_r@120",
+      "samples": 9792,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwdStart90_R",
+      "maxPosition": 4.440902102942346E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.34555799625025E-09,
+      "worst": "ball_r@148",
+      "samples": 10472,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwdStop_LU_new",
+      "maxPosition": 7.082148385961773E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.973642970223068E-09,
+      "worst": "ring_03_r@46",
+      "samples": 8500,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwdStop_LU",
+      "maxPosition": 1.241008249053266E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7344852221157225E-09,
+      "worst": "pinky_03_r@56",
+      "samples": 5236,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwdStop_RU_new",
+      "maxPosition": 3.14103613163752E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.0526479687911205E-09,
+      "worst": "ring_03_r@43",
+      "samples": 7616,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkFwdStop_RU",
+      "maxPosition": 2.2679646463075187E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.3719150260271817E-09,
+      "worst": "pinky_03_r@53",
+      "samples": 6324,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkLt_new",
+      "maxPosition": 2.9279549380589742E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.260809206511283E-09,
+      "worst": "ring_03_r@69",
+      "samples": 7344,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkLt135_new",
+      "maxPosition": 3.3988062568823807E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.840885581280929E-09,
+      "worst": "ball_r@146",
+      "samples": 10268,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkLt45_new",
+      "maxPosition": 1.484218500991119E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "ring_03_r@114",
+      "samples": 8976,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkLtStart_new",
+      "maxPosition": 2.4031276097957743E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.1064003591652067E-09,
+      "worst": "middle_03_r@26",
+      "samples": 6528,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkLtStop_LU_new",
+      "maxPosition": 1.8757389625534415E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.649824441622542E-08,
+      "worst": "middle_03_r@37",
+      "samples": 7616,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkLtStop_RU_new",
+      "maxPosition": 2.315324081791914E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.132691187157093E-09,
+      "worst": "ring_03_r@39",
+      "samples": 6120,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkRt_new",
+      "maxPosition": 3.386925982340472E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7344852221157225E-09,
+      "worst": "ball_r@117",
+      "samples": 8228,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkRt135_new",
+      "maxPosition": 1.455134793104662E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.840885581280929E-09,
+      "worst": "middle_03_r@129",
+      "samples": 9724,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkRt45_new",
+      "maxPosition": 4.322184395277873E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "ball_r@140",
+      "samples": 9996,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkRtStart_new",
+      "maxPosition": 2.700098548302776E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.8982391214450445E-09,
+      "worst": "index_03_r@73",
+      "samples": 11288,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkRtStop_LU_new",
+      "maxPosition": 1.3841246072843205E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.1064003591652067E-09,
+      "worst": "index_03_r@34",
+      "samples": 8092,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch_WalkRtStop_RU_new",
+      "maxPosition": 2.9300397272891132E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.132691187157093E-09,
+      "worst": "middle_03_r@39",
+      "samples": 6120,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch2Idle_new",
+      "maxPosition": 1.682068068475928E-05,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@62",
+      "samples": 4896,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Crouch2Idle",
+      "maxPosition": 6.59935130897793E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@52",
+      "samples": 5440,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__CrouchLoop_new",
+      "maxPosition": 1.9554083792172605E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ring_03_r@211",
+      "samples": 20536,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Death_1",
+      "maxPosition": 6.597925676032901E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.632724343560767E-09,
+      "worst": "middle_03_r@172",
+      "samples": 20468,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Death_2",
+      "maxPosition": 8.594030987296719E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.8540546875556174E-10,
+      "worst": "middle_03_r@165",
+      "samples": 28424,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__DontKnow",
+      "maxPosition": 1.8521659512771294E-05,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.292910249503734E-09,
+      "worst": "ball_r@150",
+      "samples": 12444,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__FallingLoop_RootMotion",
+      "maxPosition": 3.3798736694734544E-05,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.568751528679968E-08,
+      "worst": "ring_03_r@309",
+      "samples": 26724,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__FallingLoop",
+      "maxPosition": 3.370126069057733E-05,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.568751528679968E-08,
+      "worst": "ring_03_r@309",
+      "samples": 26724,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Fists_Hit_Left",
+      "maxPosition": 2.1633386495523155E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.292910249503734E-09,
+      "worst": "ball_r@73",
+      "samples": 9384,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Fists_Hit_Right",
+      "maxPosition": 1.6946099776760093E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.787133190906843E-09,
+      "worst": "ring_01_r@92",
+      "samples": 12648,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Fists_Idle",
+      "maxPosition": 1.7314265505774529E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.9198904688266794E-09,
+      "worst": "middle_01_l@228",
+      "samples": 16184,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Fists_Kick_Front_L",
+      "maxPosition": 2.0379211491672322E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.2391577481073455E-09,
+      "worst": "pinky_01_l@109",
+      "samples": 7752,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Fists_Kick_Front_Move_R",
+      "maxPosition": 1.6980133068500436E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@48",
+      "samples": 15572,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Fists_Punch_Heavy2Idle",
+      "maxPosition": 4.899638952338137E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.97127016932086E-08,
+      "worst": "ball_r@262",
+      "samples": 19040,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Fists_Punch_L",
+      "maxPosition": 3.2343759812647477E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.2391577481073455E-09,
+      "worst": "ball_r@64",
+      "samples": 5372,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Fists_Punch_Move_L",
+      "maxPosition": 1.3124404176778626E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.3935665954534215E-09,
+      "worst": "ring_01_l@40",
+      "samples": 9248,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Fists_Punch_Move_R",
+      "maxPosition": 8.155200703185983E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.3935665954534215E-09,
+      "worst": "ring_01_r@70",
+      "samples": 10268,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Fists_Punch_R",
+      "maxPosition": 2.4651403691677842E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.1920928910669204E-08,
+      "worst": "pinky_01_r@3",
+      "samples": 6732,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Fists2Idle",
+      "maxPosition": 6.111211405368522E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.1372953467869706E-08,
+      "worst": "ball_r@109",
+      "samples": 8908,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__GetUpFromBack",
+      "maxPosition": 4.219555194140412E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.560727357410087E-08,
+      "worst": "ring_03_r@223",
+      "samples": 19992,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__GetUpFromFace",
+      "maxPosition": 4.354512384452391E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7999867818474513E-08,
+      "worst": "ball_l@246",
+      "samples": 17340,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__HiddenButton",
+      "maxPosition": 4.6217628550948575E-06,
+      "maxAngle": 0.07912936529690494,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.834182488697934E-08,
+      "worst": "ring_03_r@475",
+      "samples": 43520,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle_Hit_Strong_Left",
+      "maxPosition": 6.917814971529879E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7400348717444558E-08,
+      "worst": "ring_03_r@12",
+      "samples": 31960,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle_Hit_Strong_Right",
+      "maxPosition": 5.50739014215651E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.552614812387446E-09,
+      "worst": "ring_03_r@272",
+      "samples": 23460,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle_Knockdown_Front",
+      "maxPosition": 5.374756256060209E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.527428405978526E-09,
+      "worst": "ring_03_r@164",
+      "samples": 22848,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle_Knockdown_Left",
+      "maxPosition": 9.385413250129204E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.568751528679968E-08,
+      "worst": "ring_03_l@111",
+      "samples": 21964,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle_Knockdown_Right",
+      "maxPosition": 9.024741302710027E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.499966843596326E-09,
+      "worst": "ring_03_r@116",
+      "samples": 16252,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle_Punch_Move_L",
+      "maxPosition": 2.8716938231809763E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.314561596885369E-09,
+      "worst": "ball_r@3",
+      "samples": 14756,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle",
+      "maxPosition": 6.3399320424650796E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.5894571969710114E-07,
+      "worst": "ball_l@16",
+      "samples": 27404,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle2",
+      "maxPosition": 1.9458140741335228E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.271565759353166E-07,
+      "worst": "ball_l@151",
+      "samples": 15232,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle2Crouch_new",
+      "maxPosition": 4.354454631538829E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.3719150260271817E-09,
+      "worst": "ball_r@3",
+      "samples": 5372,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle2Crouch",
+      "maxPosition": 5.28766622664989E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.128051817569144E-09,
+      "worst": "ball_r@2",
+      "samples": 4964,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle2Fists",
+      "maxPosition": 5.626426627713954E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.708128303361093E-09,
+      "worst": "middle_02_r@16",
+      "samples": 4760,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle3",
+      "maxPosition": 5.572217560256831E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.463301259808986E-08,
+      "worst": "ball_r@7",
+      "samples": 15708,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle4",
+      "maxPosition": 2.251531623187475E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.531062500172766E-07,
+      "worst": "ball_r@109",
+      "samples": 26316,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle5",
+      "maxPosition": 2.902006235672161E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.8919691530404634E-08,
+      "worst": "ball_r@442",
+      "samples": 41004,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Idle6",
+      "maxPosition": 0.0011599058052524924,
+      "maxAngle": 0.07912936529690494,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@195",
+      "samples": 24616,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Jump_place_ALL_short",
+      "maxPosition": 8.902384251996409E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.160152749539293E-09,
+      "worst": "ball_r@82",
+      "samples": 14484,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Jump_place_ALL",
+      "maxPosition": 0.0011806305265054107,
+      "maxAngle": 0.096913285286603,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.5894571880892272E-08,
+      "worst": "ball_r@125",
+      "samples": 17136,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Jump_run_lu_ALL",
+      "maxPosition": 3.94712060369784E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.632724343560767E-09,
+      "worst": "ball_l@329",
+      "samples": 22644,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Jump_run_ru_ALL",
+      "maxPosition": 7.3661790338519495E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.632724343560767E-09,
+      "worst": "ring_03_r@18",
+      "samples": 15708,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Jump_walk_lu_ALL",
+      "maxPosition": 1.2702942512987647E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@154",
+      "samples": 15776,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Jump_walk_ru_ALL",
+      "maxPosition": 4.94855430588359E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.787133190906843E-09,
+      "worst": "ball_r@128",
+      "samples": 10880,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpIdleLand",
+      "maxPosition": 9.062546268978622E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.4256675274235704E-09,
+      "worst": "ball_l@85",
+      "samples": 8092,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpIdleLand2Walk",
+      "maxPosition": 9.895291441353038E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.9198904688266794E-09,
+      "worst": "index_03_l@198",
+      "samples": 13940,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpIdleLandHard",
+      "maxPosition": 1.045840690494515E-05,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.0526479687911205E-09,
+      "worst": "ik_hand_l@64",
+      "samples": 10948,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpIdleStart",
+      "maxPosition": 0.0009408975602127612,
+      "maxAngle": 0.07912936529690494,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.0527362537260387E-08,
+      "worst": "ball_r@85",
+      "samples": 30940,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpRun_LU_Land",
+      "maxPosition": 3.0041735499253264E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128338747340877E-09,
+      "worst": "ball_r@193",
+      "samples": 13872,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpRun_LU_Land2Run",
+      "maxPosition": 2.702332949411357E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.702456840062098E-08,
+      "worst": "ball_r@175",
+      "samples": 12240,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpRun_RU_Land",
+      "maxPosition": 3.305145128251752E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ball_l@132",
+      "samples": 9520,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpRun_RU_Land2Run",
+      "maxPosition": 3.3939336390176322E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.973642970223068E-09,
+      "worst": "middle_03_r@108",
+      "samples": 8976,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpRunStart_LU",
+      "maxPosition": 8.736757990845945E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "middle_03_r@146",
+      "samples": 32300,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpRunStart_RU",
+      "maxPosition": 6.071409734431654E-05,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ring_03_l@117",
+      "samples": 34748,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpWalk_LU_Land",
+      "maxPosition": 4.055559656990226E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ball_l@5",
+      "samples": 11968,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpWalk_LU_Land2Walk",
+      "maxPosition": 6.43442490400048E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "ball_r@71",
+      "samples": 10948,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpWalk_RU_Land",
+      "maxPosition": 2.3801078441465506E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ball_l@159",
+      "samples": 11696,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpWalk_RU_Land2Walk",
+      "maxPosition": 5.323391633282881E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.128051817569144E-09,
+      "worst": "ball_l@47",
+      "samples": 5848,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpWalkStart_LU",
+      "maxPosition": 3.183263470418751E-05,
+      "maxAngle": 0.07912936529690494,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "pinky_03_r@449",
+      "samples": 32300,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__JumpWalkStart_RU",
+      "maxPosition": 1.8455242752679624E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ring_03_r@437",
+      "samples": 32300,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__KeypadUse_LH_90",
+      "maxPosition": 9.310630048275925E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.97127016932086E-08,
+      "worst": "ball_l@163",
+      "samples": 13940,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__KeypadUse_LH",
+      "maxPosition": 8.769168744038325E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.3894439699366785E-08,
+      "worst": "ball_r@139",
+      "samples": 12716,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__KeypadUse_RH_90",
+      "maxPosition": 3.7588160921586677E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.2632658030753419E-08,
+      "worst": "ball_r@203",
+      "samples": 15028,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__KeypadUse_RH",
+      "maxPosition": 4.261015419615433E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.2632658030753419E-08,
+      "worst": "ball_l@184",
+      "samples": 14892,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__KickTrashcan",
+      "maxPosition": 3.145292339468142E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.8134768292886747E-08,
+      "worst": "ball_l@5",
+      "samples": 18972,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__PatrolFullCycleLoop",
+      "maxPosition": 2.0264797058189288E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.9396549073321694E-08,
+      "worst": "ball_r@1257",
+      "samples": 85952,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__PatrolLoop",
+      "maxPosition": 2.978368911499274E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 6.2128007183304135E-09,
+      "worst": "ball_r@178",
+      "samples": 12580,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__PickUp_LH_90",
+      "maxPosition": 4.408288987178821E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@117",
+      "samples": 11356,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__PickUp_LH",
+      "maxPosition": 6.335416856018128E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@2",
+      "samples": 11016,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__PickUp_RH_90",
+      "maxPosition": 6.178579951665597E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@4",
+      "samples": 11560,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__PickUp_RH",
+      "maxPosition": 5.3717185437562875E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@4",
+      "samples": 11560,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__PullLever_LH_90",
+      "maxPosition": 4.021940640086541E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.607472068433708E-09,
+      "worst": "ball_r@3",
+      "samples": 11764,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__PullLever_LH",
+      "maxPosition": 3.049909537367057E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.607472068433708E-09,
+      "worst": "ball_l@159",
+      "samples": 11152,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__PullLever_RH_90",
+      "maxPosition": 4.249842731951503E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.5057768365522861E-09,
+      "worst": "middle_03_r@40",
+      "samples": 14484,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__PullLever_RH",
+      "maxPosition": 4.343202817835845E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.2767558505165653E-08,
+      "worst": "ball_l@13",
+      "samples": 14008,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunArchLoop_L",
+      "maxPosition": 1.5806473356860806E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "middle_03_r@96",
+      "samples": 7616,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunArchLoop_R",
+      "maxPosition": 1.3172575563658029E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ring_03_l@57",
+      "samples": 8636,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunBwdLoop",
+      "maxPosition": 2.2316448848869186E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ball_r@108",
+      "samples": 7956,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdLoop_LeanL",
+      "maxPosition": 6.6441480157664046E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ring_03_r@135",
+      "samples": 10200,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdLoop_LeanR",
+      "maxPosition": 7.497228125430411E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "middle_03_l@156",
+      "samples": 11152,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdLoop",
+      "maxPosition": 4.144130343775032E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ring_03_r@128",
+      "samples": 10064,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdStart",
+      "maxPosition": 7.161806479416555E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ball_l@5",
+      "samples": 8228,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdStart135_L",
+      "maxPosition": 5.635594789055176E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.672426110578613E-10,
+      "worst": "ball_l@21",
+      "samples": 10880,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdStart135_R",
+      "maxPosition": 4.561854893836426E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.455911526539239E-10,
+      "worst": "ball_l@4",
+      "samples": 11900,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdStart180_L",
+      "maxPosition": 7.68122663430404E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.672426110578613E-10,
+      "worst": "ball_r@22",
+      "samples": 10336,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdStart180_R",
+      "maxPosition": 4.650075425161049E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.455911526539239E-10,
+      "worst": "ball_r@5",
+      "samples": 13192,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdStart90_L",
+      "maxPosition": 1.688502925389912E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.708128303361093E-09,
+      "worst": "ball_l@5",
+      "samples": 10812,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdStart90_R",
+      "maxPosition": 2.7324222173774615E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@3",
+      "samples": 11016,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdStop_LU",
+      "maxPosition": 2.6666939447750337E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ball_r@257",
+      "samples": 18632,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdStop_RU",
+      "maxPosition": 2.361222868785262E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@190",
+      "samples": 13464,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdTurn180_L_LU",
+      "maxPosition": 6.278505679802038E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.479754427994976E-10,
+      "worst": "ball_r@249",
+      "samples": 17544,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdTurn180_L_RU",
+      "maxPosition": 1.7616803233977407E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 6.0490470410456965E-09,
+      "worst": "middle_03_l@9",
+      "samples": 12716,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdTurn180_R_LU",
+      "maxPosition": 1.5073376744112466E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.0742993161727554E-09,
+      "worst": "ring_03_l@268",
+      "samples": 19244,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunFwdTurn180_R_RU",
+      "maxPosition": 7.0602927735308185E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.654375690942402E-09,
+      "worst": "middle_03_r@316",
+      "samples": 23188,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunLtLoop",
+      "maxPosition": 1.0720803402364254E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ball_l@54",
+      "samples": 7752,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunRtLoop",
+      "maxPosition": 2.6054883619508473E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ball_r@99",
+      "samples": 7072,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunStrafeLeft135Loop",
+      "maxPosition": 3.7156517009862E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ring_03_l@116",
+      "samples": 8160,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunStrafeLeft45Loop",
+      "maxPosition": 5.8260302466806024E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ring_03_l@144",
+      "samples": 10200,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunStrafeRight135Loop",
+      "maxPosition": 3.3455014545324957E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ball_r@112",
+      "samples": 8024,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__RunStrafeRight45Loop",
+      "maxPosition": 5.931115993007552E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ball_r@149",
+      "samples": 10404,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__SitChairEnd",
+      "maxPosition": 3.249170731578488E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.607472068433708E-09,
+      "worst": "ball_l@104",
+      "samples": 11152,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__SitChairLoop",
+      "maxPosition": 1.37943561639986E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 6.357828752356909E-08,
+      "worst": "middle_03_r@46",
+      "samples": 20876,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__SitChairStart",
+      "maxPosition": 1.0994615877280012E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ball_l@7",
+      "samples": 9112,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Slide",
+      "maxPosition": 5.60426315132645E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.0919824600108541E-08,
+      "worst": "ball_r@277",
+      "samples": 19108,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__SprintFwdLoop1",
+      "maxPosition": 3.654105285022524E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.455911526539239E-10,
+      "worst": "ball_l@112",
+      "samples": 9452,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeLeft135Loop",
+      "maxPosition": 4.04231604989036E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@124",
+      "samples": 9112,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeLeft45Loop",
+      "maxPosition": 5.768212304246845E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@133",
+      "samples": 9520,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeLeftLoop",
+      "maxPosition": 1.9806777800113196E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ik_hand_l@67",
+      "samples": 7276,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeLeftStart",
+      "maxPosition": 5.73410625293036E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.384185793236071E-08,
+      "worst": "ball_r@1",
+      "samples": 6324,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeLeftStop_LU",
+      "maxPosition": 6.873902748338878E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.9198904688266794E-09,
+      "worst": "ball_l@161",
+      "samples": 12580,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeLeftStop_RU",
+      "maxPosition": 7.980309419508558E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.2181101749497714E-07,
+      "worst": "ball_l@178",
+      "samples": 14348,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeRight135Loop",
+      "maxPosition": 2.058694008155726E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@122",
+      "samples": 10336,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeRight45Loop",
+      "maxPosition": 3.5683924579643644E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@166",
+      "samples": 11968,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeRightLoop",
+      "maxPosition": 2.990347866216325E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@97",
+      "samples": 8500,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeRightStart",
+      "maxPosition": 0.0004567827854771167,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.181804318965533E-09,
+      "worst": "ball_r@44",
+      "samples": 11084,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeRightStop_LU",
+      "maxPosition": 2.3903942292236025E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.292910249503734E-09,
+      "worst": "ball_l@140",
+      "samples": 9860,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__StrafeRightStop_RU",
+      "maxPosition": 2.9501381959562423E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@74",
+      "samples": 5984,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Throw_Start",
+      "maxPosition": 3.927637862943811E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "middle_03_r@56",
+      "samples": 7616,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ThrowAway_LH",
+      "maxPosition": 5.468345534609398E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.1372953467869706E-08,
+      "worst": "ball_l@10",
+      "samples": 7072,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ThrowAway_RH",
+      "maxPosition": 3.5636212487588637E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.787133190906843E-09,
+      "worst": "ball_r@6",
+      "samples": 9928,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ThrowCancel",
+      "maxPosition": 9.590283298166469E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@76",
+      "samples": 12376,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ThrowEndClose",
+      "maxPosition": 4.152320343564497E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5079911036840485E-08,
+      "worst": "ball_l@177",
+      "samples": 13056,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ThrowEndFar",
+      "maxPosition": 9.390521881869063E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5079911036840485E-08,
+      "worst": "ik_hand_l@81",
+      "samples": 21488,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ThrowLoop",
+      "maxPosition": 1.1680077705022995E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.9868214962137642E-08,
+      "worst": "pinky_03_r@3",
+      "samples": 3604,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ThrowSingle1",
+      "maxPosition": 4.741426891996525E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@360",
+      "samples": 25636,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__ThrowSingle2",
+      "maxPosition": 7.540314982179552E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "index_03_r@125",
+      "samples": 24480,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Turn180Surprised",
+      "maxPosition": 1.7022750398609787E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.3974681412065593E-08,
+      "worst": "ball_l@230",
+      "samples": 20944,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__TurnLt180",
+      "maxPosition": 3.434620793996146E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.292910249503734E-09,
+      "worst": "ball_l@163",
+      "samples": 11424,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__TurnLt90_Loop",
+      "maxPosition": 1.1787393304985017E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.160152749539293E-09,
+      "worst": "ball_l@85",
+      "samples": 10676,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__TurnRt180",
+      "maxPosition": 7.046409791655606E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.787133190906843E-09,
+      "worst": "ball_r@27",
+      "samples": 14892,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__TurnRt90_Loop",
+      "maxPosition": 1.3357367606658954E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.160152749539293E-09,
+      "worst": "ball_r@61",
+      "samples": 10676,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__Vault1m",
+      "maxPosition": 5.492371656146133E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 9.536743172944284E-08,
+      "worst": "ball_l@330",
+      "samples": 23868,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkArchLoop_L",
+      "maxPosition": 3.931111677957233E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@164",
+      "samples": 11696,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkArchLoop_R",
+      "maxPosition": 2.097202695949818E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ik_hand_l@16",
+      "samples": 9928,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkBwdLoop",
+      "maxPosition": 4.354225438873982E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@126",
+      "samples": 9112,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkBwdStart",
+      "maxPosition": 9.981737093767151E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.9868214962137642E-08,
+      "worst": "ball_l@4",
+      "samples": 7004,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkBwdStop_LU",
+      "maxPosition": 4.562578851619037E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.499966843596326E-09,
+      "worst": "ball_r@115",
+      "samples": 8500,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkBwdStop_RU",
+      "maxPosition": 4.8968004193739034E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.8982391214450445E-09,
+      "worst": "ball_r@128",
+      "samples": 10676,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdLoop_LeanL",
+      "maxPosition": 2.7631108423520345E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ik_hand_l@44",
+      "samples": 11560,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdLoop_LeanR",
+      "maxPosition": 1.9599417555582477E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ik_hand_l@21",
+      "samples": 11832,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdLoop",
+      "maxPosition": 5.113943188916892E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@166",
+      "samples": 11764,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdStart",
+      "maxPosition": 1.4151835785014555E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ball_r@9",
+      "samples": 6868,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdStart135_L",
+      "maxPosition": 4.40430767412181E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "ball_l@75",
+      "samples": 7956,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdStart135_R",
+      "maxPosition": 8.434846677118912E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ik_hand_gun@173",
+      "samples": 13532,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdStart180_L",
+      "maxPosition": 5.38819176654215E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ball_l@80",
+      "samples": 7888,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdStart180_R",
+      "maxPosition": 7.000644018262392E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "ball_r@79",
+      "samples": 14348,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdStart90_L",
+      "maxPosition": 3.842398200504249E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.686476733934853E-09,
+      "worst": "ball_l@12",
+      "samples": 7072,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdStart90_R",
+      "maxPosition": 6.229990958672715E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.5894571880892272E-08,
+      "worst": "ball_l@9",
+      "samples": 10540,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdStop_LU",
+      "maxPosition": 3.1036029213282745E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.314561596885369E-09,
+      "worst": "ball_r@128",
+      "samples": 9044,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkFwdStop_RU",
+      "maxPosition": 3.41743771059555E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.4256675274235704E-09,
+      "worst": "ball_r@168",
+      "samples": 11832,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkThroughDoor_LH",
+      "maxPosition": 4.192922915535746E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.953096155446701E-09,
+      "worst": "ball_r@197",
+      "samples": 21624,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__InPlace__WalkThroughDoor_RH",
+      "maxPosition": 4.405284471431514E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.953096155446701E-09,
+      "worst": "ball_l@1",
+      "samples": 20468,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Build",
+      "maxPosition": 6.32508636044804E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@2",
+      "samples": 11016,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ButtonPush_LH_90",
+      "maxPosition": 5.090900685900124E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@160",
+      "samples": 11016,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ButtonPush_LH",
+      "maxPosition": 4.248431650921702E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@141",
+      "samples": 9860,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ButtonPush_RH_90",
+      "maxPosition": 3.2835766887728823E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@182",
+      "samples": 12580,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ButtonPush_RH",
+      "maxPosition": 4.058152626384981E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@177",
+      "samples": 12648,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Climb1m",
+      "maxPosition": 8.710432666703127E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.527428405978526E-09,
+      "worst": "ball_r@3",
+      "samples": 18292,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Climb2m",
+      "maxPosition": 9.13042458705604E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.2402622807126136E-09,
+      "worst": "ball_r@252",
+      "samples": 19788,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_Idle",
+      "maxPosition": 2.1007995201216545E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.5894571969710114E-07,
+      "worst": "ring_03_r@157",
+      "samples": 27404,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_Turn90L_new",
+      "maxPosition": 2.9924262889835518E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "middle_03_r@52",
+      "samples": 7684,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_Turn90R_new",
+      "maxPosition": 4.988619821233442E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "pinky_03_r@26",
+      "samples": 5440,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkBwd_new",
+      "maxPosition": 1.923115860336111E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.840885581280929E-09,
+      "worst": "ball_r@139",
+      "samples": 9860,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkBwdStart_new",
+      "maxPosition": 2.6485636226425413E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.654375690942402E-09,
+      "worst": "middle_03_r@55",
+      "samples": 9180,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkBwdStop_LU_new",
+      "maxPosition": 4.224157237331383E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.1064003591652067E-09,
+      "worst": "ring_03_r@71",
+      "samples": 6868,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkBwdStop_RU_new",
+      "maxPosition": 0.000964706763625145,
+      "maxAngle": 0.11190582380822713,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.132691187157093E-09,
+      "worst": "ring_03_r@71",
+      "samples": 7276,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwd_new",
+      "maxPosition": 5.367417998058954E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ball_r@125",
+      "samples": 8772,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwdLoop",
+      "maxPosition": 1.58187176566571E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "middle_03_r@88",
+      "samples": 9588,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwdStart_new",
+      "maxPosition": 1.3294850305101136E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.6017279441958863E-09,
+      "worst": "pinky_03_r@18",
+      "samples": 3536,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwdStart",
+      "maxPosition": 1.5633242583135143E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7344852221157225E-09,
+      "worst": "middle_03_r@33",
+      "samples": 7412,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwdStart180_L",
+      "maxPosition": 6.489040970336646E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.672426110578613E-10,
+      "worst": "ball_r@139",
+      "samples": 9928,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwdStart180_R",
+      "maxPosition": 8.873688784660771E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.132691187157093E-09,
+      "worst": "ring_03_r@189",
+      "samples": 13804,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwdStart90_L",
+      "maxPosition": 4.492248990572989E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "middle_03_r@42",
+      "samples": 9792,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwdStart90_R",
+      "maxPosition": 6.985228083067341E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.34555799625025E-09,
+      "worst": "ball_r@148",
+      "samples": 10472,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwdStop_LU_new",
+      "maxPosition": 1.1124732736789156E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.973642970223068E-09,
+      "worst": "middle_03_r@56",
+      "samples": 8500,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwdStop_LU",
+      "maxPosition": 1.304851707573107E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7344852221157225E-09,
+      "worst": "pinky_02_r@55",
+      "samples": 5236,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwdStop_RU_new",
+      "maxPosition": 3.6967194319004193E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.0526479687911205E-09,
+      "worst": "pinky_03_r@51",
+      "samples": 7616,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkFwdStop_RU",
+      "maxPosition": 2.553626018197974E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.3719150260271817E-09,
+      "worst": "pinky_02_r@41",
+      "samples": 6324,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkLt_new",
+      "maxPosition": 4.656988494389225E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.260809206511283E-09,
+      "worst": "ball_r@97",
+      "samples": 7344,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkLt135_new",
+      "maxPosition": 5.525383130589034E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.840885581280929E-09,
+      "worst": "ball_r@146",
+      "samples": 10268,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkLt45_new",
+      "maxPosition": 1.4342318763738149E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "pinky_03_r@46",
+      "samples": 8976,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkLtStart_new",
+      "maxPosition": 2.3886932467576116E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.1064003591652067E-09,
+      "worst": "middle_03_r@32",
+      "samples": 6528,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkLtStop_LU_new",
+      "maxPosition": 1.4714200915477704E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.649824441622542E-08,
+      "worst": "middle_03_r@37",
+      "samples": 7616,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkLtStop_RU_new",
+      "maxPosition": 2.9220336728030816E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.132691187157093E-09,
+      "worst": "middle_03_r@47",
+      "samples": 6120,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkRt_new",
+      "maxPosition": 4.798474492417881E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7344852221157225E-09,
+      "worst": "ball_r@117",
+      "samples": 8228,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkRt135_new",
+      "maxPosition": 1.6257979496003827E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.840885581280929E-09,
+      "worst": "index_03_r@86",
+      "samples": 9724,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkRt45_new",
+      "maxPosition": 6.365168246702524E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "ball_r@140",
+      "samples": 9996,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkRtStart_new",
+      "maxPosition": 2.904044777096715E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.8982391214450445E-09,
+      "worst": "ball_l@116",
+      "samples": 11288,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkRtStop_LU_new",
+      "maxPosition": 1.0520515388634522E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.1064003591652067E-09,
+      "worst": "index_03_r@33",
+      "samples": 8092,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch_WalkRtStop_RU_new",
+      "maxPosition": 2.2063784399506403E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.132691187157093E-09,
+      "worst": "middle_03_r@38",
+      "samples": 6120,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch2Idle_new",
+      "maxPosition": 1.432590124750277E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@61",
+      "samples": 4896,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Crouch2Idle",
+      "maxPosition": 6.5671742959239054E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@52",
+      "samples": 5440,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__CrouchLoop_new",
+      "maxPosition": 1.6844286392370122E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ring_03_r@205",
+      "samples": 20536,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Death_1",
+      "maxPosition": 6.183273853821447E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.632724343560767E-09,
+      "worst": "middle_03_r@176",
+      "samples": 20468,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Death_2",
+      "maxPosition": 9.851910363067873E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.8540546875556174E-10,
+      "worst": "middle_03_r@166",
+      "samples": 28424,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__DontKnow",
+      "maxPosition": 3.313277193228714E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.292910249503734E-09,
+      "worst": "ball_r@102",
+      "samples": 12444,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__FallingLoop_RootMotion",
+      "maxPosition": 6.914971163496375E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.568751528679968E-08,
+      "worst": "middle_03_l@387",
+      "samples": 26724,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__FallingLoop",
+      "maxPosition": 3.319186726002954E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.568751528679968E-08,
+      "worst": "ring_03_r@309",
+      "samples": 26724,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Fists_Hit_Left",
+      "maxPosition": 7.090197414072463E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.292910249503734E-09,
+      "worst": "index_03_r@24",
+      "samples": 9384,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Fists_Hit_Right",
+      "maxPosition": 1.698470896371873E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.787133190906843E-09,
+      "worst": "ring_01_l@94",
+      "samples": 12648,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Fists_Idle",
+      "maxPosition": 1.7338095403829357E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.9198904688266794E-09,
+      "worst": "pinky_01_l@230",
+      "samples": 16184,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Fists_Kick_Front_L",
+      "maxPosition": 1.6566445992793888E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.2391577481073455E-09,
+      "worst": "ring_01_l@92",
+      "samples": 7752,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Fists_Kick_Front_Move_R",
+      "maxPosition": 2.2950207494432107E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ring_01_l@225",
+      "samples": 15572,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Fists_Punch_Heavy2Idle",
+      "maxPosition": 4.87894158140989E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.97127016932086E-08,
+      "worst": "ball_r@262",
+      "samples": 19040,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Fists_Punch_L",
+      "maxPosition": 2.9642451409017667E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.2391577481073455E-09,
+      "worst": "pinky_01_r@66",
+      "samples": 5372,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Fists_Punch_Move_L",
+      "maxPosition": 6.4696487243054435E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.3935665954534215E-09,
+      "worst": "middle_01_l@38",
+      "samples": 9248,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Fists_Punch_Move_R",
+      "maxPosition": 3.675070047393092E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.3935665954534215E-09,
+      "worst": "pinky_01_r@70",
+      "samples": 10268,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Fists_Punch_R",
+      "maxPosition": 1.6542302319066948E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.1920928910669204E-08,
+      "worst": "ring_01_r@8",
+      "samples": 6732,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Fists2Idle",
+      "maxPosition": 4.47124239144614E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.1372953467869706E-08,
+      "worst": "ball_r@111",
+      "samples": 8908,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__GetUpFromBack",
+      "maxPosition": 7.968764293764252E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.560727357410087E-08,
+      "worst": "ring_03_l@14",
+      "samples": 19992,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__GetUpFromFace",
+      "maxPosition": 4.340025498095201E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7999867818474513E-08,
+      "worst": "ball_l@246",
+      "samples": 17340,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__HiddenButton",
+      "maxPosition": 4.710487701231614E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.834182488697934E-08,
+      "worst": "ring_03_r@468",
+      "samples": 43520,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle_Hit_Strong_Left",
+      "maxPosition": 1.0620420653140172E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7400348717444558E-08,
+      "worst": "index_03_r@14",
+      "samples": 31960,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle_Hit_Strong_Right",
+      "maxPosition": 5.125701591168763E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.552614812387446E-09,
+      "worst": "middle_03_r@265",
+      "samples": 23460,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle_Knockdown_Front",
+      "maxPosition": 5.236056949797785E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.527428405978526E-09,
+      "worst": "ring_03_r@164",
+      "samples": 22848,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle_Knockdown_Left",
+      "maxPosition": 1.0339645086787641E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.568751528679968E-08,
+      "worst": "middle_03_l@111",
+      "samples": 21964,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle_Knockdown_Right",
+      "maxPosition": 1.0832191037479788E-05,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.499966843596326E-09,
+      "worst": "middle_03_r@116",
+      "samples": 16252,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle_Punch_Move_L",
+      "maxPosition": 2.8562458282976877E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.314561596885369E-09,
+      "worst": "ball_r@3",
+      "samples": 14756,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle",
+      "maxPosition": 5.743851488659857E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.5894571969710114E-07,
+      "worst": "ball_r@39",
+      "samples": 27404,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle2",
+      "maxPosition": 1.9458140741335228E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.271565759353166E-07,
+      "worst": "ball_l@151",
+      "samples": 15232,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle2Crouch_new",
+      "maxPosition": 4.273166268831119E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.3719150260271817E-09,
+      "worst": "ball_r@3",
+      "samples": 5372,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle2Crouch",
+      "maxPosition": 5.383409188652877E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.128051817569144E-09,
+      "worst": "ball_r@2",
+      "samples": 4964,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle2Fists",
+      "maxPosition": 1.1093521607108414E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.708128303361093E-09,
+      "worst": "ball_l@16",
+      "samples": 4760,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle3",
+      "maxPosition": 5.572217560256831E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.463301259808986E-08,
+      "worst": "ball_r@7",
+      "samples": 15708,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle4",
+      "maxPosition": 2.251531623187475E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.531062500172766E-07,
+      "worst": "ball_r@109",
+      "samples": 26316,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle5",
+      "maxPosition": 2.902006235672161E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.8919691530404634E-08,
+      "worst": "ball_r@442",
+      "samples": 41004,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Idle6",
+      "maxPosition": 0.0011599058052524924,
+      "maxAngle": 0.07912936529690494,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@195",
+      "samples": 24616,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Jump_place_ALL_short",
+      "maxPosition": 1.618085843801964E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.160152749539293E-09,
+      "worst": "ball_r@78",
+      "samples": 14484,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Jump_place_ALL",
+      "maxPosition": 0.0011802087537944317,
+      "maxAngle": 0.08846932034957805,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.5894571880892272E-08,
+      "worst": "ball_r@125",
+      "samples": 17136,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Jump_run_lu_ALL",
+      "maxPosition": 4.295083726901794E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.632724343560767E-09,
+      "worst": "ball_l@329",
+      "samples": 22644,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Jump_run_ru_ALL",
+      "maxPosition": 8.179584256140515E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.632724343560767E-09,
+      "worst": "ring_03_r@18",
+      "samples": 15708,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Jump_walk_lu_ALL",
+      "maxPosition": 1.1583915693336166E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@153",
+      "samples": 15776,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Jump_walk_ru_ALL",
+      "maxPosition": 4.924535005557118E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.787133190906843E-09,
+      "worst": "ball_r@128",
+      "samples": 10880,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpIdleLand",
+      "maxPosition": 5.5176365094666835E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.4256675274235704E-09,
+      "worst": "ball_r@88",
+      "samples": 8092,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpIdleLand2Walk",
+      "maxPosition": 1.2997536941838916E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.9198904688266794E-09,
+      "worst": "index_03_l@198",
+      "samples": 13940,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpIdleLandHard",
+      "maxPosition": 7.388572157651652E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.0526479687911205E-09,
+      "worst": "ik_hand_l@64",
+      "samples": 10948,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpIdleStart",
+      "maxPosition": 0.0009409792255610228,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.0527362537260387E-08,
+      "worst": "ball_r@85",
+      "samples": 30940,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpRun_LU_Land",
+      "maxPosition": 3.058343054362922E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128338747340877E-09,
+      "worst": "ball_r@193",
+      "samples": 13872,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpRun_LU_Land2Run",
+      "maxPosition": 3.885747446474852E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.702456840062098E-08,
+      "worst": "ball_r@176",
+      "samples": 12240,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpRun_RU_Land",
+      "maxPosition": 2.5094745979004074E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ball_l@128",
+      "samples": 9520,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpRun_RU_Land2Run",
+      "maxPosition": 3.6692695175588597E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.973642970223068E-09,
+      "worst": "index_03_r@92",
+      "samples": 8976,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpRunStart_LU",
+      "maxPosition": 3.076143912039697E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "index_03_r@469",
+      "samples": 32300,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpRunStart_RU",
+      "maxPosition": 4.058201011503115E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "middle_03_l@117",
+      "samples": 34748,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpWalk_LU_Land",
+      "maxPosition": 3.884032594214659E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ball_l@55",
+      "samples": 11968,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpWalk_LU_Land2Walk",
+      "maxPosition": 6.357773145282408E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "ball_r@71",
+      "samples": 10948,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpWalk_RU_Land",
+      "maxPosition": 2.386850155744469E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ball_l@159",
+      "samples": 11696,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpWalk_RU_Land2Walk",
+      "maxPosition": 4.961398644809378E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.128051817569144E-09,
+      "worst": "ball_l@47",
+      "samples": 5848,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpWalkStart_LU",
+      "maxPosition": 4.581872417475097E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ik_foot_l@468",
+      "samples": 32300,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__JumpWalkStart_RU",
+      "maxPosition": 4.581878238241188E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "middle_03_r@468",
+      "samples": 32300,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__KeypadUse_LH_90",
+      "maxPosition": 8.070461262832396E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.97127016932086E-08,
+      "worst": "ball_r@164",
+      "samples": 13940,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__KeypadUse_LH",
+      "maxPosition": 1.1446279131632764E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.3894439699366785E-08,
+      "worst": "ball_r@141",
+      "samples": 12716,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__KeypadUse_RH_90",
+      "maxPosition": 4.233057552482933E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.2632658030753419E-08,
+      "worst": "ball_l@217",
+      "samples": 15028,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__KeypadUse_RH",
+      "maxPosition": 4.240610905981157E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.2632658030753419E-08,
+      "worst": "ball_l@184",
+      "samples": 14892,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__KickTrashcan",
+      "maxPosition": 3.5877465052180924E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.8134768292886747E-08,
+      "worst": "ball_l@266",
+      "samples": 18972,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__PatrolFullCycleLoop",
+      "maxPosition": 2.1216930690570734E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.9396549073321694E-08,
+      "worst": "ball_r@1257",
+      "samples": 85952,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__PatrolLoop",
+      "maxPosition": 3.542874537743046E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 6.2128007183304135E-09,
+      "worst": "ball_r@178",
+      "samples": 12580,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__PickUp_LH_90",
+      "maxPosition": 4.710464054369368E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@118",
+      "samples": 11356,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__PickUp_LH",
+      "maxPosition": 6.32508636044804E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@2",
+      "samples": 11016,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__PickUp_RH_90",
+      "maxPosition": 6.14597047388088E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@4",
+      "samples": 11560,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__PickUp_RH",
+      "maxPosition": 4.281880592316156E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@163",
+      "samples": 11560,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__PullLever_LH_90",
+      "maxPosition": 4.067798727191985E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.607472068433708E-09,
+      "worst": "ball_l@0",
+      "samples": 11764,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__PullLever_LH",
+      "maxPosition": 3.090338850597618E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.607472068433708E-09,
+      "worst": "ball_l@159",
+      "samples": 11152,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__PullLever_RH_90",
+      "maxPosition": 3.7903541851846967E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.5057768365522861E-09,
+      "worst": "ball_r@8",
+      "samples": 14484,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__PullLever_RH",
+      "maxPosition": 4.349563369032694E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.2767558505165653E-08,
+      "worst": "ball_l@13",
+      "samples": 14008,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunArchLoop_L",
+      "maxPosition": 1.776428462108015E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ball_r@105",
+      "samples": 7616,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunArchLoop_R",
+      "maxPosition": 1.3902072169003077E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "index_03_r@109",
+      "samples": 8636,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunBwdLoop",
+      "maxPosition": 3.17905892188719E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ik_foot_r@112",
+      "samples": 7956,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdLoop_LeanL",
+      "maxPosition": 9.931643944582902E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "pinky_03_l@142",
+      "samples": 10200,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdLoop_LeanR",
+      "maxPosition": 1.3483706425176933E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "middle_03_l@155",
+      "samples": 11152,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdLoop",
+      "maxPosition": 7.025455033726757E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "middle_03_l@140",
+      "samples": 10064,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdStart",
+      "maxPosition": 7.212893251562491E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ball_l@5",
+      "samples": 8228,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdStart135_L",
+      "maxPosition": 1.313459415541729E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.672426110578613E-10,
+      "worst": "ball_r@23",
+      "samples": 10880,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdStart135_R",
+      "maxPosition": 6.8834979174425825E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.455911526539239E-10,
+      "worst": "ring_03_l@165",
+      "samples": 11900,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdStart180_L",
+      "maxPosition": 1.580943717272021E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.672426110578613E-10,
+      "worst": "ball_r@22",
+      "samples": 10336,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdStart180_R",
+      "maxPosition": 1.0820813258760609E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.455911526539239E-10,
+      "worst": "ball_r@4",
+      "samples": 13192,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdStart90_L",
+      "maxPosition": 2.9997116143931635E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.708128303361093E-09,
+      "worst": "ball_r@6",
+      "samples": 10812,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdStart90_R",
+      "maxPosition": 2.7147578293806873E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@3",
+      "samples": 11016,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdStop_LU",
+      "maxPosition": 2.514236939532566E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ball_r@50",
+      "samples": 18632,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdStop_RU",
+      "maxPosition": 1.9372798760741716E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@180",
+      "samples": 13464,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdTurn180_L_LU",
+      "maxPosition": 1.202596649818588E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.479754427994976E-10,
+      "worst": "ball_r@249",
+      "samples": 17544,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdTurn180_L_RU",
+      "maxPosition": 1.823688421609404E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 6.0490470410456965E-09,
+      "worst": "middle_03_r@64",
+      "samples": 12716,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdTurn180_R_LU",
+      "maxPosition": 2.3903859982965514E-05,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.0742993161727554E-09,
+      "worst": "ring_03_l@274",
+      "samples": 19244,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunFwdTurn180_R_RU",
+      "maxPosition": 9.177421816275455E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.654375690942402E-09,
+      "worst": "middle_03_l@332",
+      "samples": 23188,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunLtLoop",
+      "maxPosition": 5.793697255285224E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ball_l@53",
+      "samples": 7752,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunRtLoop",
+      "maxPosition": 4.270892077329336E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ball_r@99",
+      "samples": 7072,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunStrafeLeft135Loop",
+      "maxPosition": 5.5393852562701795E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ring_03_l@116",
+      "samples": 8160,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunStrafeLeft45Loop",
+      "maxPosition": 9.679654795036186E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ball_r@144",
+      "samples": 10200,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunStrafeRight135Loop",
+      "maxPosition": 5.425516519608209E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.3672095656764895E-09,
+      "worst": "ball_r@114",
+      "samples": 8024,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__RunStrafeRight45Loop",
+      "maxPosition": 9.85556107480079E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ball_r@148",
+      "samples": 10404,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__SitChairEnd",
+      "maxPosition": 3.270669139965321E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.607472068433708E-09,
+      "worst": "ball_l@104",
+      "samples": 11152,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__SitChairLoop",
+      "maxPosition": 1.5594378055538982E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 6.357828752356909E-08,
+      "worst": "ring_03_r@161",
+      "samples": 20876,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__SitChairStart",
+      "maxPosition": 1.0939588719338644E-05,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ball_l@7",
+      "samples": 9112,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Slide",
+      "maxPosition": 7.267918135767104E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.0919824600108541E-08,
+      "worst": "ball_r@277",
+      "samples": 19108,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__SprintFwdLoop1",
+      "maxPosition": 5.9997487369400915E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 8.455911526539239E-10,
+      "worst": "pinky_03_l@128",
+      "samples": 9452,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeLeft135Loop",
+      "maxPosition": 5.162688012205763E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@124",
+      "samples": 9112,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeLeft45Loop",
+      "maxPosition": 7.051760803733487E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@132",
+      "samples": 9520,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeLeftLoop",
+      "maxPosition": 1.7921705648404895E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ik_hand_l@65",
+      "samples": 7276,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeLeftStart",
+      "maxPosition": 7.221273335744627E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.384185793236071E-08,
+      "worst": "ball_l@3",
+      "samples": 6324,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeLeftStop_LU",
+      "maxPosition": 1.206401975650806E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.9198904688266794E-09,
+      "worst": "ball_r@162",
+      "samples": 12580,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeLeftStop_RU",
+      "maxPosition": 7.973851097631268E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.2181101749497714E-07,
+      "worst": "ball_l@178",
+      "samples": 14348,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeRight135Loop",
+      "maxPosition": 2.1837192889506696E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@122",
+      "samples": 10336,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeRight45Loop",
+      "maxPosition": 4.548175184027059E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@165",
+      "samples": 11968,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeRightLoop",
+      "maxPosition": 2.9708669444517E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@97",
+      "samples": 8500,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeRightStart",
+      "maxPosition": 0.00045661802869290113,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.181804318965533E-09,
+      "worst": "ball_r@44",
+      "samples": 11084,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeRightStop_LU",
+      "maxPosition": 2.4105363536364166E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.292910249503734E-09,
+      "worst": "ball_l@140",
+      "samples": 9860,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__StrafeRightStop_RU",
+      "maxPosition": 3.2926593576121377E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@76",
+      "samples": 5984,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Throw_Start",
+      "maxPosition": 3.3789594908739673E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "ball_r@9",
+      "samples": 7616,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ThrowAway_LH",
+      "maxPosition": 3.8036071146052564E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.1372953467869706E-08,
+      "worst": "ball_r@5",
+      "samples": 7072,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ThrowAway_RH",
+      "maxPosition": 3.5551372548070503E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.787133190906843E-09,
+      "worst": "ball_r@7",
+      "samples": 9928,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ThrowCancel",
+      "maxPosition": 9.106465768127237E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_l@78",
+      "samples": 12376,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ThrowEndClose",
+      "maxPosition": 4.16956345361541E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5079911036840485E-08,
+      "worst": "ball_l@177",
+      "samples": 13056,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ThrowEndFar",
+      "maxPosition": 9.993336789193563E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5079911036840485E-08,
+      "worst": "ik_hand_l@81",
+      "samples": 21488,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ThrowLoop",
+      "maxPosition": 1.4281035873864312E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.9868214962137642E-08,
+      "worst": "ring_03_l@8",
+      "samples": 3604,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ThrowSingle1",
+      "maxPosition": 5.244076419330668E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@365",
+      "samples": 25636,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__ThrowSingle2",
+      "maxPosition": 6.975335054448806E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ring_03_r@129",
+      "samples": 24480,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Turn180Surprised",
+      "maxPosition": 1.8701493900152855E-05,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.3974681412065593E-08,
+      "worst": "ball_l@232",
+      "samples": 20944,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__TurnLt180",
+      "maxPosition": 1.1611207810346968E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.292910249503734E-09,
+      "worst": "ball_l@1",
+      "samples": 11424,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__TurnLt90_Loop",
+      "maxPosition": 4.170816464466043E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.160152749539293E-09,
+      "worst": "ball_r@83",
+      "samples": 10676,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__TurnRt180",
+      "maxPosition": 1.5020284081401769E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.787133190906843E-09,
+      "worst": "ball_l@28",
+      "samples": 14892,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__TurnRt90_Loop",
+      "maxPosition": 2.268430034746416E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.160152749539293E-09,
+      "worst": "ball_r@58",
+      "samples": 10676,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__Vault1m",
+      "maxPosition": 5.872499059478287E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 9.536743172944284E-08,
+      "worst": "ball_l@330",
+      "samples": 23868,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkArchLoop_L",
+      "maxPosition": 6.285129074967699E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@164",
+      "samples": 11696,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkArchLoop_R",
+      "maxPosition": 2.16308194467274E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ik_hand_l@16",
+      "samples": 9928,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkBwdLoop",
+      "maxPosition": 6.9468865149246994E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@127",
+      "samples": 9112,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkBwdStart",
+      "maxPosition": 7.2106763582269195E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.9868214962137642E-08,
+      "worst": "ball_r@27",
+      "samples": 7004,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkBwdStop_LU",
+      "maxPosition": 4.455378530110465E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.499966843596326E-09,
+      "worst": "ball_r@115",
+      "samples": 8500,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkBwdStop_RU",
+      "maxPosition": 4.223132236802485E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.8982391214450445E-09,
+      "worst": "ball_r@146",
+      "samples": 10608,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdLoop_LeanL",
+      "maxPosition": 2.6927846192847937E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ik_hand_l@44",
+      "samples": 11560,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdLoop_LeanR",
+      "maxPosition": 2.058788368231035E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@167",
+      "samples": 11832,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdLoop",
+      "maxPosition": 6.507629223051481E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 0,
+      "worst": "ball_r@165",
+      "samples": 11764,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdStart",
+      "maxPosition": 1.413612517353613E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.7128337637117852E-09,
+      "worst": "ball_r@9",
+      "samples": 6868,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdStart135_L",
+      "maxPosition": 5.964030151517363E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "ball_l@10",
+      "samples": 7956,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdStart135_R",
+      "maxPosition": 1.1256956895522308E-05,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ball_r@191",
+      "samples": 13532,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdStart180_L",
+      "maxPosition": 6.872198355267756E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 2.5800763747696465E-09,
+      "worst": "ball_l@8",
+      "samples": 7888,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdStart180_R",
+      "maxPosition": 6.250362275750376E-06,
+      "maxAngle": 0.096913285286603,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.521618413022566E-09,
+      "worst": "ball_r@2",
+      "samples": 14348,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdStart90_L",
+      "maxPosition": 8.812525265966542E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 5.686476733934853E-09,
+      "worst": "ball_l@13",
+      "samples": 7072,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdStart90_R",
+      "maxPosition": 2.148541716451291E-05,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 1.5894571880892272E-08,
+      "worst": "ball_l@9",
+      "samples": 10540,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdStop_LU",
+      "maxPosition": 4.225129487167578E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.314561596885369E-09,
+      "worst": "ball_r@115",
+      "samples": 9044,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkFwdStop_RU",
+      "maxPosition": 4.271548732504016E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 3.4256675274235704E-09,
+      "worst": "ball_r@163",
+      "samples": 11832,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkThroughDoor_LH",
+      "maxPosition": 4.908909431833308E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.953096155446701E-09,
+      "worst": "ball_r@197",
+      "samples": 21624,
+      "error": ""
+    },
+    {
+      "name": "MovementAnimsetPro__RootMotion__WalkThroughDoor_RH",
+      "maxPosition": 4.392311439005425E-06,
+      "maxAngle": 0.06852804019207596,
+      "maxRest": 3.776349331019446E-07,
+      "durationError": 4.953096155446701E-09,
+      "worst": "ball_l@1",
+      "samples": 20468,
+      "error": ""
+    }
+  ]
+}

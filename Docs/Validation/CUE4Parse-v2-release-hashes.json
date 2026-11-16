@@ -1,0 +1,15 @@
+{
+  "build": "Animanager-win-x64-20261114-122753",
+  "verified": [
+    {
+      "source": "Characters/Mannequins/Anims/Unarmed/MM_Idle.uasset",
+      "sha256": "b4c4ade7bd9297d560848619e2e000444e93f3372d07745aac4a6a59e1567ae8",
+      "sameAsComparedArtifact": true
+    },
+    {
+      "source": "UE4_WalkFwdLoop.uasset",
+      "sha256": "9857d83800b7849073f7028c83f0e894940df728b62147dc38dee9c4186f8af1",
+      "sameAsComparedArtifact": true
+    }
+  ]
+}

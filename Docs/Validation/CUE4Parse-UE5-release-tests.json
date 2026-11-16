@@ -1,0 +1,22 @@
+{
+  "fixture": "D:\\_Projects\\Animanager\\.runtime\\ue-standard-fixture",
+  "editor": false,
+  "checks": [
+    "Console advertises the validated independent UE5 reader",
+    "Mixed UE4 / UE5 source inspection identifies both families",
+    "inspection leaves the library unchanged",
+    "Limbo imports both families in one queued directory job",
+    "UE5 source Skeleton is validated and distinguished from preview joints",
+    "missing UE4 dependency substitution is explicit in the report",
+    "library tags retain each source skeleton family",
+    "UE5 preview retains all 161 bones and the complete source clip",
+    "UE5 source curves produce a changing pose",
+    "UE5 skeleton is available to the shared bone and trajectory API",
+    "repeated mixed import deduplicates both families",
+    "App directory import uses the same automatic profile pipeline",
+    "UE5 animation exports through the existing FBX queue",
+    "FBX export preserves the full UE5 skeleton, including unweighted bones",
+    "UE5 FBX round trip preserves sampled poses: 0.0000059 m, 0.0560 deg"
+  ],
+  "error": ""
+}

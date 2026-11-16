@@ -1,0 +1,23 @@
+{
+  "reference": "D:/_Projects/Animanager/.runtime/movement-animset/ConvertedFbx",
+  "referenceMap": {
+    "Characters__Mannequins__Anims__Unarmed__MM_Idle": "D:\\_Projects\\Animanager\\BuiltinAssets\\Baselines\\UE5_Manny_Idle.fbx"
+  },
+  "bindMap": {
+    "Characters__Mannequins__Anims__Unarmed__MM_Idle": "D:\\_Projects\\Animanager\\BuiltinAssets\\Baselines\\UE5_Manny.fbx"
+  },
+  "elapsed": 0.8666528,
+  "failed": 0,
+  "clips": [
+    {
+      "name": "Characters__Mannequins__Anims__Unarmed__MM_Idle",
+      "maxPosition": 2.268630169055541E-06,
+      "maxAngle": 0.05595291023658669,
+      "maxRest": 1.6858739115832577E-07,
+      "durationError": 6.357828752356909E-08,
+      "worst": "neck_02@214",
+      "samples": 20470,
+      "error": ""
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "source": "C:\\Users\\Reed\\Downloads\\Movement Animset Pro.zip",
+  "editor": true,
+  "checks": [
+    "self-contained CUE4Parse helper is present",
+    "Limbo reports the independent backend and explicit baseline",
+    "ZIP inspection recognizes 386 AnimSequence and 6 unsupported Montage",
+    "inspection does not import assets",
+    "Limbo imports the original ZIP through the durable batch queue",
+    "all 386 clips are indexed as animations with provenance tags",
+    "source hashes, skipped classes and library mappings are retained",
+    "preview loads MovementAnimsetPro__RootMotion__WalkFwdLoop",
+    "root displacement is preserved: MovementAnimsetPro__RootMotion__WalkFwdLoop",
+    "preview loads MovementAnimsetPro__InPlace__WalkFwdLoop",
+    "root displacement is preserved: MovementAnimsetPro__InPlace__WalkFwdLoop",
+    "preview loads MovementAnimsetPro__AimOffsets__Idle_U",
+    "root displacement is preserved: MovementAnimsetPro__AimOffsets__Idle_U",
+    "standard batch import routes ZIPs and skips all duplicates",
+    "malformed input fails visibly while later valid items still complete",
+    "retry processes only the failed item and deduplicates repaired input",
+    "cancellation test reaches a running converter",
+    "cancellation stops the helper without adding partial assets",
+    "GUI import uses the same tested independent backend",
+    "ZIP traversal entries are rejected without extraction",
+    "CUE animation can use the existing FBX export queue",
+    "CUE to FBX round trip preserves root motion and all 68 bones"
+  ],
+  "error": ""
+}

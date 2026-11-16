@@ -1,0 +1,10 @@
+.godot/
+.runtime/
+.packages/
+bin/
+obj/
+*.user
+TestResults/
+Exports/
+Builds/
+Libraries/

@@ -1,0 +1,14 @@
+{
+  "build": "Animanager-win-x64-20261114-131132",
+  "localPatches": [
+    "ue50-tagged-raw-track-v1"
+  ],
+  "unchangedComparedOutputs": [
+    "AS_Combo_Attack_01_All_Seq.uasset",
+    "AS_Combo_Attack_03_All_Seq.uasset",
+    "AS_Idle_0_Seq.uasset",
+    "AS_Idle_Seq.uasset"
+  ],
+  "standalonePlayback": "Passed: idle, attack, roll",
+  "bundleSmokeChecks": 6
+}

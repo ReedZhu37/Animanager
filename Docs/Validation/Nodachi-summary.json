@@ -1,0 +1,40 @@
+{
+  "archive": "C:\\Users\\Reed\\Downloads\\Nodachi.rar",
+  "archiveSha256": "edf9630d4f4afdf74f7c7c924c1fdf13ac3842f483be675e3048db9e1701abc7",
+  "engine": "5.0.3-20979098",
+  "inputUassets": 817,
+  "converted": 740,
+  "nonAnimationSkipped": 75,
+  "skeletonDependencies": 2,
+  "skeletalBones": 162,
+  "extraBone": "Nodachi_Weapon_R",
+  "sourceSamples": 329745,
+  "maxPositionMetres": 8.090517439995892e-06,
+  "maxAngleDegrees": 0.05595291023658669,
+  "maxScaleDifference": 4.5783195901094587e-07,
+  "maximumRootTravelMetres": 18.292662,
+  "categories": {
+    "01_Idle": 22,
+    "02_Attack": 83,
+    "03_Walk": 172,
+    "04_Run": 184,
+    "05_Jump": 42,
+    "06_Dodge": 100,
+    "07_Roll": 68,
+    "08_Hit": 57,
+    "09_Turn": 12
+  },
+  "checks": [
+    "source directory imports through the actual Limbo job queue",
+    "every source animation has a converted result",
+    "all imported animations preserve sampled original local keys, full skeletons and duration",
+    "whole-pack reimport deduplicates all converted animations",
+    "FBX export: Nodachi__Animations__Sequence__01_Idle__01_Idle__AS_Idle_Seq",
+    "FBX round trip: Nodachi__Animations__Sequence__01_Idle__01_Idle__AS_Idle_Seq / 0.0000076 m / 0.0560 deg",
+    "FBX export: Nodachi__Animations__Sequence__02_Attack__01_Combo_Attack_01__AS_Combo_Attack_01_All_Seq",
+    "FBX round trip: Nodachi__Animations__Sequence__02_Attack__01_Combo_Attack_01__AS_Combo_Attack_01_All_Seq / 0.0008001 m / 0.2238 deg",
+    "FBX export: Nodachi__Animations__Sequence__02_Attack__03_Combo_Attack_03__AS_Combo_Attack_03_All_Seq",
+    "FBX round trip: Nodachi__Animations__Sequence__02_Attack__03_Combo_Attack_03__AS_Combo_Attack_03_All_Seq / 0.0000081 m / 0.0560 deg"
+  ],
+  "validationBoundary": "Sampled original DataModel keys, App preview, reimport and three FBX round trips. No Unreal invocation or independent UE-exported FBX reference for Nodachi."
+}

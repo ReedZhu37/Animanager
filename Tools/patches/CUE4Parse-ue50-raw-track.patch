@@ -1,0 +1,8 @@
+diff --git a/CUE4Parse/UE4/Assets/Objects/FScriptStruct.cs b/CUE4Parse/UE4/Assets/Objects/FScriptStruct.cs
+--- a/CUE4Parse/UE4/Assets/Objects/FScriptStruct.cs
++++ b/CUE4Parse/UE4/Assets/Objects/FScriptStruct.cs
+@@ -168,1 +168,4 @@
++            // Animanager: early UE5 editor DataModels use tagged UPROPERTY arrays, not native bulk arrays.
++            "RawAnimSequenceTrack" when Ar.Game >= EGame.GAME_UE5_0 && FUE5ReleaseStreamObjectVersion.Get(Ar) < FUE5ReleaseStreamObjectVersion.Type.RawAnimSequenceTrackSerializer
++                => type == ReadType.ZERO ? new FStructFallback() : new FStructFallback(Ar, structName),
+             "RawAnimSequenceTrack" => new FRawAnimSequenceTrack(Ar),
