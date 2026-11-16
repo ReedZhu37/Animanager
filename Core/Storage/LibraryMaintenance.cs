@@ -3,6 +3,7 @@ using Animanager.Core.Jobs;
 using Animanager.Core.Models;
 using Animanager.Core.Motion;
 using Animanager.Core.Pipeline;
+using Animanager.Core.Browse;
 
 namespace Animanager.Core.Storage;
 
@@ -13,7 +14,7 @@ public sealed record CacheFile(string Path, long Bytes, DateTime LastWriteUtc);
 public sealed record CachePlan(string Root, CacheFile[] Files, long ConversionBytes, long PersistentBytes)
 {
     public long EligibleBytes => Files.Sum(f => f.Bytes);
-    public long PreviewDiskBytes => 0;
+    public long PreviewDiskBytes { get; init; }
 }
 public sealed record CleanupResult(int Removed, long Bytes, string[] Retained);
 
@@ -90,7 +91,9 @@ public sealed class LibraryMaintenance(WorkspaceApi api)
         var current = CacheCandidates().ToHashSet();
         if (approved.Files.Any(f => !current.Contains(f)))
             throw new InvalidOperationException("缓存范围已变更，请重新预览。");
-        return RemoveFiles(approved.Files);
+        var result = RemoveFiles(approved.Files);
+        if (approved.Files.Any(f => AssetBrowseCache.IsCacheFile(f.Path))) api.InvalidateAssetBrowseCache();
+        return result;
     });
 
     public Task<CleanupResult> PurgeAsync(string[] ids) => ExclusiveAsync(() =>
@@ -246,17 +249,18 @@ public sealed class LibraryMaintenance(WorkspaceApi api)
 
     private CachePlan PreviewCache()
     {
-        long conversion = 0, persistent = 0;
+        long conversion = 0, persistent = 0, preview = 0;
         foreach (var (path, relative) in Files(_storage.Root))
         {
             if (RootTransient(relative)) continue;
             long size = new FileInfo(path).Length;
-            if (relative.StartsWith("cache/conversion/", StringComparison.OrdinalIgnoreCase) ||
+            if (AssetBrowseCache.IsCacheFile(relative)) preview += size;
+            else if (relative.StartsWith("cache/conversion/", StringComparison.OrdinalIgnoreCase) ||
                 relative.StartsWith("uasset/", StringComparison.OrdinalIgnoreCase) && !relative.EndsWith("-report.json", StringComparison.OrdinalIgnoreCase))
                 conversion += size;
             else persistent += size;
         }
-        return new(_storage.Root, CacheCandidates(), conversion, persistent);
+        return new(_storage.Root, CacheCandidates(), conversion, persistent) { PreviewDiskBytes = preview };
     }
 
     private CacheFile[] CacheCandidates()
@@ -267,6 +271,11 @@ public sealed class LibraryMaintenance(WorkspaceApi api)
         if (assets.Values.Any(a => !LibraryManager.Nested(_storage.Resolve(a.VirtualPath), a.SourceFormat == ".motion" ? motionRoot : assetsRoot)))
             return [];
         var candidates = new List<CacheFile>();
+        var previewRoot = _storage.Resolve(AssetBrowseCache.DirectoryName);
+        if (Directory.Exists(previewRoot))
+            candidates.AddRange(Files(previewRoot)
+                .Where(f => AssetBrowseCache.IsCacheFile(Relative(_storage.Root, f.Full)))
+                .Select(f => CacheInfo(f.Full)));
         var reports = api.Jobs.Recent(int.MaxValue).Where(j => j.Kind == JobKind.ImportUasset && j.State == JobState.Completed)
             .SelectMany(j => j.Items).Where(i => i.State is ItemState.Succeeded or ItemState.Skipped).Select(i => i.Output);
         foreach (var report in reports.Distinct(StringComparer.OrdinalIgnoreCase))

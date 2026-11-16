@@ -40,6 +40,7 @@ public partial class ConsoleCommands : Node
         Bind("asset tags",nameof(Tags),"Set tags: asset tags <id_or_name> <tags>");
         Bind("asset favorite",nameof(Favorite),"Set favorite: asset favorite <id_or_name> <bool>");
         RegisterLibraryCommands(libraries,beforeSwitch,activate);
+        RegisterAssetBrowseCommands();
         Bind("preview load",nameof(Load),"Load an asset by exact unique name or ID");
         Bind("preview play",nameof(Play),"Play the selected clip");
         Bind("preview pause",nameof(Pause),"Pause the selected clip");
@@ -53,6 +54,7 @@ public partial class ConsoleCommands : Node
         Bind("export fbx",nameof(ExportFbx),"Blender FBX export: export fbx <id_or_name> <folder>");
         Bind("export scene",nameof(ExportScene),"Export loaded preview as GLB: export scene <folder>");
         Bind("export animations",nameof(ExportAnimations),"Export loaded preview as RES: export animations <folder>");
+        RegisterConfiguredExportCommands();
         Bind("pipeline blender",nameof(Blender),"Set Blender executable path for this session");
         Bind("job cancel",nameof(Cancel),"Cancel the active console import / conversion");
         Bind("job list",nameof(JobList),"Recent jobs, progress, and report locations");
@@ -63,7 +65,7 @@ public partial class ConsoleCommands : Node
         Bind("job retry",nameof(JobRetry),"Retry only failed, cancelled or interrupted items");
         Bind("export plan",nameof(ExportPlan),"Snapshot all matches without exporting: export plan <query_or_*> <folder>");
         Bind("export show",nameof(ShowPlan),"Inspect a saved plan: export show <id_or_last>");
-        Bind("export run",nameof(RunExportPlan),"Queue a saved FBX export plan");
+        Bind("export run",nameof(RunExportPlan),"Queue a saved FBX, GLB or RES export plan");
         Bind("batch export",nameof(BatchExport),"Queue all matching assets as FBX; use * for all");
         Bind("batch export_favorites",nameof(ExportFavorites),"Queue favorite assets as FBX: <folder>");
         Bind("batch import",nameof(BatchImport),"Recursively scan and queue a file / directory");
@@ -106,7 +108,7 @@ public partial class ConsoleCommands : Node
         catch(Exception ex){Fail(ex);}
         finally{token.Dispose();_job=null;if(!_closing)_refresh();}
     }
-    public void Commands()=>Info("library current | library list | library create <path> <name> | library open <path_or_id>\nlibrary register <path> | library relocate <id> <path> | library check | library rebuild <path>\nlibrary backup <path> | library restore <backup> <destination> | library cache_preview | library cache_clear true\nasset rename <asset> <name> | asset tags_add <ids> <tags> | asset tags_remove <ids> <tags> | asset favorites <ids> <bool>\nasset trash <ids> | asset trash_list * | asset restore <ids> | asset purge <ids> true\ncollection list | collection create <name> | collection add <collection_id> <ids> | collection search <collection_id> *\nmotion inspect <asset> | motion grip <asset> <x,y,z> <degrees_x,y,z>\nmotion contact <asset> <start> <end> <state> | motion sample <seconds>\nmotion visible <asset> <bool> | motion reset <asset>\nuasset status | uasset inspect <path> | uasset import <path>\nasset list 0 | asset search \"Manny\" | asset inspect <name_or_id>\nbatch import <folder> | batch import_list <json> | batch scan <folder>\nexport fbx <name_or_id> <folder> | export plan <query_or_*> <folder>\nexport show last | export run last | batch export <query_or_*> <folder>\nbatch export_favorites <folder> | batch run <plan_id>\njob current | job list | job status last | job report last | job cancel\njob cancel_id <id> | job retry <id_or_last>\npreview load <name> | preview play | preview pause | preview seek 0.5\npreview clip <clip> | preview speed 1.0 | preview bones | preview material clay\nbone tree <query_or_*> | bone select <name_or_skeleton:bone> | bone info | bone focus | bone clear\nbone show true | bone xray true | trail show true | trail world | trail relative <bone> | trail rate 60 | trail status\nbone select_many \"LeftFoot,RightFoot\" | bone add <bone> | bone remove <bone> | bone selection\ntrail pin | trail pins | trail unpin <pin_id> | trail visible <pin_id> <bool> | trail clear_pins\nrootmotion source <root_bone> | rootmotion show true | rootmotion status | rootmotion sample 0.5\nexport scene <folder> | export animations <folder> | baseline import\nUse quotes and forward slashes in paths. Jobs run sequentially; failures do not stop the batch. help <command> shows typed arguments.");
+    public void Commands()=>Info("library current | library list | library create <path> <name> | library open <path_or_id>\nlibrary register <path> | library relocate <id> <path> | library check | library rebuild <path>\nlibrary backup <path> | library restore <backup> <destination> | library cache_preview | library cache_clear true\nasset rename <asset> <name> | asset tags_add <ids> <tags> | asset tags_remove <ids> <tags> | asset favorites <ids> <bool>\nasset trash <ids> | asset trash_list * | asset restore <ids> | asset purge <ids> true\ncollection list | collection create <name> | collection add <collection_id> <ids> | collection search <collection_id> *\nmotion inspect <asset> | motion grip <asset> <x,y,z> <degrees_x,y,z>\nmotion contact <asset> <start> <end> <state> | motion sample <seconds>\nmotion visible <asset> <bool> | motion reset <asset>\nuasset status | uasset inspect <path> | uasset import <path>\nasset list 0 | asset search \"Manny\" | asset inspect <name_or_id>\nbatch import <folder> | batch import_list <json> | batch scan <folder>\nexport fbx <name_or_id> <folder> | export plan <query_or_*> <folder>\nexport show last | export run last | batch export <query_or_*> <folder>\nbatch export_favorites <folder> | batch run <plan_id>\njob current | job list | job status last | job report last | job cancel\njob cancel_id <id> | job retry <id_or_last>\npreview load <name> | preview play | preview pause | preview seek 0.5\npreview clip <clip> | preview speed 1.0 | preview bones | preview material clay\nbone tree <query_or_*> | bone select <name_or_skeleton:bone> | bone info | bone focus | bone clear\nbone show true | bone xray true | trail show true | trail world | trail relative <bone> | trail rate 60 | trail status\nbone select_many \"LeftFoot,RightFoot\" | bone add <bone> | bone remove <bone> | bone selection\ntrail pin | trail pins | trail unpin <pin_id> | trail visible <pin_id> <bool> | trail clear_pins\nrootmotion source <root_bone> | rootmotion show true | rootmotion status | rootmotion sample 0.5\nexport scene <folder> | export animations <folder> | baseline import\nUse quotes and forward slashes in paths. Jobs run sequentially; failures do not stop the batch. help <command> shows typed arguments.\n"+ConfiguredExportHelp+"\n"+AssetBrowseHelp);
     public void Status()=>Guard(()=>Info(JsonSerializer.Serialize(new{assets=_sessionApi?.Search().Total??0,library=_sessionApi?.Storage.Root,libraryId=_libraries.Active?.Identity.Id,libraryName=_libraries.Active?.Identity.Name,blender=_sessionApi?.Blender.Executable,fbxExport=_sessionApi?.Blender.Available??false,jobRunning=JobRunning,selected=SelectedId})));
     public void Search(string query)=>Guard(()=>PrintSearch(query,0));
     public void List(int page)=>Guard(()=>PrintSearch("",Math.Max(0,page)));
@@ -140,7 +142,7 @@ public partial class ConsoleCommands : Node
     public void ExportFbx(string asset,string folder)=>Guard(()=>StartPlan(_api.Planner.ExportSingle(asset,Expand(folder))));
     public void ExportPlan(string query,string folder)=>Guard(()=>PrintPlan(_api.Planner.Export(query,Expand(folder))));
     public void ShowPlan(string id)=>Guard(()=>PrintPlan(_api.Planner.Load(PlanId(id))));
-    public void RunExportPlan(string id)=>Guard(()=>{var plan=_api.Planner.Load(PlanId(id));if(plan.Kind!=JobKind.ExportFbx)throw new ArgumentException("Not an FBX export plan; use batch run.");StartPlan(plan);});
+    public void RunExportPlan(string id)=>Guard(()=>{var plan=_api.Planner.Load(PlanId(id));if(!plan.Kind.IsExport())throw new ArgumentException("Not an export plan; use batch run.");StartPlan(plan);});
     public void RunPlan(string id)=>Guard(()=>StartPlan(_api.Planner.Load(PlanId(id))));
     public void BatchExport(string query,string folder)=>Guard(()=>StartPlan(_api.Planner.Export(query,Expand(folder))));
     public void ExportFavorites(string folder)=>Guard(()=>StartPlan(_api.Planner.Export("*",Expand(folder),true)));
@@ -173,7 +175,7 @@ public partial class ConsoleCommands : Node
     private string JobId(string id)=>id switch{"last"=>_api.Jobs.LatestId??throw new InvalidOperationException("No jobs."),"current"=>_api.Jobs.CurrentId??throw new InvalidOperationException("No active job."),_=>id};
     private void PrintPlan(BatchPlan plan)
     {
-        _lastPlan=plan.Id;Info($"Plan {plan.Id} | {plan.Kind} | {plan.Items.Count} items | {plan.IgnoredFiles} other files ignored\nOutput: {plan.OutputFolder}\n"+
+        _lastPlan=plan.Id;Info($"Plan {plan.Id} | {plan.Kind} | {plan.Items.Count} items | {plan.IgnoredFiles} other files ignored\nOutput: {plan.OutputFolder}\n"+DescribeExportOptions(plan)+"\n"+
             string.Join("\n",plan.Items.Take(20).Select(i=>$"{i.AssetId} | {i.Name} | {i.Input}"+(i.Error.Length>0?" | ERROR: "+i.Error:"")))+
             (plan.Items.Count>20?$"\n... {plan.Items.Count-20} more in saved plan":"")+$"\nSaved: {Path.Combine(_api.Planner.PlansFolder,plan.Id+".json")}\nNo export files created by planning; filename conflicts are numbered at execution.");
     }
@@ -214,6 +216,6 @@ public partial class ConsoleCommands : Node
     private static string Expand(string path)=>RuntimePaths.Expand(path);
     public void Open()=>_console.Call("open_console");
     public override void _Input(InputEvent ev){if(ev is InputEventKey{Pressed:true,Echo:false,Keycode:Key.F12}){_console.Call("toggle_console");GetViewport().SetInputAsHandled();}}
-    public async Task ShutdownAsync(){_closing=true;_preview.Bones.Clear();_job?.Cancel();_scan?.Cancel();if(_sessionApi!=null)await _sessionApi.Jobs.ShutdownAsync();await PendingTask;await _maintenanceTask;}
-    public override void _ExitTree(){_closing=true;_job?.Cancel();_scan?.Cancel();_preview.Bones.Notice-=Write;if(_sessionApi!=null){_sessionApi.Jobs.Changed-=OnJobChanged;_ = _sessionApi.Jobs.ShutdownAsync();}}
+    public async Task ShutdownAsync(){_closing=true;CancelAssetBrowseCommands();_preview.Bones.Clear();_job?.Cancel();_scan?.Cancel();if(_sessionApi!=null)await _sessionApi.Jobs.ShutdownAsync();await PendingTask;await _maintenanceTask;}
+    public override void _ExitTree(){_closing=true;CancelAssetBrowseCommands();_job?.Cancel();_scan?.Cancel();_preview.Bones.Notice-=Write;if(_sessionApi!=null){_sessionApi.Jobs.Changed-=OnJobChanged;_ = _sessionApi.Jobs.ShutdownAsync();}}
 }

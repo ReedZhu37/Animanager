@@ -4,6 +4,8 @@
 
 P0 已接入多 Library 管理、资产整理和基础库维护。功能范围与验收入口见 [功能迭代计划](Docs/FUNCTIONAL_ROADMAP.md)。
 
+P1 本轮补齐可配置导出、预览缩略图与属性筛选。人物 / 武器预设管理、骨架切换和重定向留待后续。
+
 Nodachi 已实现固定人体预设、独立武器轨道及握持 / 接触记录，操作与范围见 [独立轨道说明](Docs/MOTION_STORAGE.md)。完整后续设计见 [动画存储规划](Docs/ANIMATION_STORAGE_PLAN.md)；跨骨架 retarget、接触 IK 和完整旧库迁移尚未实施。
 
 已加入独立 `.uasset / ZIP` 导入：无需安装 Unreal，使用 CUE4Parse 自动识别 UE4 / UE5 标准骨架。已验证 UE4.23 原始动画、UE5.0 AnimDataModel 与 UE5.6 Sequencer Direct FK 动画；Movement 的 386 段序列及官方 Manny Idle 已与已有 UE FBX 对照通过。UE5 保留完整 161 根骨骼；其他版本与编码尚未承诺兼容。见 [导入方法与兼容范围](Docs/CUE4PARSE_IMPORT.md)。
@@ -24,7 +26,7 @@ UE4 / UE5 独立导入样例可双击 `OpenUEStandardCUE.cmd`，打开已验证�
 
 - 工具栏的 **Library** 显示活动库、登记路径和最近打开时间，可以新建空库、登记已有库、切换和重新定位。布局与显示偏好在应用内共享。导入或导出期间先等待任务结束，也可以在任务面板取消后重新切换。
 - 资产列表用 Ctrl 增减选择，用 Shift 选择当前页连续范围。翻页和筛选保留选中 ID，数量旁会显示其他页或筛选外的选择。通过 **整理** 重命名、批量改标签和收藏、操作集合。右键点选中项可将选中资产移入回收站，也可在回收站右键恢复。恢复会带回原 ID 和展示配置。
-- **Library** 提供完整性检查、备份恢复、索引重建和转换缓存预览。备份及恢复各使用一个尚不存在的目录。已有旧库首次打开时，会将健康 SQLite 内的元数据补录到持久清单。
+- **Library** 提供完整性检查、备份恢复、索引重建和缓存清理预览。缩略图与解析属性属于可再生成缓存，和可清理转换文件一起列出，备份不依赖这些缓存。备份及恢复各使用一个尚不存在的目录。已有旧库首次打开时，会将健康 SQLite 内的元数据补录到持久清单。
 
 运行 `Test.ps1 -Suite LibraryP0` 验证 P0，测试在隔离目录运行。本地有 Nodachi 和 Movement 两个样例库时也会执行完整切库、备份和恢复流程。命令行入口见 [Limbo Console](Docs/CONSOLE.md#素材库与资产整理)。
 
@@ -34,7 +36,7 @@ UE4 / UE5 独立导入样例可双击 `OpenUEStandardCUE.cmd`，打开已验证�
 
 独立 Windows 包解压后双击 `Animanager.exe`，保留同目录的 PCK、运行库和 BuiltinAssets；不需要用工程启动。FBX 导出需要单独安装 Blender，其他基础操作不需要。运行 `Build.ps1 -Zip` 生成带独立程序冒烟验证的便携包，详见 [打包说明](Docs/BUILD.md)。
 
-新增批量工具：递归导入、JSON 文件清单、FBX 导出计划、全搜索结果 / 收藏批量导出、顺序任务队列、逐文件日志、取消和失败项重试。计划与报告保存在库目录的 `jobs/` 中，重启后仍可查询。批量导出当前输出 FBX。
+批量工具支持递归导入、JSON 文件清单、FBX / GLB / RES 导出计划、全搜索结果 / 收藏批量导出、顺序任务队列、逐文件日志、取消和失败项重试。计划与报告保存在库目录的 `jobs/` 中，重启后仍可查询。导出面板可处理当前资产、跨页多选或当前筛选的全部结果；Mesh、片段、时间范围和采样帧率配置随任务保存，重试沿用相同配置。
 
 ```text
 batch import_list "res://Examples/import-list.json"
@@ -57,8 +59,8 @@ job status last
 1. 点击导入文件 / 文件夹，或把文件 / 文件夹拖入窗口。递归扫描 GLB、glTF、FBX；后台复制入库，计算 SHA-256 去重。可取消，已完成的条目保留。
 2. 在资产列表选择模型，使用右键旋转、中键平移、滚轮缩放、F 重置相机。
 3. 动画支持播放 / 暂停、片段切换、循环、0.5–2 倍速、时间轴定位。独立 `.motion` 动画按源帧率步进，其他资产按 1/30 秒步进。空格播放 / 暂停，Ctrl+F 搜索。
-4. 按名称或标签搜索，切换动画 / 模型 / 收藏分类。标签和收藏持久化到 SQLite；列表分页，每页 60 项。
-5. 直接使用默认导出目录，或输入 / 浏览选择目录，再点击“导出”：支持 Godot `.res` AnimationLibrary（全部片段）、完整 `.glb` 和 Blender 后台 `.fbx`。同名文件自动编号，不覆盖已有文件。
+4. 按名称或标签搜索，切换动画 / 模型 / 收藏分类，并按骨架、时长和源帧率筛选；先筛选再分页，每页 60 项。列表自动生成缩略图，不能确认的属性显示未知。源帧率与预览播放速度独立。
+5. 在导出面板选择范围、格式、Mesh、动画片段及可选的时间范围 / 采样帧率，再选择目录并导出：支持 Godot `.res` AnimationLibrary、`.glb` 和 Blender 后台 `.fbx`，均使用任务队列。同名文件自动编号，不覆盖已有文件；导出设置不修改原资产。
 
 ## 数据与兼容范围
 
@@ -67,11 +69,13 @@ job status last
 - glTF 的外部 buffers / images 会一起复制；依赖必须位于 glTF 所在目录内。缺失依赖或越界依赖会明确报错，推荐先打包为 GLB。
 - FBX 使用 Godot 原生 FBXDocument 导入，Blender 5.2 后台导出。本次已验证标准人体的骨骼、动画及尺度往返；尚未在 UE 中回导验收，外部纹理打包和复杂资产兼容仍需后续测试。
 - `.res` 保存源动画轨道，需要匹配的节点路径和骨架，不进行重定向。标准 baseline 来源与 SHA-256 见 `BuiltinAssets/Baselines/provenance.json`；StudioBot 只保留为小型确定性测试 fixture。
-- 重定向 / BoneMap、专门面向 UE 的复杂异构骨骼烘焙、S3 / MinIO、批量缩略图尚未实现。独立 Windows 便携原型已加入构建流程；安装器、签名、自动更新与正式发布尚未实现。
+- 重定向 / BoneMap、专门面向 UE 的复杂异构骨骼烘焙、S3 / MinIO 尚未实现。独立 Windows 便携原型已加入构建流程；安装器、签名、自动更新与正式发布尚未实现。
 - 文件扫描 / 复制 / 哈希在后台执行。Godot 场景解析当前仍在主线程，大型模型加载可能短暂停顿。当前按首个 AnimationPlayer 提取动画，复杂多动画播放器场景需后续扩展。
 - 启用 Compatibility 渲染器和低处理器占用模式；预览暂停时仅在视角、尺寸或姿态变化后请求重绘。实际占用依赖模型与驱动，尚未完成性能基准测试。
 
 ## 验证与开发
+
+2026-11-16 P1 验证：构建零警告、零错误；36 项导出配置检查、22 项属性 / 缓存 / 筛选交互检查，以及 Nodachi 和 Movement 各 5 项图形检查通过。现有原型 26、界面 46、FBX 管线 18、批处理 28、P0 库管理 43 项回归通过。覆盖真实 Blender 5.2 输出、裁剪端点、多个对象同步的片段、原文件 / 预览不变、回收站恢复及切库布局。
 
 2026-11-14 回归：构建零警告、零错误；26 项原型检查、18 项实际 Limbo / Blender / FBX 检查、28 项批处理检查、37 项界面检查全部通过，共 109 项。界面检查覆盖布局归一化、保存恢复、停靠时保留场景、720×400 小窗口、125%–200% 缩放、Console 焦点恢复。真实窗口另行检查鼠标拖拽和字体渲染。UE4 baseline 为 68 骨骼，UE5 Simple 为 89 骨骼；FBX 往返保留 root / IK 骨骼、动画与尺度。
 
@@ -79,7 +83,7 @@ job status last
 
 多轨迹 UI 回归（2026-11-14）：新增 49 项交互检查通过，42 项既有骨骼面板和 63 项多轨迹 API 回归通过。已在实际 Windows 窗口验证 Ctrl / Shift 多选、固定列表显隐 / 移除、根骨骼选择、Root Motion 开关、停靠、720×400 和 200% 缩放，并检查并排预览截图。
 
-运行 `Test.ps1` 验证基础流程，`Test.ps1 -Suite All` 运行全部八组测试，`-Suite Interface` 单独验证工作区，`-Suite Bones` 验证骨骼与轨迹，`-Suite BoneUI` 验证骨骼面板交互，`-Suite MultiBones` 验证多选、固定轨迹与 Root Motion API，`-Suite MultiBoneUI` 验证对应面板交互。管线与批处理测试需要 Blender。或构建后运行：
+运行 `Test.ps1` 验证基础流程，`Test.ps1 -Suite All` 运行全部测试，`-Suite Interface` 单独验证工作区，`-Suite Bones` 验证骨骼与轨迹，`-Suite BoneUI` 验证骨骼面板交互，`-Suite MultiBones` 验证多选、固定轨迹与 Root Motion API，`-Suite MultiBoneUI` 验证对应面板交互。`-Suite P1` 运行导出配置与资产浏览检查，也可分别使用 `-Suite ExportOptions` 和 `-Suite AssetBrowse`。管线与包含 FBX 的导出测试需要 Blender。或构建后运行：
 
 ```powershell
 & $env:GODOT_MONO_BIN --headless --path . -- --self-test --data-dir=D:/_Projects/Animanager/.runtime/test-startup

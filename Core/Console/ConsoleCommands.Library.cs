@@ -27,8 +27,8 @@ public partial class ConsoleCommands
         Bind("library backup", nameof(LibraryBackup), "Back up the active library to a new directory");
         Bind("library restore", nameof(LibraryRestore), "Verify and open a backup in a new directory: <backup> <destination>");
         Bind("library rebuild", nameof(LibraryRebuild), "Rebuild the index of a library directory from persistent metadata");
-        Bind("library cache_preview", nameof(LibraryCachePreview), "List eligible conversion files and library sizes");
-        Bind("library cache_clear", nameof(LibraryCacheClear), "Clear the last previewed conversion files: <confirm_bool>");
+        Bind("library cache_preview", nameof(LibraryCachePreview), "List eligible conversion / preview cache files and library sizes");
+        Bind("library cache_clear", nameof(LibraryCacheClear), "Clear the last previewed conversion / preview cache files: <confirm_bool>");
         Bind("asset rename", nameof(AssetRename), "Change a display name: <id_or_name> <name>");
         Bind("asset tags_add", nameof(AssetTagsAdd), "Add tags: <comma_separated_ids> <tags>");
         Bind("asset tags_remove", nameof(AssetTagsRemove), "Remove tags: <comma_separated_ids> <tags>");
@@ -48,6 +48,7 @@ public partial class ConsoleCommands
 
     internal void ChangeLibrary(WorkspaceApi? api)
     {
+        CancelAssetBrowseCommands();
         if (_sessionApi != null) _sessionApi.Jobs.Changed -= OnJobChanged;
         _sessionApi = api;
         if (_sessionApi != null) _sessionApi.Jobs.Changed += OnJobChanged;

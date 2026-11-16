@@ -73,36 +73,6 @@ public sealed partial class WorkspaceApi(AssetDatabase database,LocalStorageProv
         finally{_writer.Release();}
     }
     public void SetFavorite(string idOrName,bool favorite)=>SetFavorites([Find(idOrName).Id],favorite);
-    public async Task<string> ExportFbxAsync(string idOrName,string folder,IProgress<string>? progress=null,CancellationToken ct=default)
-    {
-        using var activity=BeginActivity();
-        var a=Find(idOrName);var source=await Storage.AcquireLocalFileAsync(a.VirtualPath,ct);
-        if(!Path.IsPathFullyQualified(folder))throw new IOException("Export folder must be an absolute path");
-        Directory.CreateDirectory(folder);
-        // Put staging beside the final outputs: publication is a same-volume rename,
-        // including when the library and destination live on different drives.
-        // Export through a private job directory, then publish atomically without overwriting.
-        var jobsRoot=Path.Combine(folder,".animanager-staging");
-        var job=Path.Combine(jobsRoot,Guid.NewGuid().ToString("N"));Directory.CreateDirectory(job);
-        var temp=Path.Combine(job,"result.fbx");
-        try
-        {
-            if(Animanager.Core.Motion.MotionJson.IsMotion(source))source=Animanager.Core.Motion.MotionExport.Glb(source,Path.Combine(job,"assembled.glb"),true);
-            await Blender.ConvertAsync(source,temp,progress,ct);
-            ct.ThrowIfCancellationRequested();
-            var name=string.Concat(a.Name.Select(c=>Path.GetInvalidFileNameChars().Contains(c)?'_':c));
-            for(int i=1;;i++)
-            {
-                var destination=Path.Combine(folder,name+(i==1?"":"_"+i)+".fbx");
-                try{File.Move(temp,destination,false);return destination;}
-                catch(IOException) when(File.Exists(destination)){}
-            }
-        }
-        finally
-        {
-            var cleanup=Path.GetFullPath(job);
-            var allowedRoot=Path.GetFullPath(jobsRoot)+Path.DirectorySeparatorChar;
-            if(cleanup.StartsWith(allowedRoot,StringComparison.OrdinalIgnoreCase)&&Directory.Exists(cleanup))Directory.Delete(cleanup,true);
-        }
-    }
+    public Task<string> ExportFbxAsync(string idOrName,string folder,IProgress<string>? progress=null,CancellationToken ct=default) =>
+        ExportAsync(idOrName,folder,JobKind.ExportFbx,null,progress,ct);
 }

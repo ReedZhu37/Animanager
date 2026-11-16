@@ -17,9 +17,11 @@ public sealed class MotionPlayback
     public AnimationPlayer Player {get;}
     public string Contact=>MotionJson.ContactAt(Presentation.Contacts??Manifest.Props[0].Contacts,Player.CurrentAnimationPosition);
     public string Summary=>$"人体 {Skeleton.GetBoneCount()} 骨骼 · 独立武器 1 · 接触 {Contact}（仅记录） · 握持{(Presentation.GripConfirmed?"已校准":"待校准")}";
-    public MotionPlayback(string path)
+    public MotionPlayback(string path) : this(path, verifySourceObjects: true) { }
+
+    internal MotionPlayback(string path, bool verifySourceObjects)
     {
-        ManifestPath=path;Manifest=MotionJson.Load(path);Presentation=MotionJson.Presentation(path,Manifest);
+        ManifestPath=path;Manifest=verifySourceObjects?MotionJson.Load(path):MotionJson.ReadManifest(path);Presentation=MotionJson.Presentation(path,Manifest);
         var preset=MotionJson.ResolveObject(path,Manifest.Objects["preset"],false);
         using var doc=new GltfDocument();using var state=new GltfState();
         if(doc.AppendFromFile(preset,state,(uint)GltfDocument.ImportFlags.UseNamedSkinBinds)!=Error.Ok)throw new IOException("Cannot load motion character preset.");

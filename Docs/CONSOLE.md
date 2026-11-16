@@ -67,6 +67,28 @@ export animations "D:/_Projects/Animanager/TestResults/ManualExport"
 
 预览默认采用灰模以便检查蒙皮。`preview material original` 查看源材质，`preview material clay` 恢复灰模；该开关不会改变导出材质。
 
+## 可配置导出与属性筛选
+
+```text
+export asset UE5_Manny_Idle glb "D:/Exports/GLB" default
+export asset UE5_Manny_Idle res "D:/Exports/RES" {"StartSeconds":0.2,"EndSeconds":0.7,"SampleFps":24}
+export options_plan "walk" glb "D:/Exports/Walk" {"IncludeMesh":false}
+export show last
+export run last
+batch export_with "walk" res "D:/Exports/WalkRES" default
+asset attributes UE5_Manny_Idle
+asset skeletons
+asset filter "walk" "*" "*" "1..3" "unknown" 0
+```
+
+`export asset`、`export options_plan` 和 `batch export_with` 的格式参数支持 `glb`、`res`、`fbx`；最后一个参数使用 `default` 或紧凑 JSON，JSON 不额外包裹引号，属性之间不要加空格。可配置字段为 `IncludeMesh`、`Clips`（片段名数组）、`StartSeconds`、`EndSeconds`、`SampleFps`（1–600）。未指定片段时处理每项全部动画；未指定时间或采样帧率时沿用原范围及采样。RES 只保存动画库。FBX 仍需要 Blender。
+
+三种格式都使用任务队列，计划和报告保存导出选项，`job retry` 沿用原选项。指定片段不存在或时间范围超出某一资产时，该项失败并保留错误，其他项继续处理。源资产、原始骨架和预览状态不会修改；Nodachi 已有的独立武器轨道继续保留，没有新增武器预设管理。
+
+`asset filter` 的参数顺序是名称 / 标签查询、分类或集合 ID、骨架 ID、时长、源帧率、从 0 开始的页码。`*` 为不限；数值可使用精确值、`1..3`、`1..`、`..3`，或 `unknown` / `未知`。时长采用资产中最长片段，骨架 ID 从 `asset skeletons` 获取。筛选先作用于全部候选资产再分页；源帧率缺失时保持未知，与预览速度无关。
+
+缩略图在 App 列表中自动生成。解析属性和缩略图可通过 `library cache_preview` 查看清理范围，再用 `library cache_clear true` 清理，后续浏览重新生成。
+
 ## Nodachi 独立武器轨道
 
 新导入的 Nodachi 使用固定人体预设与独立道具轨道，共享时间轴。`motion inspect <asset>` 查看来源、预设哈希和握持 / 接触状态；`motion grip <asset> <x,y,z> <degrees_x,y,z>` 保存模型偏移；`motion contact <asset> <start> <end> <unknown|right|left|both|free>` 记录接触区间。`motion sample <seconds>` 检查当前武器姿态，`motion visible <asset> <bool>` 保存显隐，`motion reset <asset>` 恢复展示默认值。

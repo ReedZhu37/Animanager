@@ -1,4 +1,6 @@
 using System.Text.Json;
+using Animanager.Core.Models;
+using Animanager.Core.Pipeline;
 
 namespace Animanager.Core.Jobs;
 
@@ -7,24 +9,52 @@ public sealed class BatchPlanner(WorkspaceApi api)
     public string PlansFolder=>Path.Combine(api.Storage.Root,"jobs","plans");
     internal static readonly JsonSerializerOptions JsonOptions=new(){WriteIndented=true,PropertyNameCaseInsensitive=true};
 
-    public BatchPlan Export(string query,string folder,bool favorites=false)
+    public BatchPlan Export(string query, string folder, bool favorites = false) =>
+        Export(query, folder, JobKind.ExportFbx, null, favorites);
+
+    public BatchPlan Export(string query, string folder, JobKind kind, ExportOptions? options, bool favorites = false) =>
+        ExportAssets(api.Database.SearchAll(query == "*" ? "" : query, favorites ? "Favorites" : "All"),
+            folder, kind, options, favorites ? "Favorites: " + query : query);
+
+    public BatchPlan ExportSingle(string idOrName, string folder) =>
+        ExportSingle(idOrName, folder, JobKind.ExportFbx, null);
+
+    public BatchPlan ExportSingle(string idOrName, string folder, JobKind kind, ExportOptions? options)
     {
-        if(!Path.IsPathFullyQualified(folder))throw new IOException("Export folder must be an absolute path.");
-        folder=Path.GetFullPath(folder);
-        if(File.Exists(folder))throw new IOException("Export destination is a file, not a folder.");
-        var assets=api.Database.SearchAll(query=="*"?"":query,favorites?"Favorites":"All");
-        if(assets.Count==0)throw new InvalidOperationException("No assets matched; no export job was created.");
-        var plan=new BatchPlan{Kind=JobKind.ExportFbx,Selection=favorites?"Favorites: "+query:query,OutputFolder=folder,
-            Items=assets.Select(a=>new PlanItem{AssetId=a.Id,Name=a.Name,Input=a.VirtualPath}).ToList()};
-        Save(plan);return plan;
+        var asset = api.Find(idOrName);
+        return ExportAssets([asset], folder, kind, options, asset.Id);
     }
-    public BatchPlan ExportSingle(string idOrName,string folder)
+
+    public BatchPlan ExportSelection(IEnumerable<string> ids, string folder, JobKind kind, ExportOptions options, string selection)
     {
-        if(!Path.IsPathFullyQualified(folder)||File.Exists(folder))throw new IOException("Export destination must be an absolute folder path.");
-        var a=api.Find(idOrName);
-        var plan=new BatchPlan{Kind=JobKind.ExportFbx,Selection=a.Id,OutputFolder=Path.GetFullPath(folder),
-            Items=[new(){AssetId=a.Id,Name=a.Name,Input=a.VirtualPath}]};
-        Save(plan);return plan;
+        var requested = ids.Distinct(StringComparer.Ordinal).ToArray();
+        var assets = api.Database.Snapshot().Assets.Where(a => !a.Trashed).ToDictionary(a => a.Id, StringComparer.Ordinal);
+        return ExportAssets(requested.Select(id => assets.TryGetValue(id, out var asset) ? asset
+            : throw new KeyNotFoundException("所选资产已不在当前库中：" + id)), folder, kind, options, selection);
+    }
+
+    private BatchPlan ExportAssets(IEnumerable<AssetItem> assets, string folder, JobKind kind, ExportOptions? options, string selection)
+    {
+        if (!kind.IsExport()) throw new ArgumentException("请选择 FBX、GLB 或 RES 导出格式。");
+        var plan = new BatchPlan
+        {
+            Kind = kind,
+            Selection = selection,
+            OutputFolder = ExportFolder(folder),
+            ExportOptions = kind.SnapshotExportOptions(options),
+            Items = assets.Select(a => new PlanItem { AssetId = a.Id, Name = a.Name, Input = a.VirtualPath }).ToList()
+        };
+        if (plan.Items.Count == 0) throw new InvalidOperationException("没有可导出的匹配资产。");
+        Save(plan);
+        return plan;
+    }
+
+    internal static string ExportFolder(string folder)
+    {
+        if (!Path.IsPathFullyQualified(folder)) throw new IOException("请输入绝对导出目录路径。");
+        folder = Path.GetFullPath(folder);
+        if (File.Exists(folder)) throw new IOException("导出目标必须是目录。");
+        return folder;
     }
     public async Task<BatchPlan> ImportAsync(IEnumerable<string> paths,CancellationToken ct=default)
     {
@@ -91,7 +121,9 @@ public sealed class BatchPlanner(WorkspaceApi api)
     {
         ValidateId(id);
         var plan=JsonSerializer.Deserialize<BatchPlan>(File.ReadAllText(Path.Combine(PlansFolder,id+".json")),JsonOptions)??throw new IOException("Invalid plan.");
-        if(plan.Version!=1||plan.Id!=id||plan.Items.Count==0)throw new IOException("Unsupported or invalid plan.");return plan;
+        if(plan.Version!=1||plan.Id!=id||plan.Items==null||plan.Items.Count==0||plan.Items.Any(item=>item==null)||!Enum.IsDefined(plan.Kind))
+            throw new IOException("Unsupported or invalid plan.");
+        return plan with { ExportOptions = plan.Kind.SnapshotExportOptions(plan.ExportOptions) };
     }
     public void Save(BatchPlan plan)
     {

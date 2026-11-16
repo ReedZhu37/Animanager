@@ -45,7 +45,8 @@ public partial class MainShell
         var explicitRoot = RuntimePaths.ExplicitLibraryRoot();
         var defaultRoot = RuntimePaths.DefaultLibraryRoot();
         var uniqueTests = args.Any(a => a is "--pipeline-test" or "--batch-test" or "--interface-test" or "--smoke-test"
-            or "--bone-test" or "--bone-ui-test" or "--multi-bone-test" or "--multi-bone-ui-test" or "--library-p0-test");
+            or "--bone-test" or "--bone-ui-test" or "--multi-bone-test" or "--multi-bone-ui-test" or "--library-p0-test"
+            or "--export-options-test" or "--asset-browse-test");
         var test = uniqueTests || args.Any(a => a.StartsWith("--") && (a.Contains("-test") || a.Contains("-render") || a.StartsWith("--cue-")));
         var registry = test
             ? Path.Combine(Path.GetTempPath(), "Animanager-test-registries", Guid.NewGuid().ToString("N"), "libraries.json")
@@ -78,6 +79,7 @@ public partial class MainShell
     private void ActivateLibrary(LibrarySession session)
     {
         if (_api == session.Api) { _libraryDialog.Hide(); return; }
+        CancelAssetBrowse(resetFilters: true);
         if (_api != null) _api.Jobs.Changed -= OnWorkspaceJob;
         while (_jobUpdates.TryDequeue(out _)) { }
         while (_progress.TryDequeue(out _)) { }
@@ -140,7 +142,7 @@ public partial class MainShell
             ShowApproval("重建索引", chosen.Name + "\n" + chosen.Path + "\n现有索引会保存在 recovery 目录。",
                 () => StartLibraryTask(() => RebuildLibrary(chosen.Path)));
         })));
-        maintenance.AddChild(Button("转换缓存…", () => StartLibraryTask(PreviewCacheCleanup)));
+        maintenance.AddChild(Button("缓存清理…", () => StartLibraryTask(PreviewCacheCleanup)));
 
         _entryDialog = new ConfirmationDialog { OkButtonText = "确认", CancelButtonText = "取消" };
         AddChild(_entryDialog);
@@ -288,11 +290,11 @@ public partial class MainShell
     {
         var maintenance = CurrentMaintenance();
         var plan = await maintenance.PreviewCacheAsync();
-        var summary = $"持久文件 {FormatSize(plan.PersistentBytes)}\n转换目录 {FormatSize(plan.ConversionBytes)}\n预览缓存仅使用内存\n"
+        var summary = $"持久文件 {FormatSize(plan.PersistentBytes)}\n转换目录 {FormatSize(plan.ConversionBytes)}\n缩略图与属性缓存 {FormatSize(plan.PreviewDiskBytes)}\n"
             + $"可清理 {plan.Files.Length} 个文件 · {FormatSize(plan.EligibleBytes)}";
-        if (plan.Files.Length == 0) { ShowError("转换缓存", summary); return; }
-        ShowApproval("清理转换缓存", summary + "\n\n" + string.Join("\n", plan.Files.Select(f => f.Path)),
-            () => StartLibraryTask(async () => ShowCleanup(await maintenance.ClearCacheAsync(plan))));
+        if (plan.Files.Length == 0) { ShowError("缓存清理", summary); return; }
+        ShowApproval("清理转换与预览缓存", summary + "\n\n" + string.Join("\n", plan.Files.Select(f => f.Path)),
+            () => StartLibraryTask(async () => { var result = await maintenance.ClearCacheAsync(plan); Refresh(); ShowCleanup(result); }));
     }
 
     private void ShowCleanup(CleanupResult result) =>
@@ -427,6 +429,7 @@ public partial class MainShell
     {
         var hidden = _assetSelection.Count - _items.Count(a => _assetSelection.Contains(a.Id));
         _selectionCount.Text = $"已选 {_assetSelection.Count}" + (hidden > 0 ? $" · 其他页或筛选外 {hidden}" : "");
+        SyncExportControls();
     }
 
     private void ClearAssetSelection()

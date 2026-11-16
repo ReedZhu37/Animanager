@@ -35,6 +35,7 @@ public sealed class AssetDatabase
     public const string IndexName = "index.sqlite";
     public const string CatalogName = "asset-catalog.json";
     public string Root { get; }
+    internal string CatalogRevision { get { lock (_gate) return _catalog.Revision; } }
 
     public AssetDatabase(string path, bool rebuild = false, bool repairProjection = true)
     {

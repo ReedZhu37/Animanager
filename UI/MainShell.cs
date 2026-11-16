@@ -48,6 +48,8 @@ public partial class MainShell : Control
             _commands.Initialize(_api,_preview,Refresh,SyncConsoleSelection,_libraries,BeforeLibrarySwitch,ActivateLibrary);
             ConnectWorkspace();
             if(_api==null){ShowLibraryDialog();SetStatus(startup.Error);return;}
+            if(OS.GetCmdlineUserArgs().Contains("--export-options-test")){await Tests.ExportOptionsTests.Run(this,_preview,_api,_commands);return;}
+            if(OS.GetCmdlineUserArgs().Any(a=>a is "--asset-browse-test" or "--asset-browse-render")){await Tests.AssetBrowseTests.Run(this,_api,_commands);return;}
             if(OS.GetCmdlineUserArgs().Contains("--library-p0-test")){await Tests.LibraryP0Tests.Run(this,_commands);return;}
             if(OS.GetCmdlineUserArgs().Contains("--motion-render")){await Tests.MotionTests.Render(this,_preview,_api,_commands);return;}
             var motionTest=OS.GetCmdlineUserArgs().FirstOrDefault(a=>a.StartsWith("--motion-test="));
@@ -126,30 +128,7 @@ public partial class MainShell : Control
     {
         var dialog=new FileDialog{FileMode=mode,Access=FileDialog.AccessEnum.Filesystem,UseNativeDialog=true,Title=title};AddChild(dialog);return dialog;
     }
-    private void Refresh()
-    {
-        if(_database==null)return;
-        RefreshCollections();
-        if(_assetSelection.Count>0)_assetSelection.IntersectWith(_database.ExistingIds(_assetSelection,_category=="Trash"));
-        var result=_database.Search(_search.Text,_category,_page);
-        if(result.Items.Count==0&&_page>0){_page=0;result=_database.Search(_search.Text,_category,_page);}
-        _items=result.Items;_list.Clear();
-        foreach(var item in _items)
-        {
-            var kind=item.Type=="Animation"?"动画":"模型";
-            var label=$"{(item.Favorite?"★  ":"")}{item.Name}     ·     {kind}   /   {item.SourceFormat.TrimStart('.').ToUpperInvariant()}   /   {FormatSize(item.Size)}";
-            if(item.Tags.Length>0)label+="   ·   "+item.Tags;
-            _list.AddItem(label);_list.SetItemTooltip(_list.ItemCount-1,item.Name+"\n"+item.VirtualPath);
-        }
-        _count.Text=$"{result.Total} 个结果";_libraryCount.Text=$"{_libraries.Active!.Identity.Name} · {_database.Search().Total} 个资产";
-        _libraryCount.TooltipText=_dataRoot;
-        _pageLabel.Text=$"{_page+1} / {Math.Max(1,(result.Total+59)/60)}";_previous.Disabled=_page==0;_next.Disabled=(_page+1)*60>=result.Total;
-        _empty.Visible=result.Total==0;
-        _empty.Text=_search.Text.Length>0?"没有匹配的资产\n试试其他名称或标签。":"这里还没有资产\n导入文件，或载入内置示例。";
-        foreach(var pair in _categories)pair.Value.SetPressedNoSignal(pair.Key==_category);
-        SyncAssetSelection();
-        RefreshCurrentAsset();
-    }
+    private void Refresh()=>RefreshAssetBrowse();
     private async void SelectAsset(int index)
     {
         if(index<0||index>=_items.Count||_items[index].Trashed)return;
@@ -157,7 +136,7 @@ public partial class MainShell : Control
         _selected=_items[index];_title.Text=_selected.Name;_tags.Text=_selected.Tags;
         var asset=_selected;
         _favorite.Text=_selected.Favorite?"已收藏":"收藏";
-        _clips.Clear();_export.Disabled=true;SetStatus("正在加载 · "+_selected.Name);
+        _clips.Clear();SyncExportControls();SetStatus("正在加载 · "+_selected.Name);
         try
         {
             using var activity=api.BeginActivity();
@@ -173,7 +152,7 @@ public partial class MainShell : Control
             _detail.Text=$"{_selected.SourceFormat.TrimStart('.').ToUpperInvariant()}   ·   {FormatSize(_selected.Size)}   ·   {_preview.MeshCount} 网格   ·   {_preview.BoneCount} 骨骼   ·   {_preview.Clips.Length} 动画";
             var type=_preview.Clips.Length>0?"Animation":"Model";
             if(type!=_selected.Type){api.SetAssetType(asset.Id,type);Refresh();}
-            _export.Disabled=false;
+            SyncExportControls();
             SetStatus(_selected.SourceFormat==".fbx"?"FBX 实验性预览：外部纹理未打包时可能缺失；建议使用 GLB。":"预览已就绪 · 空格播放 / 暂停，F 重置视角");
         }
         catch(Exception ex){_previewAssetId="";_commands?.ForgetSelection();_preview.Clear();_detail.Text="此资产无法预览，请检查文件格式与依赖。";ShowError("加载失败",ex.Message);}
@@ -191,7 +170,7 @@ public partial class MainShell : Control
         if(_preview.Clips.Length==0)_clips.AddItem("无动画");_clips.Disabled=_preview.Clips.Length==0;
         _detail.Text=$"{asset.SourceFormat} · {_preview.MeshCount} 网格 · {_preview.BoneCount} 骨骼 · {_preview.Clips.Length} 动画";
         if(_preview.Motion!=null)_detail.Text+="\n"+_preview.Motion.Summary;
-        _export.Disabled=false;UpdateTransport();Refresh();
+        SyncExportControls();UpdateTransport();Refresh();
     }
     private async Task Import(string[] paths,bool uasset=false)
     {
@@ -226,34 +205,6 @@ public partial class MainShell : Control
         try{_api.SetFavorite(_selected.Id,!_selected.Favorite);Refresh();}
         catch(Exception ex){ShowError("保存失败",ex.Message);}
     }
-    private async void Export(string folder)
-    {
-        if(_selected==null||_exportCancellation!=null)return;
-        _exportCancellation=new CancellationTokenSource();
-        try
-        {
-            using var activity=_api.BeginActivity();
-            if(string.IsNullOrWhiteSpace(folder)||!Path.IsPathFullyQualified(folder))throw new IOException("请输入完整的导出目录路径，或使用浏览按钮选择。");
-            _export.Disabled=true;
-            if(_exportType.Selected==2)
-            {
-                var id=_api.Jobs.Enqueue(_api.Planner.ExportSingle(_selected.Id,folder));SetStatus("FBX 导出已加入队列 · "+id[..8]);
-                var result=await _api.Jobs.WaitAsync(id);
-                if(result.State!=Core.Jobs.JobState.Completed)throw new IOException($"{JobStateName(result.State)}："+string.Join("\n",result.Items.Select(i=>i.Error)));
-                _lastExport=result.Items[0].Output;
-            }
-            else
-            {
-                if(_previewAssetId!=_selected.Id)throw new InvalidOperationException("请先加载所选资产再导出。");
-                _lastExport=ExportService.Export(_preview,folder,_selected.Name,_exportType.Selected==0);
-            }
-            if(_closing)return;
-            while(_progress.TryDequeue(out _)){}
-            SetStatus("已导出 · "+_lastExport);
-        }
-        catch(Exception ex){if(!_closing)ShowError("导出失败",ex.Message);}
-        finally{_exportCancellation.Dispose();_exportCancellation=null;if(!_closing)_export.Disabled=_previewAssetId.Length==0;}
-    }
     private void TogglePlayback(){_preview.TogglePlay();UpdateTransport();}
     private void UpdateTransport()
     {
@@ -264,10 +215,11 @@ public partial class MainShell : Control
         _time.Text=$"{_preview.Playhead:F2} / {_preview.Duration:F2} s";
         if(_preview.Motion is {} motion)_detail.Text=_detail.Text.Split('\n')[0]+"\n"+motion.Summary;
         _favorite.Disabled=_selected==null;
-        _export.Disabled=_selected==null||_previewAssetId.Length==0||_exportCancellation!=null;
+        SyncExportControls();
     }
     public override void _Process(double delta)
     {
+        ProcessAssetBrowse();
         _tick+=delta;if(_tick<0.08)return;_tick=0;
         if(_workspace!=null)UpdateWorkspace();
         string? latest=null;while(_progress.TryDequeue(out var next))latest=next;if(latest!=null)SetStatus(latest);
@@ -286,14 +238,14 @@ public partial class MainShell : Control
         if(key.Keycode==Key.Space){TogglePlayback();GetViewport().SetInputAsHandled();}
         if(key.Keycode==Key.F){_preview.FrameModel();GetViewport().SetInputAsHandled();}
     }
-    public override void _ExitTree(){_closing=true;SaveWorkspace();_preview?.Bones?.Clear();if(_api!=null)_api.Jobs.Changed-=OnWorkspaceJob;_importCancellation?.Cancel();_exportCancellation?.Cancel();_libraries?.Dispose();}
+    public override void _ExitTree(){_closing=true;CancelAssetBrowse();SaveWorkspace();_preview?.Bones?.Clear();if(_api!=null)_api.Jobs.Changed-=OnWorkspaceJob;_importCancellation?.Cancel();_exportCancellation?.Cancel();_libraries?.Dispose();}
     private static string FormatSize(long bytes)=>bytes>=1048576?$"{bytes/1048576.0:F1} MB":$"{bytes/1024.0:F1} KB";
     private void SetStatus(string message){_status.Text=message;_status.TooltipText=message;}
     private void ShowError(string title,string message){SetStatus(title+" · "+message);_message.Title=title;_messageBody.Text=message;PopupFit(_message,new(560,240));}
     private void ShowHelp()
     {
         _message.Title="Animanager · 使用说明";
-        _messageBody.Text="1. 拖入文件或文件夹，或点击工具栏的导入。资产复制到本地库，按内容去重。\n2. 拖动面板标签，在其他面板中央合并、边缘停靠；拖动分隔线调整大小。面板菜单可隐藏、最大化；工作区菜单保存和恢复布局。\n3. 小窗口自动切到标签布局。显示菜单支持系统 DPI 与 100%–200% 缩放。\n4. 点击资产预览；空格播放，右键旋转，中键或 Shift+左键平移，滚轮缩放。\n5. 添加标签和收藏。Ctrl+F 搜索，F6 切换面板焦点，F12 打开 Limbo Console。\n6. 导出支持 .res 动画库、完整 .glb 和 Blender .fbx。导入及 FBX 导出进度可在任务面板查看。\n\n动画保留源骨架与轨道，当前不进行重定向。FBX 外部纹理未自动打包。FBX 导出需要安装 Blender；其他基础操作不需要。";
+        _messageBody.Text="1. 拖入文件或文件夹，或点击工具栏的导入。资产复制到本地库，按内容去重。\n2. 拖动面板标签，在其他面板中央合并、边缘停靠；拖动分隔线调整大小。面板菜单可隐藏、最大化；工作区菜单保存和恢复布局。\n3. 小窗口自动切到标签布局。显示菜单支持系统 DPI 与 100%–200% 缩放。\n4. 点击资产预览；空格播放，右键旋转，中键或 Shift+左键平移，滚轮缩放。\n5. 添加标签和收藏。Ctrl+F 搜索，F6 切换面板焦点，F12 打开 Limbo Console。\n6. 导出支持当前资产、跨页多选或筛选结果，选择网格、片段、时间范围及采样帧率；.res / .glb / .fbx 均可在任务面板取消或重试。\n7. 资产列表自动生成缩略图；属性筛选支持骨架、时长、源帧率和未知值。\n\n动画保留源骨架与轨道，当前不进行重定向。FBX 外部纹理未自动打包。FBX 导出需要安装 Blender；其他基础操作不需要。";
         PopupFit(_message,new(640,360));
     }
 }

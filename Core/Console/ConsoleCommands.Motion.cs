@@ -29,7 +29,11 @@ public partial class ConsoleCommands
     public void MotionContact(string asset,double start,double end,string state)=>Guard(()=>{_api.SetMotionContact(asset,start,end,state);Info("Contact interval saved (observe-only; no IK applied).");ReloadMotion(asset);});
     public void MotionVisible(string asset,bool visible)=>Guard(()=>{_api.SetMotionVisible(asset,visible);Info("Prop visibility saved.");ReloadMotion(asset);});
     public void MotionReset(string asset)=>Guard(()=>{_api.ResetMotionPresentation(asset);Info("Presentation reset; original tracks retained.");ReloadMotion(asset);});
-    private void ReloadMotion(string asset){if(_api.Find(asset).Id==SelectedId)Load(asset);}
+    private void ReloadMotion(string asset)
+    {
+        if (_api.Find(asset).Id == SelectedId) Load(asset);
+        else _refresh();
+    }
     public void MotionSample(double seconds)=>Guard(()=>
     {
         var m=_preview.Motion??throw new InvalidOperationException("Load a separated motion asset first.");

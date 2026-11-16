@@ -112,6 +112,7 @@ public partial class MainShell
         var col=new VBoxContainer();_search=Input("搜索名称或标签…  Ctrl+F");_search.Name="AssetSearch";col.AddChild(_search);
         _searchTimer=new Godot.Timer{OneShot=true,WaitTime=.2};AddChild(_searchTimer);_search.TextChanged+=_=>_searchTimer.Start();
         _searchTimer.Timeout+=()=>{if(DisplayScaleController.IsComposing){_searchTimer.Start();return;}_page=0;Refresh();};
+        BuildAssetBrowseControls(col);
         var header=new HFlowContainer();col.AddChild(header);_count=Label("0 个结果",true,12);header.AddChild(_count);
         BuildAssetActions(header);
         _list=new ItemList{Name="AssetRows",SelectMode=ItemList.SelectModeEnum.Multi,SizeFlagsVertical=SizeFlags.ExpandFill,SizeFlagsHorizontal=SizeFlags.ExpandFill,CustomMinimumSize=new(0,80),MaxColumns=1,AllowReselect=true,TextOverrunBehavior=TextServer.OverrunBehavior.TrimEllipsis};col.AddChild(_list);
@@ -140,18 +141,10 @@ public partial class MainShell
     private Control BuildInspector()
     {
         var col=new VBoxContainer();_title=Wrapped("选择一个资产",false);col.AddChild(_title);_detail=Wrapped("格式、骨架与动画信息显示在这里。");col.AddChild(_detail);
+        BuildAssetBrowseProperties(col);
         _favorite=Button("收藏",ToggleFavorite);col.AddChild(_favorite);col.AddChild(Label("标签",true,12));_tags=Input("例如：行走 战斗 Humanoid");col.AddChild(_tags);_tags.TextSubmitted+=_=>SaveTags();col.AddChild(Button("保存标签",SaveTags));return col;
     }
-    private Control BuildExport()
-    {
-        var col=new VBoxContainer();_exportSummary=Wrapped("导出当前选中的资产。");col.AddChild(_exportSummary);
-        col.AddChild(Label("输出格式",true,12));_exportType=new OptionButton{FitToLongestItem=false,CustomMinimumSize=new(140,32)};
-        _exportType.AddItem("Godot 动画库 · .res");_exportType.AddItem("通用场景 · .glb");_exportType.AddItem("FBX · Blender");_exportType.Select(2);col.AddChild(_exportType);
-        col.AddChild(Label("目标目录",true,12));_exportPath=Input("绝对路径");_exportPath.Text=ProjectSettings.GlobalizePath("user://Exports");col.AddChild(_exportPath);
-        var row=Row(col);row.AddChild(Button("浏览…",()=>_output.PopupCenteredRatio(.7f)));_export=Button("导出所选",()=>Export(_exportPath.Text),true);row.AddChild(_export);
-        col.AddChild(Wrapped("同名文件自动编号。FBX 导出进入任务队列；片段与源骨架保持不变。"));
-        col.AddChild(Button("打开最近输出目录",()=>{if(_lastExport.Length>0)OS.ShellOpen(Path.GetDirectoryName(_lastExport)!);else SetStatus("还没有导出结果。");}));return col;
-    }
+    private Control BuildExport()=>BuildConfiguredExport();
     private Control BuildJobs()
     {
         var col=new VBoxContainer();var row=new HFlowContainer();col.AddChild(row);row.AddChild(Button("刷新",RefreshJobs));row.AddChild(Button("取消所选",()=>JobAction(false)));row.AddChild(Button("重试失败项",()=>JobAction(true)));
@@ -206,17 +199,19 @@ public partial class MainShell
         if(dirty)RefreshJobs();
     }
     private static string JobStateName(JobState state)=>state switch{JobState.Queued=>"排队",JobState.Running=>"运行中",JobState.Completed=>"已完成",JobState.CompletedWithErrors=>"部分失败",JobState.Cancelled=>"已取消",JobState.Interrupted=>"已中断",_=>"失败"};
+    private static string JobKindName(JobKind kind)=>kind switch{JobKind.Import=>"导入",JobKind.ImportUasset=>".uasset 导入",JobKind.ExportGlb=>"GLB 导出",JobKind.ExportRes=>"RES 导出",JobKind.ExportFbx=>"FBX 导出",_=>kind.ToString()};
     private void RefreshJobs()
     {
         if(_api==null||_jobsList==null)return;var old=_jobsList.GetSelectedItems().FirstOrDefault(-1);var selected=old>=0&&old<_jobIds.Count?_jobIds[old]:"";
         var jobs=_api.Jobs.Recent();_jobsList.Clear();_jobIds=jobs.Select(j=>j.Id).ToList();
-        foreach(var job in jobs)_jobsList.AddItem($"{JobStateName(job.State)}  {job.Finished}/{job.Total}  ·  {(job.Kind==JobKind.Import?"导入":job.Kind==JobKind.ImportUasset?".uasset 导入":"FBX 导出")}  ·  {job.Id[..8]}");
+        foreach(var job in jobs)_jobsList.AddItem($"{JobStateName(job.State)}  {job.Finished}/{job.Total}  ·  {JobKindName(job.Kind)}  ·  {job.Id[..8]}");
         if(jobs.Length>0)_jobsList.Select(Math.Max(0,_jobIds.IndexOf(selected)));ShowJobDetails();
     }
     private void ShowJobDetails()
     {
-        var selected=_jobsList.GetSelectedItems();if(selected.Length==0){_jobDetails.Text="暂无任务。导入和 FBX 导出的记录会显示在这里。";return;}
+        var selected=_jobsList.GetSelectedItems();if(selected.Length==0){_jobDetails.Text="暂无任务。导入和 FBX / GLB / RES 导出的记录会显示在这里。";return;}
         var job=_api.Jobs.Get(_jobIds[selected[0]]);_jobDetails.Text=$"成功 {job.Succeeded} · 跳过 {job.Skipped} · 失败 {job.Failed} · 取消 {job.Cancelled}\n{job.Message}\n{job.ReportPath}\n"+string.Join("\n",job.Items.Where(i=>i.Error.Length>0).Take(8).Select(i=>i.Source.Name+": "+i.Error));
+        if(job.ExportOptions is {} options)_jobDetails.Text+="\n"+options.Describe();
         if(job.Kind==JobKind.ImportUasset)_jobDetails.Text+=$"\n动画：新增 {job.Items.Sum(i=>i.ImportedAssets)} · 重复 {job.Items.Sum(i=>i.DuplicateAssets)} · 不支持 {job.Items.Sum(i=>i.UnsupportedAssets)}\n骨架：自动识别 UE4 / UE5，依赖与替代信息见报告；仅源姿势，不含重定向 / Montage / 曲线 / 事件\n"+string.Join("\n",job.Items.Where(i=>i.Output.Length>0).Select(i=>i.Output));
     }
     private void JobAction(bool retry)
@@ -230,7 +225,7 @@ public partial class MainShell
     }
     private async Task QuitSafely()
     {
-        if(_closing)return;SaveWorkspace();_closing=true;SetStatus("正在保存并停止任务…");
+        if(_closing)return;SaveWorkspace();_closing=true;CancelAssetBrowse();SetStatus("正在保存并停止任务…");
         _importCancellation?.Cancel();_exportCancellation?.Cancel();
         if(_commands!=null)await _commands.ShutdownAsync();
         await _libraryUiTask;

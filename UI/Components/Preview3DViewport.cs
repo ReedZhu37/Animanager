@@ -1,6 +1,7 @@
 using Godot;
 using Animanager.Core.Preview;
 using Animanager.Core.Motion;
+using Animanager.Core.Pipeline;
 
 namespace Animanager.UI.Components;
 
@@ -70,20 +71,7 @@ public partial class Preview3DViewport : SubViewportContainer
         {
             var motion=new MotionPlayback(path);AttachModel(motion.Root);Motion=motion;motion.Sync();Redraw();return;
         }
-        using GltfDocument document=Path.GetExtension(path).Equals(".fbx",StringComparison.OrdinalIgnoreCase)?new FbxDocument():new GltfDocument();
-        using GltfState state=document is FbxDocument?new FbxState():new GltfState();
-        var error=document.AppendFromFile(path,state, (uint)GltfDocument.ImportFlags.UseNamedSkinBinds);
-        if(error!=Error.Ok) throw new IOException("模型解析失败："+error);
-        float bakeFps=30;
-        if(state.Json.TryGetValue("extras",out var extras)&&extras.VariantType==Variant.Type.Dictionary)
-        {
-            var metadata=extras.AsGodotDictionary();
-            if(metadata.TryGetValue("animanagerSourceFps",out var rate)&&rate.VariantType is Variant.Type.Float or Variant.Type.Int)
-            {var value=(float)rate.AsDouble();if(float.IsFinite(value)&&value>=1&&value<=600)bakeFps=value;}
-        }
-        var scene=document.GenerateScene(state,bakeFps);
-        if(scene is not Node3D root) {scene?.Free();throw new IOException("文件未生成有效的 3D 场景。");}
-        AttachModel(root);
+        AttachModel(SceneAsset.Load(path,out _));
     }
     internal void AttachModel(Node3D root)
     {
@@ -124,9 +112,14 @@ public partial class Preview3DViewport : SubViewportContainer
     public void SetClay(bool enabled)
     {
         _clay=enabled;
-        if(Model!=null)foreach(var mesh in Descendants(Model).OfType<MeshInstance3D>())
-            if(!mesh.HasMeta("animanager_prop_visual"))mesh.MaterialOverride=enabled?new StandardMaterial3D{AlbedoColor=new Color("a9b6c5"),Roughness=.8f,Metallic=0}:null;
+        if (Model != null) ApplyClay(Model, enabled);
         Redraw();
+    }
+    internal static void ApplyClay(Node3D model, bool enabled)
+    {
+        foreach (var mesh in Descendants(model).OfType<MeshInstance3D>())
+            if (!mesh.HasMeta("animanager_prop_visual"))
+                mesh.MaterialOverride = enabled ? new StandardMaterial3D { AlbedoColor = new Color("a9b6c5"), Roughness = .8f } : null;
     }
     public override void _Process(double delta) {Redraw();if(!Playing)SetProcess(false);}
     public void Redraw() { foreach(var attachment in _attachments)attachment.OnSkeletonUpdate();if(View!=null)View.RenderTargetUpdateMode=IsVisibleInTree()?SubViewport.UpdateMode.Once:SubViewport.UpdateMode.Disabled; }

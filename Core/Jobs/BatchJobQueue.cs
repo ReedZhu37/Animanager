@@ -76,9 +76,11 @@ public sealed class BatchJobQueue
     public string Enqueue(BatchPlan plan,string retryOf="")
     {
         if(plan.Items.Count==0)throw new InvalidOperationException("Cannot enqueue an empty plan.");
+        if(!Enum.IsDefined(plan.Kind))throw new ArgumentException("Invalid job kind.");
         if(plan.Kind==JobKind.ExportFbx&&!_api.Blender.Available)throw new InvalidOperationException("Blender is not configured; use pipeline blender <exe>.");
         if(plan.Kind==JobKind.ImportUasset&&!_api.Uasset.Available)throw new InvalidOperationException("CUE4Parse helper is missing. Run Tools/Build-CueImporter.ps1.");
         var job=new JobRecord{Kind=plan.Kind,PlanId=plan.Id,RetryOf=retryOf,OutputFolder=plan.OutputFolder,IgnoredFiles=plan.IgnoredFiles,
+            ExportOptions=plan.Kind.SnapshotExportOptions(plan.ExportOptions),
             Items=plan.Items.Select(p=>new JobItem{Source=p}).ToList()};
         job.ReportPath=Path.Combine(ReportsFolder,job.Id+".json");
         lock(_gate)
@@ -120,7 +122,8 @@ public sealed class BatchJobQueue
         var items=original.Items.Where(i=>i.State is ItemState.Failed or ItemState.Cancelled or ItemState.Interrupted or ItemState.Pending)
             .Select(i=>i.Source with{Error=""}).ToList();
         if(items.Count==0)throw new InvalidOperationException("Nothing to retry; successful / skipped items are not exported again.");
-        var plan=new BatchPlan{Kind=original.Kind,Selection="Retry "+id,OutputFolder=original.OutputFolder,Items=items};
+        var plan=new BatchPlan{Kind=original.Kind,Selection="Retry "+id,OutputFolder=original.OutputFolder,
+            ExportOptions=original.Kind.SnapshotExportOptions(original.ExportOptions),Items=items};
         _api.Planner.Save(plan);return Enqueue(plan,id);
     }
     public Task ShutdownAsync()
@@ -158,9 +161,9 @@ public sealed class BatchJobQueue
                         using var log=new ItemLog(item.Log,line=>{lock(_gate)job.Message=line;Notify(job);});
                         log.Report("Input: "+item.Source.Input);
                         if(item.Source.Error.Length>0)throw new IOException(item.Source.Error);
-                        if(job.Kind==JobKind.ExportFbx)
+                        if(job.Kind.IsExport())
                         {
-                            var output=await _api.ExportFbxAsync(item.Source.AssetId,job.OutputFolder,log,token.Token);
+                            var output=await _api.ExportAsync(item.Source.AssetId,job.OutputFolder,job.Kind,job.ExportOptions,log,token.Token);
                             lock(_gate){item.Output=output;item.State=ItemState.Succeeded;}
                         }
                         else if(job.Kind==JobKind.ImportUasset)

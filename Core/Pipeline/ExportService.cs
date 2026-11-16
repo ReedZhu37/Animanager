@@ -3,7 +3,7 @@ using Animanager.UI.Components;
 
 namespace Animanager.Core.Pipeline;
 
-public static class ExportService
+public static partial class ExportService
 {
     public static string Export(Preview3DViewport preview,string folder,string name,bool animationOnly)
     {
