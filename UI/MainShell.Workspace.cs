@@ -33,7 +33,7 @@ public partial class MainShell
 
     private void InitializeDisplay()
     {
-        _preferencesPath=Path.Combine(_dataRoot,"workspace.json");
+        _preferencesPath=_dataRoot.Length==0?"":Path.Combine(_dataRoot,"workspace.json");
         _preferences=WorkspacePreferences.Load(_preferencesPath,out _workspaceError);
         _display=new DisplayScaleController();AddChild(_display);_display.SetScale(_preferences.Scale);
         Theme=StudioTheme.Create(_preferences.Comfortable);GetWindow().Title="Animanager";
@@ -53,10 +53,11 @@ public partial class MainShell
         var root=Column(margins);root.AddThemeConstantOverride("separation",6);
         var toolbar=new HFlowContainer{SizeFlagsHorizontal=SizeFlags.ExpandFill};root.AddChild(toolbar);
         var brand=Label("Animanager",false,16);brand.CustomMinimumSize=new(120,32);toolbar.AddChild(brand);
+        var libraryButton=Button("Library",ShowLibraryDialog);libraryButton.Name="LibraryButton";toolbar.AddChild(libraryButton);
         var fileMenu=new MenuButton{Text="文件",FocusMode=FocusModeEnum.All};toolbar.AddChild(fileMenu);
         var filePopup=fileMenu.GetPopup();filePopup.AddItem("导入文件…",0);filePopup.AddItem("导入文件夹…",1);filePopup.AddItem("导入基准资产",2);filePopup.AddSeparator();filePopup.AddItem("打开资产库目录",3);filePopup.AddItem("使用说明",4);
         filePopup.AddItem("导入 .uasset 文件夹 · UE4 / UE5…",5);
-        filePopup.IdPressed+=id=>{switch(id){case 0:_files.PopupCenteredRatio(.7f);break;case 1:_folder.PopupCenteredRatio(.7f);break;case 2:_ = ImportBaselines();break;case 3:OS.ShellOpen(_dataRoot);break;case 4:ShowHelp();break;case 5:_uassetFolder.PopupCenteredRatio(.7f);break;}};
+        filePopup.IdPressed+=id=>{switch(id){case 0:_files.PopupCenteredRatio(.7f);break;case 1:_folder.PopupCenteredRatio(.7f);break;case 2:_ = ImportBaselines();break;case 3:OpenLibraryFolder();break;case 4:ShowHelp();break;case 5:_uassetFolder.PopupCenteredRatio(.7f);break;}};
         _viewMenu=new MenuButton{Text="面板",FocusMode=FocusModeEnum.All};toolbar.AddChild(_viewMenu);_viewMenu.AboutToPopup+=FillViewMenu;
         _viewMenu.GetPopup().IdPressed+=id=>_workspace.ShowPanel(WorkspaceLayout.PanelIds[(int)id]);
         _layoutMenu=new MenuButton{Text="工作区",FocusMode=FocusModeEnum.All};toolbar.AddChild(_layoutMenu);_layoutMenu.AboutToPopup+=FillLayoutMenu;_layoutMenu.GetPopup().IdPressed+=LayoutMenuAction;
@@ -81,6 +82,7 @@ public partial class MainShell
         _output=Dialog(FileDialog.FileModeEnum.OpenDir,"选择导出目录");_output.DirSelected+=path=>_exportPath.Text=path;
         _message=new AcceptDialog{Title="Animanager",OkButtonText="关闭"};AddChild(_message);
         _messageBody=new RichTextLabel{CustomMinimumSize=new(160,70),SelectionEnabled=true,BbcodeEnabled=false,FitContent=false};_message.AddChild(_messageBody);
+        BuildLibraryDialogs();
         _saveLayoutDialog=new ConfirmationDialog{Title="保存工作区布局",OkButtonText="保存",CancelButtonText="取消"};AddChild(_saveLayoutDialog);
         var layoutForm=Column(_saveLayoutDialog);layoutForm.AddChild(Label("布局名称"));
         _layoutName=Input("例如：我的双栏布局");_layoutName.MaxLength=60;layoutForm.AddChild(_layoutName);
@@ -95,25 +97,29 @@ public partial class MainShell
     private Control BuildNavigation()
     {
         var col=new VBoxContainer();col.AddChild(Label("资产库",true,12));_libraryCount=Wrapped("0 个资产");col.AddChild(_libraryCount);
-        foreach(var (key,title) in new[]{("All","全部资产"),("Animation","动画片段"),("Model","模型与骨架"),("Favorites","我的收藏")})
+        foreach(var (key,title) in new[]{("All","全部资产"),("Animation","动画片段"),("Model","模型与骨架"),("Favorites","我的收藏"),("Trash","回收站")})
         {
-            var button=Button(title,()=>{_category=key;_page=0;Refresh();_workspace.ShowPanel("assets");});button.ToggleMode=true;button.Alignment=HorizontalAlignment.Left;col.AddChild(button);_categories[key]=button;
+            var button=Button(title,()=>ShowAssetCategory(key));button.ToggleMode=true;button.Alignment=HorizontalAlignment.Left;col.AddChild(button);_categories[key]=button;
         }
-        col.AddChild(new HSeparator());col.AddChild(Wrapped("通过名称或标签搜索。文件会复制到本地库，重复内容自动跳过。"));
+        col.AddChild(new HSeparator());
+        _collectionFilter=new OptionButton{FitToLongestItem=false,CustomMinimumSize=new(90,32)};col.AddChild(_collectionFilter);
+        _collectionFilter.ItemSelected+=index=>{if(index>0&&index<=_collections.Length)ShowAssetCategory(_collections[index-1].Id);};
         var space=new Control{SizeFlagsVertical=SizeFlags.ExpandFill};col.AddChild(space);
-        col.AddChild(Button("打开库目录",()=>OS.ShellOpen(_dataRoot)));return col;
+        col.AddChild(Button("打开库目录",OpenLibraryFolder));return col;
     }
     private Control BuildAssets()
     {
-        var col=new VBoxContainer();_search=Input("搜索名称或标签…  Ctrl+F");col.AddChild(_search);
+        var col=new VBoxContainer();_search=Input("搜索名称或标签…  Ctrl+F");_search.Name="AssetSearch";col.AddChild(_search);
         _searchTimer=new Godot.Timer{OneShot=true,WaitTime=.2};AddChild(_searchTimer);_search.TextChanged+=_=>_searchTimer.Start();
         _searchTimer.Timeout+=()=>{if(DisplayScaleController.IsComposing){_searchTimer.Start();return;}_page=0;Refresh();};
-        var header=Row(col);_count=Label("0 个结果",true,12);header.AddChild(_count);
-        _list=new ItemList{SizeFlagsVertical=SizeFlags.ExpandFill,SizeFlagsHorizontal=SizeFlags.ExpandFill,CustomMinimumSize=new(0,80),MaxColumns=1,AllowReselect=true,TextOverrunBehavior=TextServer.OverrunBehavior.TrimEllipsis};col.AddChild(_list);_list.ItemSelected+=i=>SelectAsset((int)i);
+        var header=new HFlowContainer();col.AddChild(header);_count=Label("0 个结果",true,12);header.AddChild(_count);
+        BuildAssetActions(header);
+        _list=new ItemList{Name="AssetRows",SelectMode=ItemList.SelectModeEnum.Multi,SizeFlagsVertical=SizeFlags.ExpandFill,SizeFlagsHorizontal=SizeFlags.ExpandFill,CustomMinimumSize=new(0,80),MaxColumns=1,AllowReselect=true,TextOverrunBehavior=TextServer.OverrunBehavior.TrimEllipsis};col.AddChild(_list);
+        _list.GuiInput+=HandleAssetInput;_list.MultiSelected+=(_,_)=>QueueNativeAssetSelection();
         _empty=Wrapped("导入文件以建立资产库。");col.AddChild(_empty);
         var pagination=Row(col);_previous=Button("‹",()=>{_page--;Refresh();});_previous.TooltipText="上一页";pagination.AddChild(_previous);
         _pageLabel=Label("1 / 1",true,12);_pageLabel.SizeFlagsHorizontal=SizeFlags.ExpandFill;_pageLabel.HorizontalAlignment=HorizontalAlignment.Center;pagination.AddChild(_pageLabel);
-        _next=Button("›",()=>{_page++;Refresh();});_next.TooltipText="下一页";pagination.AddChild(_next);return col;
+        _next=Button("›",()=>{_page++;Refresh();});_next.Name="AssetPageNext";_next.TooltipText="下一页";pagination.AddChild(_next);return col;
     }
     private Control BuildPreview()
     {
@@ -181,11 +187,12 @@ public partial class MainShell
         _preferences.Layout=_workspace.Layout;
         if(GetWindow().Mode==Window.ModeEnum.Windowed){_preferences.Width=GetWindow().Size.X;_preferences.Height=GetWindow().Size.Y;_preferences.X=GetWindow().Position.X;_preferences.Y=GetWindow().Position.Y;_preferences.HasPosition=true;}
         _preferences.Maximized=GetWindow().Mode==Window.ModeEnum.Maximized;
-        try{_preferences.Save(_preferencesPath);}catch(Exception ex){if(!_closing)SetStatus("布局无法保存："+ex.Message);}
+        try{using var activity=_api?.BeginActivity();_preferences.Save(_preferencesPath);}catch(Exception ex){if(!_closing&&_api?.LibraryBusy!=true)SetStatus("布局无法保存："+ex.Message);}
     }
     private void ConnectWorkspace()
     {
-        _api.Jobs.Changed+=OnWorkspaceJob;RefreshJobs();
+        if(_api!=null)_api.Jobs.Changed+=OnWorkspaceJob;
+        RefreshJobs();
         // Limbo already saves and restores the GUI focus; only gate application shortcuts here.
         GetNode("/root/LimboConsole").Connect("toggled",Callable.From<bool>(visible=>_consoleOpen=visible));
         if(_workspaceError.Length>0)SetStatus(_workspaceError);
@@ -226,6 +233,7 @@ public partial class MainShell
         if(_closing)return;SaveWorkspace();_closing=true;SetStatus("正在保存并停止任务…");
         _importCancellation?.Cancel();_exportCancellation?.Cancel();
         if(_commands!=null)await _commands.ShutdownAsync();
+        await _libraryUiTask;
         GetTree().Quit();
     }
 }

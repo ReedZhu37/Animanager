@@ -2,7 +2,7 @@
 
 基于 Godot 4.7.2 Mono / .NET 8 的本地 3D 资产管理原型。
 
-后续功能优先级与分阶段验收见 [功能迭代计划](Docs/FUNCTIONAL_ROADMAP.md)。下一轮规划为多 Library 管理、资产整理和基础库维护，目前仅落盘计划，尚未实施。
+P0 已接入多 Library 管理、资产整理和基础库维护。功能范围与验收入口见 [功能迭代计划](Docs/FUNCTIONAL_ROADMAP.md)。
 
 Nodachi 已实现固定人体预设、独立武器轨道及握持 / 接触记录，操作与范围见 [独立轨道说明](Docs/MOTION_STORAGE.md)。完整后续设计见 [动画存储规划](Docs/ANIMATION_STORAGE_PLAN.md)；跨骨架 retarget、接触 IK 和完整旧库迁移尚未实施。
 
@@ -10,7 +10,7 @@ Nodachi 已实现固定人体预设、独立武器轨道及握持 / 接触记录
 
 ## 启动
 
-直接从 Godot 工程按 F5 或运行 `Launch.cmd` 时，默认打开工程内 `Libraries/Nodachi-Motion`，包含 740 条 Nodachi 动画和 4 个官方基准资产。此开发默认值配置在 `project.godot` 的 `animanager/development_library`；显式 `--data-dir` 优先，独立发行版仍默认使用用户库。若开发库不存在则回退到用户库。`Libraries/.gdignore` 使动画库不显示在 Godot 文件系统面板，也不随程序打包；请在运行后的 App 资产列表中搜索 `Nodachi`。
+直接从 Godot 工程按 F5 或运行 `Launch.cmd` 时，优先打开 `--data-dir` 指定的库，其次是最近有效的库。开发环境默认库由 `project.godot` 的 `animanager/development_library` 指向 `Libraries/Nodachi-Motion`，其中有 740 条 Nodachi 动画和 4 个基准资产。开发库缺失时回退到 `user://Library`，独立发行版也使用这个默认路径。`Libraries/.gdignore` 将本地素材库排除在工程资源和打包产物之外。
 
 人体 / 武器分轨版本可双击 `OpenNodachiMotion.cmd`，打开新库的 740 段 Nodachi 动画并定位到连招 03 转刀片段。握持和接触操作见 [独立轨道说明](Docs/MOTION_STORAGE.md)。
 
@@ -18,7 +18,15 @@ Nodachi 的 740 段 UE5.0 动画已导入并验证，可双击 `OpenNodachiCUE.c
 
 UE4 / UE5 独立导入样例可双击 `OpenUEStandardCUE.cmd`，打开已验证便携版及独立样例库。
 
-本机双击 `Launch.cmd`。脚本构建 C# 工程后启动独立应用窗口。首次启动自动导入官方 UE4 Mannequin、UE5 Manny / Quinn（Simple）及 Manny Idle 基准资产。也可用 Godot Mono 打开 `project.godot` 后运行。
+本机双击 `Launch.cmd`。脚本构建 C# 工程后启动独立应用窗口。程序首次自动创建默认库时导入 UE4 Mannequin、UE5 Manny / Quinn（Simple）及 Manny Idle 基准资产。也可用 Godot Mono 打开 `project.godot` 后运行。
+
+## 管理素材库
+
+- 工具栏的 **Library** 显示活动库、登记路径和最近打开时间，可以新建空库、登记已有库、切换和重新定位。导入或导出期间先等待任务结束，也可以在任务面板取消后重新切换。
+- 资产列表用 Ctrl 增减选择，用 Shift 选择当前页连续范围。翻页和筛选保留选中 ID，数量旁会显示其他页或筛选外的选择。通过 **整理** 重命名、批量改标签和收藏、操作集合或移入回收站。恢复会带回原 ID 和展示配置。
+- **Library** 提供完整性检查、备份恢复、索引重建和转换缓存预览。备份及恢复各使用一个尚不存在的目录。已有旧库首次打开时，会将健康 SQLite 内的元数据补录到持久清单。
+
+运行 `Test.ps1 -Suite LibraryP0` 验证 P0，测试在隔离目录运行。本地有 Nodachi 和 Movement 两个样例库时也会执行完整切库、备份和恢复流程。命令行入口见 [Limbo Console](Docs/CONSOLE.md#素材库与资产整理)。
 
 **0.4 已实现可拖拽工作区、统一控件、小窗口标签布局和 DPI 缩放。** 操作说明与当前边界见 [Docs/WORKSPACE.md](Docs/WORKSPACE.md)，原始路线图见 [Docs/INTERFACE_PLAN.md](Docs/INTERFACE_PLAN.md)。Limbo Console 完整保留：按 F12 或反引号打开，`app commands` 查看入口。完整命令样例见 [Docs/CONSOLE.md](Docs/CONSOLE.md)。
 

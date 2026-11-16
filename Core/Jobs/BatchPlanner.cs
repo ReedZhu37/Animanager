@@ -28,6 +28,7 @@ public sealed class BatchPlanner(WorkspaceApi api)
     }
     public async Task<BatchPlan> ImportAsync(IEnumerable<string> paths,CancellationToken ct=default)
     {
+        using var activity=api.BeginActivity();
         var inputs=paths.ToArray();
         if(inputs.Length>0&&inputs.All(p=>Path.GetExtension(p).ToLowerInvariant() is ".uasset" or ".zip"))return ImportUasset(inputs);
         var plan=await Task.Run(()=>{
@@ -80,6 +81,7 @@ public sealed class BatchPlanner(WorkspaceApi api)
     }
     public async Task<BatchPlan> ImportManifestAsync(string path,CancellationToken ct=default)
     {
+        using var activity=api.BeginActivity();
         var file=Path.GetFullPath(path);
         var inputs=JsonSerializer.Deserialize<string[]>(await File.ReadAllTextAsync(file,ct))??throw new IOException("Expected a JSON array of file or folder paths.");
         if(inputs.Length==0||inputs.Any(string.IsNullOrWhiteSpace))throw new IOException("Import manifest must contain non-empty paths.");
@@ -93,6 +95,7 @@ public sealed class BatchPlanner(WorkspaceApi api)
     }
     public void Save(BatchPlan plan)
     {
+        using var activity=api.BeginActivity();
         ValidateId(plan.Id);Directory.CreateDirectory(PlansFolder);
         AtomicJson(Path.Combine(PlansFolder,plan.Id+".json"),plan);
     }

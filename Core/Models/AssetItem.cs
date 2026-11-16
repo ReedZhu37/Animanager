@@ -10,6 +10,7 @@ public sealed record AssetItem
     public string Tags { get; set; } = "";
     public string Type { get; set; } = "Model";
     public bool Favorite { get; set; }
+    public bool Trashed { get; init; }
     public long Size { get; init; }
     public string ImportedAt { get; init; } = DateTime.UtcNow.ToString("O");
 }

@@ -58,6 +58,6 @@ Root Motion 区域先选择根骨骼，再打开“显示 Root Motion”。菜�
 
 ## 当前边界
 
-这次完成工作区基础。仍为单窗口；浮动面板、跨窗口停靠、完整资产多选、表格列配置、缩略图网格、快捷键自定义、辅助技术专项验收待后续迭代。批量导出仍可通过 Console 的查询 / 收藏 / 导出计划完成。UI 不承诺任意极端尺寸下保持全部面板同时可见。
+工作区使用单窗口。资产多选、集合及回收站的操作见 [管理素材库](../README.md#管理素材库)。浮动面板、跨窗口停靠、表格列配置和缩略图网格待后续迭代。批量导出可通过 Console 的查询、收藏及导出计划完成。
 
 主要实现：`UI/Workspace` 负责布局模型、停靠和 DPI；`UI/Controls/AppControls.cs` 与 `UI/StudioTheme.cs` 提供统一控件；`MainShell.Workspace.cs` 连接应用功能。验证入口：`Test.ps1 -Suite Interface`。

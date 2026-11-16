@@ -2,6 +2,46 @@
 
 工作区与 Console 共用功能 API。按 **F12** 或反引号打开实际的 **Limbo Console 0.8.0**，支持命令帮助、Tab 补全与历史。打开后键盘输入由 Console 接收，关闭后恢复原控件焦点。插件来源：本机已有的 upstream 插件副本；[上游仓库](https://github.com/limbonaut/limbo_console)，MIT 许可位于 `addons/limbo_console/LICENSE.md`。未复制其社区 C# wrapper，直接使用 Godot Callable 注册带类型的 C# 方法。
 
+## 素材库与资产整理
+
+```text
+library current
+library list
+library create "D:/AnimationLibraries/Study" "动作练习"
+library register "D:/AnimationLibraries/Movement"
+library open "D:/AnimationLibraries/Movement"
+library relocate <库ID> "D:/AnimationLibraries/MovementMoved"
+library check
+library backup "D:/Backups/Movement-2026-11-16"
+library restore "D:/Backups/Movement-2026-11-16" "D:/AnimationLibraries/MovementRestored"
+library rebuild "D:/AnimationLibraries/MovementRestored"
+library cache_preview
+library cache_clear true
+```
+
+`library open` 接受路径或登记表里的库 ID。路径失效时用 `library relocate` 更新登记。备份和恢复的目标需要是尚不存在的目录，恢复验证通过后会登记并切换到新库。缓存清理使用当前会话最后一次预览的范围，执行时再次验证候选文件。
+
+```text
+asset search "walk"
+asset rename <资产ID> "步行循环"
+asset tags_add <ID1,ID2> "步行 humanoid"
+asset tags_remove <ID1,ID2> "humanoid"
+asset favorites <ID1,ID2> true
+collection create "步行动作"
+collection list
+collection add <集合ID> <ID1,ID2>
+collection search <集合ID> *
+collection remove <集合ID> <ID2>
+collection rename <集合ID> "移动动作"
+collection delete <集合ID>
+asset trash <ID1,ID2>
+asset trash_list *
+asset restore <ID1>
+asset purge <ID2> true
+```
+
+批量参数使用逗号分隔的完整资产 ID。永久删除只处理回收站里的资产，结果会列出保留的文件及原因。
+
 ```text
 app commands
 app status

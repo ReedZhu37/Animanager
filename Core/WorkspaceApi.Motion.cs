@@ -16,15 +16,22 @@ public sealed partial class WorkspaceApi
     }
     public void SetMotionGrip(string asset,float[] position,float[] rotation)
     {
+        using var activity=BeginActivity();
         string path=MotionPath(asset);var m=MotionJson.Load(path);var p=MotionJson.Presentation(path,m);p.GripPosition=position;p.GripRotation=rotation;p.GripConfirmed=true;MotionAssetStore.SavePresentation(path,p);
     }
     public void SetMotionContact(string asset,double start,double end,string state)
     {
+        using var activity=BeginActivity();
         string path=MotionPath(asset);var m=MotionJson.Load(path);var p=MotionJson.Presentation(path,m);MotionAssetStore.SetContact(p,m,start,end,state);MotionAssetStore.SavePresentation(path,p);
     }
     public void SetMotionVisible(string asset,bool visible)
     {
+        using var activity=BeginActivity();
         string path=MotionPath(asset);var m=MotionJson.Load(path);var p=MotionJson.Presentation(path,m);p.Visible=visible;MotionAssetStore.SavePresentation(path,p);
     }
-    public void ResetMotionPresentation(string asset)=>MotionAssetStore.SavePresentation(MotionPath(asset),new());
+    public void ResetMotionPresentation(string asset)
+    {
+        using var activity=BeginActivity();
+        MotionAssetStore.SavePresentation(MotionPath(asset),new());
+    }
 }

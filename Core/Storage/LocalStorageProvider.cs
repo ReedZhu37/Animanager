@@ -2,16 +2,31 @@ namespace Animanager.Core.Storage;
 
 public sealed class LocalStorageProvider(string root) : IStorageProvider
 {
-    public string Root { get; } = Path.GetFullPath(root);
+    public string Root { get; } = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
 
     public string Resolve(string virtualPath)
     {
         if (string.IsNullOrWhiteSpace(virtualPath) || Path.IsPathRooted(virtualPath) || virtualPath.Contains(':'))
             throw new IOException("资产路径必须是库内相对路径。");
         var path = Path.GetFullPath(Path.Combine(Root, virtualPath));
-        if (!path.StartsWith(Root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        if (!path.StartsWith(Path.EndsInDirectorySeparator(Root) ? Root : Root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) || path.Equals(Root, StringComparison.OrdinalIgnoreCase))
             throw new IOException("资产路径不能离开库目录。");
+        RequireLocalPath(path);
         return path;
+    }
+
+    internal static void RequireLocalPath(string path)
+    {
+        for (string? current = path; current != null; current = Path.GetDirectoryName(current))
+        {
+            try
+            {
+                if ((File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
+                    throw new IOException("库路径不能经过链接或联接点：" + current);
+            }
+            catch (FileNotFoundException) { }
+            catch (DirectoryNotFoundException) { }
+        }
     }
 
     public Task<string> AcquireLocalFileAsync(string virtualPath, CancellationToken ct = default)

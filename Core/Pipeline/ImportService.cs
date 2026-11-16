@@ -27,7 +27,13 @@ public sealed class ImportService(AssetDatabase database, IStorageProvider stora
                         progress?.Report("正在入库 · "+Path.GetFileName(file));
                         if(MotionJson.IsMotion(file))
                         {
-                            if(await MotionAssetStore.Import(file,database,storage,ct))added++;else skipped++;
+                            if(await MotionAssetStore.Import(file,database,storage,ct))added++;
+                            else
+                            {
+                                skipped++;
+                                if(database.FindByHash(MotionJson.Hash(await File.ReadAllBytesAsync(file,ct)))?.Trashed==true)
+                                    progress?.Report("资产已在回收站，可从回收站恢复："+Path.GetFileName(file));
+                            }
                             continue;
                         }
                         var dependencies=ReadDependencies(file,ext);
@@ -39,7 +45,11 @@ public sealed class ImportService(AssetDatabase database, IStorageProvider stora
                             while((read=await stream.ReadAsync(buffer,ct))>0) hash.AppendData(buffer,0,read);
                         }
                         var digest=Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
-                        if(database.HasHash(digest)) {skipped++; continue;}
+                        if(database.FindByHash(digest) is {} duplicate)
+                        {
+                            if(duplicate.Trashed)progress?.Report("资产已在回收站，可从回收站恢复："+duplicate.Name);
+                            skipped++;continue;
+                        }
                         var prefix="assets/"+digest+"/";
                         foreach(var dependency in dependencies) await storage.PutFileAsync(dependency.Source,prefix+dependency.Relative,ct);
                         var relative=prefix+Path.GetFileName(file);
@@ -67,7 +77,7 @@ public sealed class ImportService(AssetDatabase database, IStorageProvider stora
             foreach(var file in EnumerateFiles(child))yield return file;
         }
     }
-    private static List<(string Source,string Relative)> ReadDependencies(string file,string ext)
+    internal static List<(string Source,string Relative)> ReadDependencies(string file,string ext)
     {
         var result=new List<(string,string)>();
         if(ext!=".gltf") return result;
@@ -86,6 +96,7 @@ public sealed class ImportService(AssetDatabase database, IStorageProvider stora
                 if(Path.IsPathRooted(relative)||relative.Contains(':')||!path.StartsWith(root,StringComparison.OrdinalIgnoreCase))
                     throw new IOException("glTF 依赖必须位于文件所在目录内；请先打包为 GLB。");
                 if(!File.Exists(path)) throw new FileNotFoundException("缺少 glTF 依赖: "+relative);
+                LocalStorageProvider.RequireLocalPath(path);
                 result.Add((path,relative));
             }
         }

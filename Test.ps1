@@ -1,4 +1,4 @@
-param([ValidateSet('Prototype','Pipeline','Batch','Interface','Bones','BoneUI','MultiBones','MultiBoneUI','All')][string]$Suite = 'Prototype')
+param([ValidateSet('Prototype','Pipeline','Batch','Interface','Bones','BoneUI','MultiBones','MultiBoneUI','LibraryP0','All')][string]$Suite = 'Prototype')
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 $env:DOTNET_CLI_HOME = Join-Path $PSScriptRoot '.runtime\dotnet'
@@ -19,7 +19,8 @@ $modes = switch ($Suite) {
     'BoneUI' { 'bone-ui-test' }
     'MultiBones' { 'multi-bone-test' }
     'MultiBoneUI' { 'multi-bone-ui-test' }
-    'All' { 'self-test'; 'pipeline-test'; 'batch-test'; 'interface-test'; 'bone-test'; 'bone-ui-test'; 'multi-bone-test'; 'multi-bone-ui-test' }
+    'LibraryP0' { 'library-p0-test' }
+    'All' { 'self-test'; 'pipeline-test'; 'batch-test'; 'interface-test'; 'bone-test'; 'bone-ui-test'; 'multi-bone-test'; 'multi-bone-ui-test'; 'library-p0-test' }
 }
 foreach ($mode in $modes) {
     & $engine --headless --path $PSScriptRoot --log-file (Join-Path $PSScriptRoot ".runtime\$mode.log") -- "--$mode" "--data-dir=$PSScriptRoot\.runtime\$mode-library"

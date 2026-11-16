@@ -15,6 +15,7 @@ public sealed class BatchJobQueue
     private string? _activeId;
     private bool _pumping,_stopping;
     private Task _pump=Task.CompletedTask;
+    private IDisposable? _activity;
     public event Action<JobUpdate>? Changed;
     public string ReportsFolder { get; }
     public string? CurrentId { get{lock(_gate)return _activeId;} }
@@ -31,6 +32,7 @@ public sealed class BatchJobQueue
             try{job=JsonSerializer.Deserialize<JobRecord>(File.ReadAllText(path),BatchPlanner.JsonOptions);}
             catch(Exception ex) when(ex is JsonException or IOException or UnauthorizedAccessException){continue;}
             if(job==null||job.Version!=1||!Guid.TryParseExact(job.Id,"N",out _)||Path.GetFileNameWithoutExtension(path)!=job.Id||job.Items==null||job.Items.Any(i=>i==null||i.Source==null))continue;
+            RebaseLibraryPaths(job, api.Storage.Root);
             job.ReportPath=path;
             if(job.State is JobState.Queued or JobState.Running)
             {
@@ -39,6 +41,36 @@ public sealed class BatchJobQueue
                 Save(job);
             }
             _jobs.Add(job);
+        }
+    }
+
+    private static void RebaseLibraryPaths(JobRecord job, string libraryRoot)
+    {
+        if (string.IsNullOrEmpty(job.ReportPath) || !Path.IsPathFullyQualified(job.ReportPath)) return;
+        var reports = Path.GetDirectoryName(job.ReportPath);
+        var jobs = Path.GetDirectoryName(reports);
+        var previousRoot = Path.GetDirectoryName(jobs);
+        if (previousRoot == null || !string.Equals(Path.GetFileName(reports), "reports", StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(Path.GetFileName(jobs), "jobs", StringComparison.OrdinalIgnoreCase) ||
+            Storage.LibraryManager.SamePath(previousRoot, libraryRoot)) return;
+
+        string Rebase(string path)
+        {
+            if (string.IsNullOrEmpty(path) || !Path.IsPathFullyQualified(path)) return path;
+            try
+            {
+                var full = Path.GetFullPath(path);
+                return Storage.LibraryManager.Nested(full, previousRoot)
+                    ? Path.Combine(libraryRoot, Path.GetRelativePath(previousRoot, full)) : path;
+            }
+            catch (ArgumentException) { return path; }
+        }
+
+        job.OutputFolder = Rebase(job.OutputFolder);
+        foreach (var item in job.Items)
+        {
+            item.Log = Rebase(item.Log);
+            item.Output = Rebase(item.Output);
         }
     }
     public string Enqueue(BatchPlan plan,string retryOf="")
@@ -52,8 +84,9 @@ public sealed class BatchJobQueue
         lock(_gate)
         {
             if(_stopping)throw new InvalidOperationException("Queue is shutting down.");
+            using var admission=_api.BeginActivity();
             Save(job);_jobs.Add(job);_completion[job.Id]=new(TaskCreationOptions.RunContinuationsAsynchronously);
-            if(!_pumping){_pumping=true;_pump=PumpAsync();}
+            if(!_pumping){_activity=_api.BeginActivity();_pumping=true;_pump=PumpAsync();}
         }
         Notify(job);return job.Id;
     }
@@ -106,7 +139,7 @@ public sealed class BatchJobQueue
             lock(_gate)
             {
                 var next=_jobs.FirstOrDefault(j=>j.State==JobState.Queued);
-                if(next==null){_pumping=false;return;}
+                if(next==null){_activity?.Dispose();_activity=null;_pumping=false;return;}
                 job=next;_activeId=job.Id;_activeToken=token=new CancellationTokenSource();
                 job.State=JobState.Running;job.StartedUtc=DateTime.UtcNow;job.Message="Starting";
             }

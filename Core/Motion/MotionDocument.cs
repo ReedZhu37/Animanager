@@ -93,17 +93,23 @@ public static class MotionJson
         var root=System.IO.Path.GetFullPath(System.IO.Path.GetDirectoryName(manifestPath)!)+System.IO.Path.DirectorySeparatorChar;
         if(System.IO.Path.IsPathRooted(item.Path)||item.Path.Contains(':')||!item.Path.Replace('\\','/').StartsWith("objects/",StringComparison.Ordinal))throw new InvalidDataException("Motion object must be inside objects/.");
         var path=System.IO.Path.GetFullPath(System.IO.Path.Combine(root,item.Path));
-        if(!path.StartsWith(root,StringComparison.OrdinalIgnoreCase)||!File.Exists(path))throw new IOException("Missing or invalid motion object: "+item.Path);
+        if(!path.StartsWith(System.IO.Path.Combine(root,"objects")+System.IO.Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase)||!File.Exists(path))throw new IOException("Missing or invalid motion object: "+item.Path);
+        Animanager.Core.Storage.LocalStorageProvider.RequireLocalPath(path);
         if(new FileInfo(path).Length!=item.Bytes)throw new InvalidDataException("Motion object size mismatch: "+item.Path);
         if(verify&&Hash(File.ReadAllBytes(path))!=item.Sha256)throw new InvalidDataException("Motion object checksum mismatch: "+item.Path);
         return path;
     }
     public static MotionManifest Load(string path,bool verify=true)
     {
+        var m=ReadManifest(path);
+        foreach(var o in m.Objects.Values)ResolveObject(path,o,verify);
+        return m;
+    }
+    public static MotionManifest ReadManifest(string path)
+    {
         var m=Read<MotionManifest>(path);
         if(m.SchemaVersion!=1||m.Kind!="animanager-motion"||m.Mapping!="nodachi-ue5-hand-r-v1"||m.PoseSemantics!="raw-source-pose"||m.RootMotionStorage!="embedded-in-body-root"||!double.IsFinite(m.Duration)||m.Duration<=0||m.Duration>3600||m.Frames<2||!double.IsFinite(m.SourceFps)||m.SourceFps<1||m.SourceFps>600)throw new InvalidDataException("Unsupported motion manifest or timeline.");
         foreach(var key in new[]{"preset","rig","sourceRig","source","body","prop"})if(!m.Objects.ContainsKey(key))throw new InvalidDataException("Missing motion object: "+key);
-        foreach(var o in m.Objects.Values)ResolveObject(path,o,verify);
         if(m.Props.Count!=1||m.Props[0].Anchor!="hand_r"||m.Props[0].Space!="skeleton-anchor"||m.Props[0].TrackObject!="prop")throw new NotSupportedException("This version supports the verified Nodachi right-hand mapping.");
         ValidateContacts(m.Props[0].Contacts,m.Duration);
         return m;

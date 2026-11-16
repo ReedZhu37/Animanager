@@ -13,7 +13,6 @@ namespace Animanager.UI;
 public partial class MainShell : Control
 {
     private AssetDatabase _database=null!;
-    private LocalStorageProvider _storage=null!;
     private WorkspaceApi _api=null!;
     private ConsoleCommands _commands=null!;
     private Preview3DViewport _preview=null!;
@@ -43,14 +42,13 @@ public partial class MainShell : Control
     {
         try
         {
-            _dataRoot=RuntimePaths.LibraryRoot();
-            if(OS.GetCmdlineUserArgs().Any(a=>a is "--pipeline-test" or "--batch-test" or "--interface-test" or "--smoke-test" or "--bone-test" or "--bone-ui-test" or "--multi-bone-test" or "--multi-bone-ui-test"))_dataRoot=Path.Combine(_dataRoot,Guid.NewGuid().ToString("N"));
-            GD.Print($"Asset library: {_dataRoot}");
+            var startup=OpenStartupLibrary();
             InitializeDisplay();BuildUi();
-            _storage=new LocalStorageProvider(_dataRoot);_database=new AssetDatabase(Path.Combine(_dataRoot,"index.sqlite"));
-            _api=new WorkspaceApi(_database,_storage,new BlenderPipeline(RuntimePaths.Bundled("BuiltinAssets/Scripts/blender_convert.py")));
-            _commands=new ConsoleCommands();AddChild(_commands);_commands.Initialize(_api,_preview,Refresh,SyncConsoleSelection);
+            _commands=new ConsoleCommands();AddChild(_commands);
+            _commands.Initialize(_api,_preview,Refresh,SyncConsoleSelection,_libraries,BeforeLibrarySwitch,ActivateLibrary);
             ConnectWorkspace();
+            if(_api==null){ShowLibraryDialog();SetStatus(startup.Error);return;}
+            if(OS.GetCmdlineUserArgs().Contains("--library-p0-test")){await Tests.LibraryP0Tests.Run(this,_commands);return;}
             if(OS.GetCmdlineUserArgs().Contains("--motion-render")){await Tests.MotionTests.Render(this,_preview,_api,_commands);return;}
             var motionTest=OS.GetCmdlineUserArgs().FirstOrDefault(a=>a.StartsWith("--motion-test="));
             if(motionTest!=null){await Tests.MotionTests.Run(this,_preview,_api,_commands,Path.GetFullPath(motionTest[14..]));return;}
@@ -107,9 +105,14 @@ public partial class MainShell : Control
                 await Tests.AssetPackTests.Run(this,_preview,_api,_commands,Path.GetFullPath(packArgument[18..]));return;
             }
             Refresh();
-            if(_database.Find("UE5_Manny")==null&&Directory.Exists(RuntimePaths.Bundled("BuiltinAssets/Baselines")))await ImportBaselines();
-            else if(_database.Search().Total==0)await ImportSamples();
-            else { SetStatus("本地资产库已就绪 · 拖入文件或文件夹开始导入"); if(_items.Count>0){_list.Select(0);SelectAsset(0);} }
+            if(startup.Bootstrap)
+            {
+                if(Directory.Exists(RuntimePaths.Bundled("BuiltinAssets/Baselines")))await ImportBaselines();
+                else await ImportSamples();
+            }
+            else if(_items.Count>0)SelectOnly(0);
+            if(startup.Error.Length>0)SetStatus(startup.Error);
+            else if(!startup.Bootstrap)SetStatus("本地资产库已就绪 · 拖入文件或文件夹开始导入");
             var previewAsset=OS.GetCmdlineUserArgs().FirstOrDefault(a=>a.StartsWith("--preview-asset="));
             if(previewAsset!=null){_commands.Load(previewAsset[16..]);await _commands.PendingTask;}
             if(OS.GetCmdlineUserArgs().Contains("--console"))_commands.Open();
@@ -125,6 +128,8 @@ public partial class MainShell : Control
     private void Refresh()
     {
         if(_database==null)return;
+        RefreshCollections();
+        if(_assetSelection.Count>0)_assetSelection.IntersectWith(_database.ExistingIds(_assetSelection,_category=="Trash"));
         var result=_database.Search(_search.Text,_category,_page);
         if(result.Items.Count==0&&_page>0){_page=0;result=_database.Search(_search.Text,_category,_page);}
         _items=result.Items;_list.Clear();
@@ -135,36 +140,42 @@ public partial class MainShell : Control
             if(item.Tags.Length>0)label+="   ·   "+item.Tags;
             _list.AddItem(label);_list.SetItemTooltip(_list.ItemCount-1,item.Name+"\n"+item.VirtualPath);
         }
-        _count.Text=$"{result.Total} 个结果";_libraryCount.Text=$"{_database.Search().Total} 个资产 · 本地库";
+        _count.Text=$"{result.Total} 个结果";_libraryCount.Text=$"{_libraries.Active!.Identity.Name} · {_database.Search().Total} 个资产";
+        _libraryCount.TooltipText=_dataRoot;
         _pageLabel.Text=$"{_page+1} / {Math.Max(1,(result.Total+59)/60)}";_previous.Disabled=_page==0;_next.Disabled=(_page+1)*60>=result.Total;
         _empty.Visible=result.Total==0;
         _empty.Text=_search.Text.Length>0?"没有匹配的资产\n试试其他名称或标签。":"这里还没有资产\n导入文件，或载入内置示例。";
         foreach(var pair in _categories)pair.Value.SetPressedNoSignal(pair.Key==_category);
-        var selectedIndex=_items.FindIndex(i=>i.Id==_selected?.Id);
-        if(selectedIndex>=0) _list.Select(selectedIndex);
+        SyncAssetSelection();
+        RefreshCurrentAsset();
     }
     private async void SelectAsset(int index)
     {
-        if(index<0||index>=_items.Count)return;
+        if(index<0||index>=_items.Count||_items[index].Trashed)return;
+        var api=_api;
         _selected=_items[index];_title.Text=_selected.Name;_tags.Text=_selected.Tags;
+        var asset=_selected;
         _favorite.Text=_selected.Favorite?"已收藏":"收藏";
         _clips.Clear();_export.Disabled=true;SetStatus("正在加载 · "+_selected.Name);
         try
         {
-            var path=await _storage.AcquireLocalFileAsync(_selected.VirtualPath);
+            using var activity=api.BeginActivity();
+            var path=await api.Storage.AcquireLocalFileAsync(asset.VirtualPath);
+            if(_api!=api||_selected?.Id!=asset.Id)return;
             _preview.LoadFile(path);
             _previewAssetId=_selected.Id;_previewName.Text=_selected.Name;_exportSummary.Text="导出资产："+_selected.Name;
+            _commands?.TrackSelection(asset.Id);
             foreach(var clip in _preview.Clips)_clips.AddItem(clip);
             if(_preview.Clips.Length==0)_clips.AddItem("无动画");
             _clips.Disabled=_preview.Clips.Length==0;
             _preview.SetSpeed(new[]{0.5,1,1.5,2}[_speed.Selected]);
             _detail.Text=$"{_selected.SourceFormat.TrimStart('.').ToUpperInvariant()}   ·   {FormatSize(_selected.Size)}   ·   {_preview.MeshCount} 网格   ·   {_preview.BoneCount} 骨骼   ·   {_preview.Clips.Length} 动画";
             var type=_preview.Clips.Length>0?"Animation":"Model";
-            if(type!=_selected.Type){_selected.Type=type;_database.Update(_selected);Refresh();}
+            if(type!=_selected.Type){api.SetAssetType(asset.Id,type);Refresh();}
             _export.Disabled=false;
             SetStatus(_selected.SourceFormat==".fbx"?"FBX 实验性预览：外部纹理未打包时可能缺失；建议使用 GLB。":"预览已就绪 · 空格播放 / 暂停，F 重置视角");
         }
-        catch(Exception ex){_previewAssetId="";_preview.Clear();_detail.Text="此资产无法预览，请检查文件格式与依赖。";ShowError("加载失败",ex.Message);}
+        catch(Exception ex){_previewAssetId="";_commands?.ForgetSelection();_preview.Clear();_detail.Text="此资产无法预览，请检查文件格式与依赖。";ShowError("加载失败",ex.Message);}
         if(_preview.Motion!=null)_detail.Text+="\n"+_preview.Motion.Summary;
         UpdateTransport();
     }
@@ -172,6 +183,7 @@ public partial class MainShell : Control
     private async Task ImportBaselines()=>await Import([RuntimePaths.Bundled("BuiltinAssets/Baselines")]);
     private void SyncConsoleSelection(AssetItem asset)
     {
+        _assetSelection.Clear();_assetSelection.Add(asset.Id);_assetAnchor=asset.Id;
         _previewAssetId=asset.Id;_previewName.Text=asset.Name;_exportSummary.Text="导出资产："+asset.Name;
         _selected=asset;_title.Text=asset.Name;_tags.Text=asset.Tags;_favorite.Text=asset.Favorite?"已收藏":"收藏";
         _clips.Clear();foreach(var clip in _preview.Clips)_clips.AddItem(clip);
@@ -182,17 +194,19 @@ public partial class MainShell : Control
     }
     private async Task Import(string[] paths,bool uasset=false)
     {
+        if(_api==null){SetStatus("请先打开或新建资产库。");return;}
         if(_busy){SetStatus("已有导入任务正在运行，请等待或取消。");return;}
         _busy=true;_cancel.Visible=true;_importCancellation=new CancellationTokenSource();
         try
         {
+            using var activity=_api.BeginActivity();
             var plan=uasset?_api.Planner.ImportUasset(paths):await _api.Planner.ImportAsync(paths,_importCancellation.Token);
             var id=_api.Jobs.Enqueue(plan);_cancel.Visible=false;
             var result=await _api.Jobs.WaitAsync(id);
             if(_closing)return;
             while(_progress.TryDequeue(out _)){}
             _page=0;Refresh();SetStatus(result.Kind==JobKind.ImportUasset?$".uasset · {JobStateName(result.State)} · 新增 {result.Items.Sum(i=>i.ImportedAssets)} · 重复 {result.Items.Sum(i=>i.DuplicateAssets)} · 不支持 {result.Items.Sum(i=>i.UnsupportedAssets)} · 失败 {result.Failed}":$"入库 · {JobStateName(result.State)} · 新增 {result.Succeeded} · 重复 {result.Skipped} · 失败 {result.Failed}");
-            if(_selected==null&&_items.Count>0){_list.Select(0);SelectAsset(0);}
+            if(_selected==null&&_items.Count>0&&_category!="Trash")SelectOnly(0);
         }
         catch(OperationCanceledException){if(!_closing){Refresh();SetStatus("导入已取消，已完成的资产已保留。");}}
         catch(Exception ex){if(!_closing)ShowError("导入失败",ex.Message);}
@@ -202,13 +216,13 @@ public partial class MainShell : Control
     private void SaveTags()
     {
         if(_selected==null)return;
-        try{_selected.Tags=_tags.Text.Trim();_database.Update(_selected);Refresh();SetStatus("标签已保存，可立即搜索。");}
+        try{_api.SetTags(_selected.Id,_tags.Text);Refresh();SetStatus("标签已保存，可立即搜索。");}
         catch(Exception ex){ShowError("保存失败",ex.Message);}
     }
     private void ToggleFavorite()
     {
         if(_selected==null)return;
-        try{_selected.Favorite=!_selected.Favorite;_database.Update(_selected);_favorite.Text=_selected.Favorite?"已收藏":"收藏";Refresh();}
+        try{_api.SetFavorite(_selected.Id,!_selected.Favorite);Refresh();}
         catch(Exception ex){ShowError("保存失败",ex.Message);}
     }
     private async void Export(string folder)
@@ -217,6 +231,7 @@ public partial class MainShell : Control
         _exportCancellation=new CancellationTokenSource();
         try
         {
+            using var activity=_api.BeginActivity();
             if(string.IsNullOrWhiteSpace(folder)||!Path.IsPathFullyQualified(folder))throw new IOException("请输入完整的导出目录路径，或使用浏览按钮选择。");
             _export.Disabled=true;
             if(_exportType.Selected==2)
@@ -236,7 +251,7 @@ public partial class MainShell : Control
             SetStatus("已导出 · "+_lastExport);
         }
         catch(Exception ex){if(!_closing)ShowError("导出失败",ex.Message);}
-        finally{_exportCancellation.Dispose();_exportCancellation=null;if(!_closing)_export.Disabled=false;}
+        finally{_exportCancellation.Dispose();_exportCancellation=null;if(!_closing)_export.Disabled=_previewAssetId.Length==0;}
     }
     private void TogglePlayback(){_preview.TogglePlay();UpdateTransport();}
     private void UpdateTransport()
@@ -247,7 +262,8 @@ public partial class MainShell : Control
         _timeline.SetValueNoSignal(Math.Min(_preview.Playhead,_preview.Duration));
         _time.Text=$"{_preview.Playhead:F2} / {_preview.Duration:F2} s";
         if(_preview.Motion is {} motion)_detail.Text=_detail.Text.Split('\n')[0]+"\n"+motion.Summary;
-        if(_selected==null){_favorite.Disabled=true;_export.Disabled=true;}else _favorite.Disabled=false;
+        _favorite.Disabled=_selected==null;
+        _export.Disabled=_selected==null||_previewAssetId.Length==0||_exportCancellation!=null;
     }
     public override void _Process(double delta)
     {
@@ -269,7 +285,7 @@ public partial class MainShell : Control
         if(key.Keycode==Key.Space){TogglePlayback();GetViewport().SetInputAsHandled();}
         if(key.Keycode==Key.F){_preview.FrameModel();GetViewport().SetInputAsHandled();}
     }
-    public override void _ExitTree(){_closing=true;SaveWorkspace();_preview?.Bones?.Clear();if(_api!=null)_api.Jobs.Changed-=OnWorkspaceJob;_importCancellation?.Cancel();_exportCancellation?.Cancel();}
+    public override void _ExitTree(){_closing=true;SaveWorkspace();_preview?.Bones?.Clear();if(_api!=null)_api.Jobs.Changed-=OnWorkspaceJob;_importCancellation?.Cancel();_exportCancellation?.Cancel();_libraries?.Dispose();}
     private static string FormatSize(long bytes)=>bytes>=1048576?$"{bytes/1048576.0:F1} MB":$"{bytes/1024.0:F1} KB";
     private void SetStatus(string message){_status.Text=message;_status.TooltipText=message;}
     private void ShowError(string title,string message){SetStatus(title+" · "+message);_message.Title=title;_messageBody.Text=message;PopupFit(_message,new(560,240));}

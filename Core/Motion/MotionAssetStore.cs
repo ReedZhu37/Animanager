@@ -22,8 +22,6 @@ public static class MotionAssetStore
         string relative="motion/"+digest+".motion.json";
         await storage.PutFileAsync(path,relative,ct);ct.ThrowIfCancellationRequested();
         var asset=new AssetItem{Name=manifest.Name,VirtualPath=relative,SourceFormat=".motion",FileHash=digest,Type="Animation",Tags="Nodachi UE5 separated-motion",Size=new FileInfo(path).Length+new[]{"body","prop"}.Sum(k=>manifest.Objects[k].Bytes)};
-        // Metadata is written before indexing: a cancelled/unindexed asset can be recovered without losing its identity.
-        var local=await storage.AcquireLocalFileAsync(relative,ct);MotionJson.Atomic(local+".asset.json",asset);
         return db.Insert(asset);
     }
     public static void SavePresentation(string path,MotionPresentation presentation)

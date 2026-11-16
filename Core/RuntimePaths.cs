@@ -5,17 +5,21 @@ namespace Animanager.Core;
 /// <summary>Files consumed by .NET / Blender live beside the executable, outside the PCK.</summary>
 public static class RuntimePaths
 {
-    public static string LibraryRoot()
+    public static string? ExplicitLibraryRoot()
     {
         var dataArg=OS.GetCmdlineUserArgs().FirstOrDefault(a=>a.StartsWith("--data-dir="));
-        if(dataArg!=null)return Expand(dataArg[11..]);
+        return dataArg!=null?Expand(dataArg[11..]):null;
+    }
+
+    public static string DefaultLibraryRoot()
+    {
         if(OS.HasFeature("editor"))
         {
             string configured=ProjectSettings.GetSetting("animanager/development_library", "").AsString();
             if(!string.IsNullOrWhiteSpace(configured))
             {
                 string root=Expand(configured);
-                if(File.Exists(Path.Combine(root,"index.sqlite")))return root;
+                if(Storage.LibraryManager.HasLibrary(root))return root;
                 GD.PushWarning($"Development library is missing: {root}. Using the user library.");
             }
         }

@@ -21,7 +21,7 @@ Library/
   index.sqlite
   motion/
     <hash>.motion.json                 # 不可变的组合动画清单
-    <hash>.motion.json.asset.json      # 资产 ID、标签、收藏等元数据副本
+    <hash>.motion.json.asset.json      # 旧库的资产元数据副本
     <hash>.motion.json.presentation.json
                                       # 当前展示配置
     objects/<hash>.<extension>         # 共享预设、rig、轨道及源文件
@@ -31,7 +31,7 @@ Library/
   jobs/                               # 队列报告
 ```
 
-所有必需对象使用相对路径、字节数和 SHA-256 校验。保存握持或接触配置不改原始轨道与人物文件；新配置原子发布并保留修订历史。完整搬迁需复制整个 Library，单独复制清单不包含它引用的对象。完整索引重建、单资产 `.animpack` 和旧库自动迁移属于后续阶段。
+所有必需对象使用相对路径、字节数和 SHA-256 校验。保存握持或接触配置时保留原始轨道、人物文件及展示修订历史。P0 库在根目录的 `asset-catalog.json` 保存资产元数据，可从该文件重建索引。搬迁或复制库可使用 Library 的完整备份和恢复。单资产 `.animpack` 和旧库全面迁移属于后续阶段。
 
 ## 握持与接触
 
