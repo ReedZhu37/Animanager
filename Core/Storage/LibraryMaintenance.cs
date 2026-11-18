@@ -172,6 +172,14 @@ public sealed class LibraryMaintenance(WorkspaceApi api)
             });
         }
         CheckRetainedMotion(storage, db.Snapshot(), Inspect);
+        var retargetFolder = storage.Resolve("retarget");
+        if (Directory.Exists(retargetFolder))
+            foreach (var file in Directory.GetFiles(retargetFolder, "*.json", SearchOption.AllDirectories))
+                Inspect("", Path.GetRelativePath(storage.Root, file), () =>
+                {
+                    if (Path.GetFileName(Path.GetDirectoryName(file)) == "assets") MotionJson.Read<Retarget.RetargetOptions>(file).Snapshot();
+                    else MotionJson.Read<Retarget.RetargetPreset>(file).Options.Snapshot();
+                });
         return issues.ToArray();
     }
 

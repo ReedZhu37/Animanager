@@ -185,20 +185,23 @@ public static class LibraryP0Tests
                 owner.DisplayScale.SetScale(1);
                 owner.GetWindow().Size = new(1440, 1000);
                 if (DisplayServer.GetName() != "headless") owner.GetWindow().GrabFocus();
-                owner.Workspace.UsePreset("browse");
+                owner.Workspace.RestorePanels();
                 owner.Workspace.ShowPanel("assets");
                 await Frames(30);
                 var panel = owner.Workspace.Panel("assets");
-                var rows = (ItemList)panel.FindChild("AssetRows", true, false)!;
+                var rows = (Animanager.UI.Shell.AssetBrowser)panel.FindChild("AssetBrowser", true, false)!;
+                rows.SetMode(Animanager.UI.Shell.AssetBrowser.ViewMode.List);await Frames(30);
                 var next = (Button)panel.FindChild("AssetPageNext", true, false)!;
                 if (DisplayServer.GetName() == "headless") owner.GetViewport().NotifyMouseEntered();
                 async Task ClickRow(int index, bool control = false, bool shift = false)
                 {
+                    await owner.PendingBrowse;
+                    await Frames();
                     var viewport = owner.GetViewport();
-                    var local = new Vector2(36, rows.GetItemRect(index).GetCenter().Y);
-                    if (rows.GetItemAtPosition(local) != index || !rows.IsVisibleInTree())
+                    var local = rows.RowRect(index).GetCenter();
+                    if (rows.Row(index) == null || !rows.IsVisibleInTree())
                         throw new InvalidOperationException($"Asset click target {index} missing at {local} in {rows.Size}.");
-                    var point = rows.GetGlobalTransformWithCanvas() * local;
+                    var point = rows.ActiveView.GetGlobalTransformWithCanvas() * local;
                     if (DisplayServer.GetName() != "headless")
                     {
                         Input.WarpMouse(point * owner.GetWindow().ContentScaleFactor);
@@ -217,7 +220,7 @@ public static class LibraryP0Tests
                 }
 
                 await ClickRow(0);
-                Check(owner.SelectedAssetIds.Length == 1, $"Single click selects one asset (native rows {string.Join(',', rows.GetSelectedItems())})");
+                Check(owner.SelectedAssetIds.Length == 1, $"Single click selects one asset (native rows {string.Join(',', rows.Selection.Ids)})");
                 await ClickRow(2, shift: true);
                 Check(owner.SelectedAssetIds.Length == 3, $"Shift selects a contiguous visible asset range (selected {owner.SelectedAssetIds.Length})");
                 await ClickRow(1, control: true);
@@ -226,12 +229,12 @@ public static class LibraryP0Tests
                 await Frames();
                 await ClickRow(0, control: true);
                 var ids = owner.SelectedAssetIds;
-                Check(ids.Length == 3 && rows.GetSelectedItems().Length == 1, "Ctrl extends selection across asset pages");
-                var search = (LineEdit)panel.FindChild("AssetSearch", true, false)!;
+                Check(ids.Length == 3 && rows.Rows.Count(r=>rows.Selection.Contains(r.Id)) == 1, "Ctrl extends selection across asset pages");
+                var search = (LineEdit)owner.FindChild("AssetSearch", true, false)!;
                 search.Text = "P0-test-No-Matches";
                 search.EmitSignal(LineEdit.SignalName.TextChanged, search.Text);
                 await owner.ToSignal(owner.GetTree().CreateTimer(.3), SceneTreeTimer.SignalName.Timeout);
-                Check(rows.ItemCount == 0 && owner.SelectedAssetIds.ToHashSet().SetEquals(ids), "Search keeps all selected IDs when they are hidden");
+                Check(rows.Count == 0 && owner.SelectedAssetIds.ToHashSet().SetEquals(ids), "Search keeps all selected IDs when they are hidden");
                 await Execute("collection create " + Quote("验收动作"));
                 var collectionId = p0.Database.Collections().Single(c => c.Name == "验收动作").Id;
                 await Execute($"collection add {collectionId} {string.Join(',', ids)}");
@@ -281,7 +284,7 @@ public static class LibraryP0Tests
                 var libraryDialog = (AcceptDialog)owner.FindChild("LibraryDialog", true, false)!;
                 var libraryRows = (ItemList)libraryDialog.FindChild("LibraryRows", true, false)!;
                 Check(libraryDialog.Visible, "Toolbar opens the Library manager");
-                libraryRows.Select(Enumerable.Range(0, libraryRows.ItemCount).Single(i => libraryRows.GetItemText(i).StartsWith("Nodachi · ")));
+                libraryRows.Select(Enumerable.Range(0, libraryRows.ItemCount).Single(i => libraryRows.GetItemTooltip(i).Split('\n')[0] == nodachi));
                 var openChoice = (Button)libraryDialog.FindChild("OpenLibraryChoice", true, false)!;
                 openChoice.EmitSignal(BaseButton.SignalName.Pressed);
                 await Frames();

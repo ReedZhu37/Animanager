@@ -29,6 +29,10 @@ public static class BundleSmokeTests
                 Check(preview.BoneCount==89&&preview.Clips.Length>0,"standalone Blender FBX export round trip");
             }
             else GD.Print("SKIP FBX conversion: Blender not configured on this machine.");
+            foreach (string rig in Core.Retarget.RigCatalog.Ids)
+                Check(Core.Retarget.RigCatalog.Hash(rig).Length == 64, "packaged retarget reference resolves: " + rig);
+            console.Call("execute_command", "retarget preview UE5_Manny_Idle ue4-mannequin"); await commands.PendingTask;
+            Check(preview.BoneCount == 68 && preview.AppliedRetarget?.TargetRig == "ue4-mannequin", "standalone retarget evaluator and target mesh load");
             var report=$"PASS: {checks.Count} bundle smoke checks\n"+string.Join("\n",checks)+"\nEditor binary: "+OS.HasFeature("editor");
             File.WriteAllText(Path.Combine(api.Storage.Root,"bundle-results.txt"),report);GD.Print(report);owner.GetTree().Quit(0);
         }

@@ -23,7 +23,7 @@ internal static class SceneAsset
             if (float.IsFinite(value) && value is >= 1 and <= 600) sourceFps = value;
         }
 
-        if (forExport && document is FbxDocument)
+        if (document is FbxDocument)
         {
             // FBX metadata may be absent (including in ASCII input), while scene import can still succeed.
             try

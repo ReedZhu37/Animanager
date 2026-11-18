@@ -3,6 +3,7 @@ using Animanager.Core.Models;
 using Animanager.Core.Pipeline;
 using Animanager.Core.Storage;
 using Godot;
+using Animanager.UI.Shell;
 using static Animanager.UI.Controls.AppControls;
 
 namespace Animanager.UI;
@@ -24,13 +25,12 @@ public partial class MainShell
     private LibraryEntry[] _entries = [];
     private Task _libraryUiTask = Task.CompletedTask;
 
-    private readonly HashSet<string> _assetSelection = [];
-    private OptionButton _collectionFilter = null!;
+    private AssetSelection _assetSelection => _browser.Selection;
     private AssetCollection[] _collections = [];
-    private string? _assetAnchor;
+    private (AssetDatabase Database, string Revision)? _tagCatalog;
+    private string? _assetAnchor { get=>_assetSelection.Anchor; set=>_assetSelection.SetAnchor(value); }
     private MenuButton _assetActions = null!;
     private PopupMenu _assetContextMenu = null!;
-    private int _selectionEpoch, _mouseEpoch = -1;
     private Label _selectionCount = null!;
 
     private const int RestoreAssetsAction = 2, PurgeAssetsAction = 3, TrashAssetsAction = 9;
@@ -44,16 +44,19 @@ public partial class MainShell
         var args = OS.GetCmdlineUserArgs();
         var explicitRoot = RuntimePaths.ExplicitLibraryRoot();
         var defaultRoot = RuntimePaths.DefaultLibraryRoot();
-        var uniqueTests = args.Any(a => a is "--pipeline-test" or "--batch-test" or "--interface-test" or "--smoke-test"
+        var uniqueTests = args.Any(a => a is "--shell-visual-test" or "--pipeline-test" or "--batch-test" or "--interface-test" or "--smoke-test"
             or "--bone-test" or "--bone-ui-test" or "--multi-bone-test" or "--multi-bone-ui-test" or "--library-p0-test"
-            or "--export-options-test" or "--asset-browse-test");
-        var test = uniqueTests || args.Any(a => a.StartsWith("--") && (a.Contains("-test") || a.Contains("-render") || a.StartsWith("--cue-")));
+            or "--export-options-test" or "--asset-browse-test" or "--retarget-test" or "--character-test" or "--third-feedback-test");
+        var probe = args.Any(a => a.StartsWith("--retarget-probe=") || a.StartsWith("--retarget-demo="));
+        var test = uniqueTests || probe || args.Any(a => a.StartsWith("--") && (a.Contains("-test") || a.Contains("-render") || a.StartsWith("--cue-")));
         var registry = test
             ? Path.Combine(Path.GetTempPath(), "Animanager-test-registries", Guid.NewGuid().ToString("N"), "libraries.json")
             : ProjectSettings.GlobalizePath("user://libraries.json");
         _preferencesPath = Path.Combine(Path.GetDirectoryName(registry)!, "workspace.json");
         _libraries = new(registry, new BlenderPipeline(RuntimePaths.Bundled("BuiltinAssets/Scripts/blender_convert.py")));
-        if (uniqueTests) explicitRoot = Path.Combine(explicitRoot ?? defaultRoot, Guid.NewGuid().ToString("N"));
+        if ((args.Contains("--retarget-test") || probe) && explicitRoot == null)
+            explicitRoot = RuntimePaths.Bundled(".runtime/retarget-test-library");
+        if (uniqueTests || probe) explicitRoot = Path.Combine(explicitRoot ?? defaultRoot, Guid.NewGuid().ToString("N"));
         var startup = _libraries.OpenStartup(explicitRoot, defaultRoot, ProjectSettings.GlobalizePath("user://Library"));
         if (startup.Session is { } session)
         {
@@ -67,16 +70,22 @@ public partial class MainShell
 
     private void BeforeLibrarySwitch()
     {
+        _retargetCancellation?.Cancel();
         if (_closing) throw new InvalidOperationException("应用正在关闭。");
     }
 
-    private void SwitchLibrary(Func<LibrarySession> open)
+    private async void SwitchLibrary(Func<LibrarySession> open)
     {
-        BeforeLibrarySwitch();
-        ActivateLibrary(open());
+        try
+        {
+            BeforeLibrarySwitch();
+            await PendingRetargetPreview;
+            if (!_closing) ActivateLibrary(open());
+        }
+        catch (Exception e) { ShowError("切换库失败", e.Message); }
     }
 
-    private void ActivateLibrary(LibrarySession session)
+    internal void ActivateLibrary(LibrarySession session)
     {
         if (_api == session.Api) { _libraryDialog.Hide(); return; }
         CancelAssetBrowse(resetFilters: true);
@@ -92,14 +101,16 @@ public partial class MainShell
         _page = 0;
         _searchTimer.Stop();
         _search.Text = "";
+        _assetSearch.Text = "";
         _assetContextMenu.Hide();
         ClearAssetPreview();
         _api = session.Api;
         _database = session.Api.Database;
         _dataRoot = session.Root;
         _commands.ChangeLibrary(_api);
+        LoadAssetRetargetConfiguration();
         _api.Jobs.Changed += OnWorkspaceJob;
-        _workspace.CancelDrag();
+        _workspace.CloseDrawer();
         _libraryDialog.Hide();
         Refresh();
         RefreshJobs();
@@ -110,10 +121,14 @@ public partial class MainShell
     {
         _libraryDialog = new AcceptDialog { Name = "LibraryDialog", Title = "Library", OkButtonText = "关闭" };
         AddChild(_libraryDialog);
-        var content = Column(_libraryDialog);
+        // A flow row's minimum height depends on its current width. Keep it behind a
+        // scroll boundary so an initially narrow native dialog cannot grow off-screen.
+        var scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
+        _libraryDialog.AddChild(scroll);
+        var content = Column(scroll);
         _activeLibrary = Wrapped("");
         content.AddChild(_activeLibrary);
-        _libraryRows = new ItemList { Name = "LibraryRows", CustomMinimumSize = new(240, 90), SizeFlagsVertical = SizeFlags.ExpandFill };
+        _libraryRows = new ItemList { Name = "LibraryRows", CustomMinimumSize = new(240, 130), SizeFlagsVertical = SizeFlags.ExpandFill };
         content.AddChild(_libraryRows);
         _libraryRows.ItemActivated += _ => OpenRegisteredLibrary();
         var libraryActions = new HFlowContainer();
@@ -313,18 +328,19 @@ public partial class MainShell
     private void RefreshCollections()
     {
         var next = _database.Collections().OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase).ToArray();
-        if (!_collections.Select(c => (c.Id, c.Name)).SequenceEqual(next.Select(c => (c.Id, c.Name))))
-        {
-            _collectionFilter.Clear();
-            _collectionFilter.AddItem("查看集合…");
-            foreach (var collection in next) _collectionFilter.AddItem(collection.Name);
-        }
-        if (_collectionFilter.ItemCount == 0) _collectionFilter.AddItem("查看集合…");
-        var index = Array.FindIndex(next, c => c.Id == _category);
-        if (index < 0 && _collections.Any(c => c.Id == _category)) { _category = "All"; _page = 0; }
-        _collectionFilter.Select(index + 1);
-        _collectionFilter.Disabled = next.Length == 0;
+        if(!_collections.Select(c=>(c.Id,c.Name)).SequenceEqual(next.Select(c=>(c.Id,c.Name))))
+            _sideBar.SetCollections(next.Select(c=>(c.Id,c.Name)));
+        if(!next.Any(c=>c.Id==_category)&&_collections.Any(c=>c.Id==_category)){_category="All";_page=0;}
         _collections = next;
+        var catalog = (_database, _database.CatalogRevision);
+        if (_tagCatalog != catalog)
+        {
+            _tagCatalog = catalog;
+            _sideBar.SetTags(_database.Snapshot().Assets.Where(a => !a.Trashed)
+                .SelectMany(a => WorkspaceApi.ParseTags(a.Tags).Distinct(StringComparer.OrdinalIgnoreCase))
+                .GroupBy(tag => tag, StringComparer.OrdinalIgnoreCase).OrderByDescending(group => group.Count())
+                .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase).Take(20).Select(group => (group.Key, group.Count())));
+        }
     }
 
     private void SelectOnly(int index)
@@ -336,117 +352,43 @@ public partial class MainShell
         SelectAsset(index);
     }
 
-    private void HandleAssetInput(InputEvent input)
+    internal void ShowAssetContextMenu(string id)
     {
-        if (input is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: false } context)
-        {
-            ShowAssetContextMenu(context.Position);
-            return;
-        }
-        if (input is not InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true } mouse) return;
-        var index = _list.GetItemAtPosition(mouse.Position, false);
-        if (index < 0 || index >= _items.Count) return;
-        var epoch = _selectionEpoch;
-        _mouseEpoch = epoch;
-        var control = mouse.CtrlPressed || mouse.MetaPressed;
-        var shift = mouse.ShiftPressed;
-        Callable.From(() =>
-        {
-            if (epoch != _selectionEpoch) return;
-            ApplyAssetGesture((int)index, control, shift);
-            _mouseEpoch = -1;
-        }).CallDeferred();
-    }
-
-    private void ShowAssetContextMenu(Vector2 localPosition)
-    {
-        var index = _list.GetItemAtPosition(localPosition, false);
-        if (index < 0 || index >= _items.Count) return;
-        _list.AcceptEvent();
-        if (!_assetSelection.Contains(_items[index].Id)) SelectOnly(index);
-
+        int index=_browser.IndexOf(id);if(index<0)return;
+        if(!_assetSelection.Contains(id))SelectOnly(index);
         _assetContextMenu.Clear();
-        if (_category == "Trash")
-        {
-            _assetContextMenu.AddItem("恢复所选…", RestoreAssetsAction);
-            _assetContextMenu.AddItem("永久删除所选…", PurgeAssetsAction);
-        }
-        else _assetContextMenu.AddItem(TrashAssetsLabel, TrashAssetsAction);
-
-        var parentPosition = GetWindow().GetFinalTransform() * (_list.GetGlobalTransformWithCanvas() * localPosition);
-        _assetContextMenu.ResetSize();
-        _assetContextMenu.PopupOnParent(new Rect2I((Vector2I)parentPosition, Vector2I.One));
+        if(_category=="Trash")
+        {_assetContextMenu.AddItem("恢复所选…",RestoreAssetsAction);_assetContextMenu.AddItem("永久删除所选…",PurgeAssetsAction);}
+        else _assetContextMenu.AddItem(TrashAssetsLabel,TrashAssetsAction);
+        PopupMenuAtPointer(_assetContextMenu);
     }
-
-    private void ApplyAssetGesture(int index, bool control, bool shift)
-    {
-        var asset = _items[index];
-        if (shift && _items.FindIndex(a => a.Id == _assetAnchor) is var anchor && anchor >= 0)
-        {
-            foreach (var a in _items.Skip(Math.Min(anchor, index)).Take(Math.Abs(anchor - index) + 1)) _assetSelection.Add(a.Id);
-        }
-        else
-        {
-            if (!control) _assetSelection.Clear();
-            if (!control || !_assetSelection.Remove(asset.Id)) _assetSelection.Add(asset.Id);
-            _assetAnchor = asset.Id;
-        }
-        SyncAssetSelection();
-        if (_assetSelection.Contains(asset.Id) && !asset.Trashed) SelectAsset(index);
-        else if (_selected?.Id == asset.Id) ClearAssetPreview();
-    }
-
-    private void QueueNativeAssetSelection()
-    {
-        var epoch = _selectionEpoch;
-        Callable.From(() =>
-        {
-            if (epoch != _selectionEpoch || _mouseEpoch == epoch) return;
-            foreach (var item in _items) _assetSelection.Remove(item.Id);
-            var indices = _list.GetSelectedItems();
-            foreach (var index in indices) _assetSelection.Add(_items[index].Id);
-            if (indices.Length > 0)
-            {
-                var primary = indices[^1];
-                _assetAnchor = _items[primary].Id;
-                if (!_items[primary].Trashed) SelectAsset(primary);
-            }
-            else if (_selected != null && !_assetSelection.Contains(_selected.Id)) ClearAssetPreview();
-            UpdateAssetSelectionCount();
-        }).CallDeferred();
-    }
-
-    private void SyncAssetSelection()
-    {
-        _selectionEpoch++;
-        _list.DeselectAll();
-        for (int i = 0; i < _items.Count; i++)
-            if (_assetSelection.Contains(_items[i].Id)) _list.Select(i, false);
-        UpdateAssetSelectionCount();
-    }
+    private void SyncAssetSelection() { UpdateAssetSelectionCount(); }
 
     private void UpdateAssetSelectionCount()
     {
         var hidden = _assetSelection.Count - _items.Count(a => _assetSelection.Contains(a.Id));
         _selectionCount.Text = $"已选 {_assetSelection.Count}" + (hidden > 0 ? $" · 其他页或筛选外 {hidden}" : "");
-        SyncExportControls();
+        _selectionBar?.SetTrashMode(_category=="Trash");_selectionBar?.SetCount(_assetSelection.Count);
+        _workspace.Status.ContextLabel.Text=$"{FilteredAssetCount:N0} 个资产 · 已选 {_assetSelection.Count}";
+        SyncFilterChips();SyncExportControls();
     }
 
     private void ClearAssetSelection()
     {
         _assetSelection.Clear();
         _assetAnchor = null;
-        _mouseEpoch = -1;
-        _selectionEpoch++;
     }
 
     private void ClearAssetPreview()
     {
+        _previewGeneration++;
+        _retargetCancellation?.Cancel();
+        if (_retargetEnabled != null) _retargetEnabled.ButtonPressed = false;
         _selected = null;
         _previewAssetId = "";
         _preview.Clear();
-        _clips.Clear();
-        _clips.Disabled = true;
+        _stage.SetClips([],null);
+        _stage.SetLoadStatus("");
         _title.Text = _previewName.Text = "选择一个资产";
         _detail.Text = "格式、骨架与动画信息显示在这里。";
         _tags.Text = "";
@@ -463,7 +405,7 @@ public partial class MainShell
         if (current.Tags != _selected.Tags) _tags.Text = current.Tags;
         _selected = current;
         _title.Text = current.Name;
-        _favorite.Text = current.Favorite ? "已收藏" : "收藏";
+        _inspectorStamp="";SyncInspector();
         if (_previewAssetId == current.Id)
         {
             _previewName.Text = current.Name;

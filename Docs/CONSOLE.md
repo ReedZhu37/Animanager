@@ -267,7 +267,7 @@ batch import_list "res://Examples/import-list.json"
 
 ## 独立 .uasset 导入
 
-`uasset status` 查看后端状态，`uasset inspect "路径"` 检查 ZIP / .uasset / 目录，`uasset import "路径"` 批量入库。`batch import` 也支持 ZIP / .uasset 文件。自动识别 UE4 / UE5 标准骨架，无需 Unreal；支持 UE4.23 原始轨道、UE5.0 AnimDataModel、UE5.6 Sequencer Direct FK 源动画，建议把 Skeleton 依赖放在同一目录 / ZIP。检查输出列出各骨架家族数量及缺失 Skeleton 替代数；支持范围和验证报告见 [CUE4PARSE_IMPORT.md](CUE4PARSE_IMPORT.md)。`job status last` 显示新增 / 重复 / 不支持数，`job report last` 提供详细报告路径，现有取消和重试命令可复用。
+`uasset status` 查看后端状态，`uasset inspect "路径"` 检查 ZIP / .uasset / 目录，`uasset import "路径"` 批量入库。`batch import` 也支持 ZIP / .uasset 文件。自动识别 UE4 / UE5 标准骨架，无需 Unreal；支持 UE4.23 / 4.27 原始轨道、UE5.0 AnimDataModel、UE5.6 Sequencer Direct FK 源动画，建议把 Skeleton 依赖放在同一目录 / ZIP。检查输出列出各骨架家族数量及缺失 Skeleton 替代数；支持范围和验证报告见 [CUE4PARSE_IMPORT.md](CUE4PARSE_IMPORT.md)。`job status last` 显示新增 / 重复 / 不支持数，`job report last` 提供详细报告路径，现有取消和重试命令可复用。
 
 ## FBX 支持范围
 

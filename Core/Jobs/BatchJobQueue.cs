@@ -78,7 +78,7 @@ public sealed class BatchJobQueue
         if(plan.Items.Count==0)throw new InvalidOperationException("Cannot enqueue an empty plan.");
         if(!Enum.IsDefined(plan.Kind))throw new ArgumentException("Invalid job kind.");
         if(plan.Kind==JobKind.ExportFbx&&!_api.Blender.Available)throw new InvalidOperationException("Blender is not configured; use pipeline blender <exe>.");
-        if(plan.Kind==JobKind.ImportUasset&&!_api.Uasset.Available)throw new InvalidOperationException("CUE4Parse helper is missing. Run Tools/Build-CueImporter.ps1.");
+        if(plan.Kind==JobKind.ImportUasset&&!_api.Uasset.Available)throw new InvalidOperationException("缺少 uasset 导入器。请使用包含 CUE4Parse 的完整应用，开发环境可运行 Tools/Build-CueImporter.ps1。");
         var job=new JobRecord{Kind=plan.Kind,PlanId=plan.Id,RetryOf=retryOf,OutputFolder=plan.OutputFolder,IgnoredFiles=plan.IgnoredFiles,
             ExportOptions=plan.Kind.SnapshotExportOptions(plan.ExportOptions),
             Items=plan.Items.Select(p=>new JobItem{Source=p}).ToList()};
@@ -166,17 +166,18 @@ public sealed class BatchJobQueue
                             var output=await _api.ExportAsync(item.Source.AssetId,job.OutputFolder,job.Kind,job.ExportOptions,log,token.Token);
                             lock(_gate){item.Output=output;item.State=ItemState.Succeeded;}
                         }
-                        else if(job.Kind==JobKind.ImportUasset)
+                        else if(job.Kind==JobKind.ImportUasset||item.Source.IsUasset)
                         {
                             var result=await _api.ImportUassetAsync(item.Source.Input,log,token.Token);
-                            lock(_gate){item.Output=result.ReportPath;item.ImportedAssets=result.Added;item.DuplicateAssets=result.Skipped;item.UnsupportedAssets=result.Unsupported;}
+                            lock(_gate){item.Output=result.ReportPath;item.ImportedAssets=result.Added;item.DuplicateAssets=result.Skipped;item.UnsupportedAssets=result.Unsupported;item.Warnings=result.Warnings;}
                             if(result.Errors.Count>0)throw new IOException(string.Join("\n",result.Errors));
-                            if(result.Added+result.Skipped==0)throw new IOException("No supported AnimSequence imported. See report: "+result.ReportPath);
+                            if(result.Added+result.Skipped==0)throw new IOException("没有导入可用的 AnimSequence 动画。\n"+string.Join("\n",result.Warnings)+"\n详细报告："+result.ReportPath);
                             lock(_gate)item.State=result.Added>0?ItemState.Succeeded:ItemState.Skipped;
                         }
                         else
                         {
                             var result=await _api.ImportAsync([item.Source.Input],log,token.Token);
+                            lock(_gate){item.ImportedAssets=result.Added;item.DuplicateAssets=result.Skipped;}
                             if(result.Errors.Count>0)throw new IOException(string.Join("\n",result.Errors));
                             if(result.Added==0&&result.Skipped==0)throw new IOException("No asset was imported; input is missing or unsupported.");
                             lock(_gate)item.State=result.Added>0?ItemState.Succeeded:ItemState.Skipped;

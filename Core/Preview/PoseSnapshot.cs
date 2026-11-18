@@ -24,4 +24,10 @@ public sealed class PoseSnapshot
                 for(int i=0;i<bones.Length;i++)s.SetBonePose(i,bones[i]);
         }
     }
+
+    internal void SetRootTransform(Transform3D transform)
+    {
+        for (int i = 0; i < _nodes.Count; i++)
+            if (_nodes[i].Path.ToString() == ".") _nodes[i] = (_nodes[i].Path, transform, _nodes[i].Bones);
+    }
 }

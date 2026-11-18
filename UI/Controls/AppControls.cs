@@ -7,7 +7,7 @@ public static class AppControls
     public static Label Label(string text,bool muted=false,int size=14)
     {
         var label=new Label{Text=text,MouseFilter=Control.MouseFilterEnum.Ignore};
-        label.AddThemeFontSizeOverride("font_size",size);if(muted)label.AddThemeColorOverride("font_color",StudioTheme.Muted);return label;
+        label.AddThemeFontSizeOverride("font_size",size);if(muted)label.AddThemeColorOverride("font_color",Animanager.UI.Shell.Tokens.Text3);return label;
     }
     public static Button Button(string text,Action action,bool primary=false)
     {

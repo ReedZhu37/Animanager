@@ -44,8 +44,8 @@ public static class BoneTests
             preview.Seek(.317);
             Check(Near(bones.Overlay.SelectedWorldPosition!.Value,bones.WorldPose(selected).Origin)&&Near(bones.Overlay.CurrentWorldPosition!.Value,bones.WorldPose(selected).Origin),"selection and current marker follow sub-sample seek exactly");
             Check(bones.Overlay.SegmentCount==bones.Trajectory.Samples.Length-1,"trajectory does not connect the loop endpoint back to the start");
-            var savedTrajectory=bones.Trajectory;owner.Workspace.UsePreset("preview");await Frames(20);
-            owner.Workspace.Maximize("preview");await Frames(5);owner.Workspace.Maximize("preview");await Frames(5);
+            var savedTrajectory=bones.Trajectory;owner.Workspace.ShowPanel("preview");await Frames(20);
+            owner.Workspace.FocusPanel("preview");await Frames(5);owner.Workspace.FocusPanel("preview");await Frames(5);
             Check(bones.Selected==selected&&ReferenceEquals(bones.Trajectory,savedTrajectory)&&Math.Abs(preview.Playhead-.317)<.0001,"workspace reparenting retains bone selection, trajectory, and playhead");
             int runs=bones.SamplingRuns;await Execute("trail show false");await Execute("trail show true");
             Check(bones.SamplingRuns==runs,"same selection and clip reuse cached trajectory");
@@ -111,7 +111,7 @@ public static class BoneTests
             {
                 // Deterministic rendered evidence produced by the real preview viewport.
                 await Execute("preview load StudioBot_Walk");await Execute("bone select LeftFoot");await Execute("bone show true");await Execute("trail show true");preview.Seek(.3);
-                owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,900);owner.Workspace.Maximize("preview");preview.FrameModel();await Frames(10);
+                owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,900);owner.Workspace.FocusPanel("preview");preview.FrameModel();await Frames(10);
                 preview.Redraw();await owner.ToSignal(RenderingServer.Singleton,RenderingServer.SignalName.FramePostDraw);
                 using var image=preview.View.GetTexture().GetImage();image.SavePng(Path.Combine(root,"bone-trajectory.png"));
                 Check(image.GetWidth()>200,"rendered preview evidence captured");

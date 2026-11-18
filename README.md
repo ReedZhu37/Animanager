@@ -4,11 +4,13 @@
 
 P0 已接入多 Library 管理、资产整理和基础库维护。功能范围与验收入口见 [功能迭代计划](Docs/FUNCTIONAL_ROADMAP.md)。
 
-P1 本轮补齐可配置导出、预览缩略图与属性筛选。人物 / 武器预设管理、骨架切换和重定向留待后续。
+P1 本轮补齐可配置导出、预览缩略图与属性筛选。已加入标准 UE4 Mannequin ↔ UE5 Manny 重定向、并排预览、预设保存及批量导出。跨动画库共享的角色库支持导入通过 Ready-v1 检查的自定义人体角色（含 Mixamo 常见骨名），选择预览角色后自动应用到后续动画；任意骨名映射与武器预设管理留待后续。见 [角色库与 Retarget 使用说明](Docs/RETARGET.md)。
 
-Nodachi 已实现固定人体预设、独立武器轨道及握持 / 接触记录，操作与范围见 [独立轨道说明](Docs/MOTION_STORAGE.md)。完整后续设计见 [动画存储规划](Docs/ANIMATION_STORAGE_PLAN.md)；跨骨架 retarget、接触 IK 和完整旧库迁移尚未实施。
+Nodachi 已实现固定人体预设、独立武器轨道及握持 / 接触记录，操作与范围见 [独立轨道说明](Docs/MOTION_STORAGE.md)。完整后续设计见 [动画存储规划](Docs/ANIMATION_STORAGE_PLAN.md)；标准人体 retarget 已接入；接触 IK 和完整旧库迁移尚未实施。
 
-已加入独立 `.uasset / ZIP` 导入：无需安装 Unreal，使用 CUE4Parse 自动识别 UE4 / UE5 标准骨架。已验证 UE4.23 原始动画、UE5.0 AnimDataModel 与 UE5.6 Sequencer Direct FK 动画；Movement 的 386 段序列及官方 Manny Idle 已与已有 UE FBX 对照通过。UE5 保留完整 161 根骨骼；其他版本与编码尚未承诺兼容。见 [导入方法与兼容范围](Docs/CUE4PARSE_IMPORT.md)。
+已加入独立 `.uasset / ZIP` 导入：无需安装 Unreal，使用 CUE4Parse 自动识别 UE4 / UE5 标准骨架。已验证 UE4.23 / 4.27 原始动画、UE5.0 AnimDataModel 与 UE5.6 Sequencer Direct FK 动画；Movement 的 386 段序列及官方 Manny Idle 已与已有 UE FBX 对照通过。UE5 保留完整 161 根骨骼；其他版本与编码尚未承诺兼容。见 [导入方法与兼容范围](Docs/CUE4PARSE_IMPORT.md)。
+
+本轮新增四个默认男/女角色、自动重定向准入检查、播放滑条和 Blender 风格导航。详见 [Ready-v1 规则与验收](Docs/ASSET_READINESS.md)。
 
 ## 启动
 
@@ -57,8 +59,8 @@ job status last
 ## 第一版可用流程
 
 1. 点击导入文件 / 文件夹，或把文件 / 文件夹拖入窗口。递归扫描 GLB、glTF、FBX；后台复制入库，计算 SHA-256 去重。可取消，已完成的条目保留。
-2. 在资产列表选择模型，使用右键旋转、中键平移、滚轮缩放、F 重置相机。
-3. 动画支持播放 / 暂停、片段切换、循环、0.5–2 倍速、时间轴定位。独立 `.motion` 动画按源帧率步进，其他资产按 1/30 秒步进。空格播放 / 暂停，Ctrl+F 搜索。
+2. 在资产列表选择模型，使用中键/右键旋转、Shift+中键平移、滚轮缩放、F 聚焦；工具栏与可拖动坐标轴提供同样的操作。
+3. 动画支持播放 / 暂停、片段切换、循环、0.1–3 倍速滑条、当前帧 / 总帧显示、时间轴定位。独立 `.motion` 动画按源帧率步进，其他资产按已知源帧率步进，未知时使用 30 FPS。空格播放 / 暂停，Ctrl+F 搜索。
 4. 按名称或标签搜索，切换动画 / 模型 / 收藏分类，并按骨架、时长和源帧率筛选；先筛选再分页，每页 60 项。列表自动生成缩略图，不能确认的属性显示未知。源帧率与预览播放速度独立。
 5. 在导出面板选择范围、格式、Mesh、动画片段及可选的时间范围 / 采样帧率，再选择目录并导出：支持 Godot `.res` AnimationLibrary、`.glb` 和 Blender 后台 `.fbx`，均使用任务队列。同名文件自动编号，不覆盖已有文件；导出设置不修改原资产。
 
@@ -68,8 +70,8 @@ job status last
 - 元数据只保存库内相对路径；原始资产不修改。SQLite 索引使用 FTS5，中文 / 子串搜索以参数化 LIKE 补充。
 - glTF 的外部 buffers / images 会一起复制；依赖必须位于 glTF 所在目录内。缺失依赖或越界依赖会明确报错，推荐先打包为 GLB。
 - FBX 使用 Godot 原生 FBXDocument 导入，Blender 5.2 后台导出。本次已验证标准人体的骨骼、动画及尺度往返；尚未在 UE 中回导验收，外部纹理打包和复杂资产兼容仍需后续测试。
-- `.res` 保存源动画轨道，需要匹配的节点路径和骨架，不进行重定向。标准 baseline 来源与 SHA-256 见 `BuiltinAssets/Baselines/provenance.json`；StudioBot 只保留为小型确定性测试 fixture。
-- 重定向 / BoneMap、专门面向 UE 的复杂异构骨骼烘焙、S3 / MinIO 尚未实现。独立 Windows 便携原型已加入构建流程；安装器、签名、自动更新与正式发布尚未实现。
+- `.res` 保存动画轨道，需要匹配的节点路径和骨架；启用 Retarget 时保存目标骨架轨道。标准 baseline 来源与 SHA-256 见 `BuiltinAssets/Baselines/provenance.json`；StudioBot 只保留为小型确定性测试 fixture。
+- 任意骨架 BoneMap、接触 IK、专门面向 UE 的复杂异构骨骼烘焙、S3 / MinIO 尚未实现。独立 Windows 便携原型已加入构建流程；安装器、签名、自动更新与正式发布尚未实现。
 - 文件扫描 / 复制 / 哈希在后台执行。Godot 场景解析当前仍在主线程，大型模型加载可能短暂停顿。当前按首个 AnimationPlayer 提取动画，复杂多动画播放器场景需后续扩展。
 - 启用 Compatibility 渲染器和低处理器占用模式；预览暂停时仅在视角、尺寸或姿态变化后请求重绘。实际占用依赖模型与驱动，尚未完成性能基准测试。
 
@@ -83,7 +85,7 @@ job status last
 
 多轨迹 UI 回归（2026-11-14）：新增 49 项交互检查通过，42 项既有骨骼面板和 63 项多轨迹 API 回归通过。已在实际 Windows 窗口验证 Ctrl / Shift 多选、固定列表显隐 / 移除、根骨骼选择、Root Motion 开关、停靠、720×400 和 200% 缩放，并检查并排预览截图。
 
-运行 `Test.ps1` 验证基础流程，`Test.ps1 -Suite All` 运行全部测试，`-Suite Interface` 单独验证工作区，`-Suite Bones` 验证骨骼与轨迹，`-Suite BoneUI` 验证骨骼面板交互，`-Suite MultiBones` 验证多选、固定轨迹与 Root Motion API，`-Suite MultiBoneUI` 验证对应面板交互。`-Suite P1` 运行导出配置与资产浏览检查，也可分别使用 `-Suite ExportOptions` 和 `-Suite AssetBrowse`。管线与包含 FBX 的导出测试需要 Blender。或构建后运行：
+运行 `Test.ps1` 验证基础流程，`Test.ps1 -Suite All` 运行全部测试，`-Suite Interface` 单独验证工作区，`-Suite Bones` 验证骨骼与轨迹，`-Suite BoneUI` 验证骨骼面板交互，`-Suite MultiBones` 验证多选、固定轨迹与 Root Motion API，`-Suite MultiBoneUI` 验证对应面板交互。`-Suite P1` 运行导出配置与资产浏览检查，也可分别使用 `-Suite ExportOptions` 和 `-Suite AssetBrowse`。`-Suite Retarget` 验证双向重定向、武器运动与预设。管线与包含 FBX 的导出测试需要 Blender。或构建后运行：
 
 ```powershell
 & $env:GODOT_MONO_BIN --headless --path . -- --self-test --data-dir=D:/_Projects/Animanager/.runtime/test-startup

@@ -63,7 +63,8 @@ public sealed class BatchPlanner(WorkspaceApi api)
         if(inputs.Length>0&&inputs.All(p=>Path.GetExtension(p).ToLowerInvariant() is ".uasset" or ".zip"))return ImportUasset(inputs);
         var plan=await Task.Run(()=>{
             var items=new List<PlanItem>();var visited=new HashSet<string>(StringComparer.OrdinalIgnoreCase);int ignored=0;
-            void Visit(string raw,bool explicitInput)
+            var uassetInputs=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            void Visit(string raw,bool explicitInput,string? directoryRoot=null)
             {
                 ct.ThrowIfCancellationRequested();
                 string path;
@@ -79,22 +80,28 @@ public sealed class BatchPlanner(WorkspaceApi api)
                         foreach(var child in Directory.EnumerateFileSystemEntries(path).OrderBy(p=>p,StringComparer.OrdinalIgnoreCase))
                         {
                             if(manifests.Length>0&&Directory.Exists(child)&&Path.GetFileName(child).Equals("objects",StringComparison.OrdinalIgnoreCase))continue;
-                            Visit(child,false);
+                            Visit(child,false,directoryRoot??path);
                         }
                     }
                     else if(Path.GetExtension(path).ToLowerInvariant() is ".glb" or ".gltf" or ".fbx"||Animanager.Core.Motion.MotionJson.IsMotion(path))
                         items.Add(new(){Input=path,Name=Path.GetFileNameWithoutExtension(path)});
-                    else if(explicitInput)throw new IOException("Unsupported format; use GLB, glTF or FBX.");
+                    else if(Path.GetExtension(path).Equals(".uasset",StringComparison.OrdinalIgnoreCase))
+                        uassetInputs.Add(directoryRoot??path);
+                    else if(Path.GetExtension(path).Equals(".zip",StringComparison.OrdinalIgnoreCase))
+                        uassetInputs.Add(path);
+                    else if(explicitInput)throw new IOException("不支持此格式。请选择 GLB、glTF、FBX、motion.json、uasset、ZIP 或资产文件夹。");
                     else ignored++;
                 }
                 catch(OperationCanceledException){throw;}
                 catch(Exception ex){items.Add(new(){Input=path,Name=Path.GetFileName(path),Error=ex.Message});}
             }
-            foreach(var path in inputs)Visit(path,true);
+            // Scan directories before files so overlapping selections keep one dependency root.
+            foreach(var path in inputs.OrderBy(p=>Directory.Exists(p)?0:1).ThenBy(p=>p.Length))Visit(path,true);
+            foreach(var path in uassetInputs)items.Add(new(){Input=path,Name=Path.GetFileName(path),IsUasset=true});
             return new BatchPlan{Kind=JobKind.Import,Selection=string.Join("; ",inputs),IgnoredFiles=ignored,Items=items};
         },ct);
         ct.ThrowIfCancellationRequested();
-        if(plan.Items.Count==0)throw new InvalidOperationException($"No supported assets found ({plan.IgnoredFiles} other files ignored).");
+        if(plan.Items.Count==0)throw new InvalidOperationException($"没有找到可导入资产（跳过 {plan.IgnoredFiles} 个辅助或不支持的文件）。支持 GLB、glTF、FBX、motion.json、uasset 和 ZIP。请检查所选目录。 ");
         Save(plan);return plan;
     }
     public BatchPlan ImportUasset(IEnumerable<string> paths)
@@ -106,7 +113,7 @@ public sealed class BatchPlanner(WorkspaceApi api)
             if(!Directory.Exists(path)&&(!File.Exists(path)||Path.GetExtension(path).ToLowerInvariant() is not (".uasset" or ".zip")))throw new IOException("Choose a .uasset, ZIP, or asset directory: "+path);
             if((File.GetAttributes(path)&FileAttributes.ReparsePoint)!=0)throw new IOException("Reparse points are not supported.");
         }
-        var plan=new BatchPlan{Kind=JobKind.ImportUasset,Selection="UE4 / UE5 standard skeletons · "+string.Join("; ",inputs),Items=inputs.Select(p=>new PlanItem{Input=p,Name=Path.GetFileName(p)}).ToList()};
+        var plan=new BatchPlan{Kind=JobKind.ImportUasset,Selection="UE4 / UE5 standard skeletons · "+string.Join("; ",inputs),Items=inputs.Select(p=>new PlanItem{Input=p,Name=Path.GetFileName(p),IsUasset=true}).ToList()};
         Save(plan);return plan;
     }
     public async Task<BatchPlan> ImportManifestAsync(string path,CancellationToken ct=default)

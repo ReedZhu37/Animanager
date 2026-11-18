@@ -66,7 +66,12 @@ public sealed partial class WorkspaceApi(AssetDatabase database,LocalStorageProv
                 }
             }
             BatchPlanner.AtomicJson(Path.Combine(reports,"import-report.json"),new{version=2,input,profile=UassetPipeline.Profile,conversionReport=report.ReportPath,cacheRoot=output,added,skipped,unsupported=report.Unsupported,errors,items=imported});
-            var outcome=new UassetImportOutcome(added,skipped,report.Unsupported,report.ReportPath,errors);
+            var warnings=report.Items.Where(i=>i.Status is not ("converted" or "dependency" or "failed"))
+                .GroupBy(i=>i.Error).OrderByDescending(g=>g.Count())
+                .Select(g=>$"{g.Count()} 个：{g.Key}（例如 {Path.GetFileName(g.First().Source)}）").Take(12).ToList();
+            if(added+skipped==0&&errors.Count==0&&warnings.Count==0)
+                warnings.Add(report.Items.Count==0?"目录中没有找到 .uasset 文件。":"目录中只有骨架等依赖资源，没有可导入的 AnimSequence 动画。");
+            var outcome=new UassetImportOutcome(added,skipped,report.Unsupported,report.ReportPath,errors){Warnings=warnings};
             progress?.Report($"UASSET_RESULT {added} added; {skipped} duplicates; {report.Unsupported} unsupported. {report.ReportPath}");
             return outcome;
         }

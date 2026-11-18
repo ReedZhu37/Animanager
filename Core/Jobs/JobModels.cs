@@ -32,6 +32,7 @@ public sealed record PlanItem
     public string Name { get; init; }="";
     public string Input { get; init; }="";
     public string Error { get; init; }="";
+    public bool IsUasset { get; init; }
 }
 public sealed record BatchPlan
 {
@@ -55,6 +56,7 @@ public sealed class JobItem
     public int ImportedAssets { get; set; }
     public int DuplicateAssets { get; set; }
     public int UnsupportedAssets { get; set; }
+    public List<string> Warnings { get; set; }=[];
 }
 public sealed class JobRecord
 {

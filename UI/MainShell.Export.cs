@@ -38,6 +38,7 @@ public partial class MainShell
         column.AddChild(_exportType);
         _exportMesh = new CheckBox { Name = "ExportIncludeMesh", Text = "包含网格", ButtonPressed = true };
         column.AddChild(_exportMesh);
+        column.AddChild(Button("配置 Retarget…", () => _workspace.ShowPanel("retarget")));
 
         column.AddChild(Label("动画片段", true, 12));
         _exportClipMode = new OptionButton { Name = "ExportClipMode", FitToLongestItem = false };
@@ -100,6 +101,8 @@ public partial class MainShell
         };
         _exportSummary.Text = scope == 1 && count > 0 ? _selected!.Name
             : count == 0 ? "此范围内没有可导出的资产。" : $"{count} 个资产";
+        if (_retargetEnabled?.ButtonPressed == true) _exportSummary.Text += "\nRetarget → " + RetargetCharacter.Name;
+        if (_exportFps != null) _exportFps.PlaceholderText = _retargetEnabled?.ButtonPressed == true ? "默认自动选择；独立武器 600 FPS" : "默认使用源采样";
         _exportMesh.Visible = (JobKind)_exportType.GetSelectedId() != JobKind.ExportRes;
 
         var preview = _previewAssetId.Length > 0 && _previewAssetId == _selected?.Id ? _preview : null;
@@ -147,7 +150,8 @@ public partial class MainShell
                 Clips = _exportClipMode.Selected == 1 ? _exportClipList.GetSelectedItems().Select(_exportClipList.GetItemText).ToArray() : null,
                 StartSeconds = ExportNumber(_exportStart, "起始时间"),
                 EndSeconds = ExportNumber(_exportEnd, "结束时间"),
-                SampleFps = ExportNumber(_exportFps, "采样帧率")
+                SampleFps = ExportNumber(_exportFps, "采样帧率"),
+                Retarget = _retargetEnabled?.ButtonPressed == true ? ReadRetargetOptions() : null
             }.Snapshot(kind == JobKind.ExportRes);
 
             BatchPlan plan;

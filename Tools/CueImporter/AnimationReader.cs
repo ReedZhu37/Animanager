@@ -20,7 +20,7 @@ internal static class AnimationReader
         if(anim.bForceRootLock)throw new NotSupportedException("Force root lock evaluation is not supported.");
         if((int)anim.Interpolation!=0)throw new NotSupportedException("Non-linear sequence interpolation is not supported.");
         if(anim.AdditiveAnimType is not (EAdditiveAnimationType.AAT_None or EAdditiveAnimationType.AAT_RotationOffsetMeshSpace))throw new NotSupportedException("This additive animation type is not validated.");
-        if(major==4&&minor==23&&anim.RawAnimationData is {Length:>0})
+        if(major==4&&minor is 23 or 27&&anim.RawAnimationData is {Length:>0})
         {
             var names=anim.GetOrDefault<FName[]>("AnimationTrackNames",[]).Select(x=>x.Text).ToArray();
             if(names.Length!=anim.RawAnimationData.Length)throw new InvalidDataException("Raw track name count differs from data count.");

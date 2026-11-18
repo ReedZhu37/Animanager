@@ -433,6 +433,9 @@ public sealed class AssetDatabase
     }
 
     public (List<AssetItem> Items, int Total) Search(string query = "", string category = "All", int page = 0, int pageSize = 60)
+        => Search(query, category, Animanager.Core.Browse.AssetSort.Default, page, pageSize);
+
+    public (List<AssetItem> Items, int Total) Search(string query, string category, Animanager.Core.Browse.AssetSort sort, int page = 0, int pageSize = 60)
     {
         lock (_gate)
         {
@@ -457,7 +460,7 @@ public sealed class AssetDatabase
             cmd.Parameters.AddWithValue("$cat", category);
             cmd.CommandText = "SELECT count(*) FROM assets " + where;
             int total = Convert.ToInt32(cmd.ExecuteScalar());
-            cmd.CommandText = "SELECT " + AssetColumns + ",trashed FROM assets " + where + " ORDER BY imported DESC,name,id LIMIT $limit OFFSET $offset";
+            cmd.CommandText = "SELECT " + AssetColumns + ",trashed FROM assets " + where + " ORDER BY " + sort.SqlOrder + " LIMIT $limit OFFSET $offset";
             cmd.Parameters.AddWithValue("$limit", pageSize);
             cmd.Parameters.AddWithValue("$offset", (long)page * pageSize);
             using var reader = cmd.ExecuteReader();

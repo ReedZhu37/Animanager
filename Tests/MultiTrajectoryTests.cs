@@ -66,7 +66,7 @@ public static class MultiTrajectoryTests
             Check(bones.Trajectories.Single(t=>t.PinId==relativePin).Trajectory.Samples.All(s=>Near(s.Position,new(0,1,.5f))),"relative pin cancels ancestor translation, rotation and scale");
             await Execute("trail world");await Execute("trail rate 30");preview.Seek(.317);
             Check(bones.Trajectories.Single(t=>t.PinId==relativePin).Trajectory is {Reference:not null,Rate:60},"fixed reference and rate survive later global settings");
-            var relativeRoot=(Node3D)Preview3DViewport.Descendants(bones.Overlay).OfType<Label3D>().Single(l=>l.Text.StartsWith("PIN "+relativePin+" ·")).GetParent();
+            var relativeRoot=(Node3D)Preview3DViewport.Descendants(bones.Overlay).OfType<BoneLabelAnchor>().Single(l=>l.Text.StartsWith("PIN "+relativePin+" ·")).GetParent();
             Check(relativeRoot.GlobalTransform.IsEqualApprox(bones.WorldPose(new(0,0))),"relative pin geometry follows its captured reference, not the global setting");
             Check(bones.Trajectories.All(t=>Near(bones.Overlay.TrailCurrentWorldPosition(t.Id)!.Value,bones.WorldPose(t.Trajectory.Bone).Origin)),"all world and relative pin markers track exact sub-sample poses");
             await Execute("trail pins");Check(commands.LastResult.Contains("relative to 0:0")&&commands.LastResult.Contains("60/s"),"Console lists independent pin settings");
@@ -133,7 +133,7 @@ public static class MultiTrajectoryTests
             bones.ShowSkeleton(true);preview.Seek(.3);preview.SetSpeed(1);
             if(DisplayServer.GetName()!="headless")
             {
-                owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,900);owner.Workspace.Maximize("preview");preview.FrameModel();await Frames(10);
+                owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,900);owner.Workspace.FocusPanel("preview");preview.FrameModel();await Frames(10);
                 preview.Redraw();await owner.ToSignal(RenderingServer.Singleton,RenderingServer.SignalName.FramePostDraw);
                 using var image=preview.View.GetTexture().GetImage();image.SavePng(Path.Combine(folder,"multi-trajectories.png"));
                 Check(image.GetWidth()>200,"rendered multi-path and Root Motion evidence captured");

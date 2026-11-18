@@ -20,7 +20,13 @@ public partial class Preview3DViewport : SubViewportContainer
     public bool Playing => Player?.IsPlaying() == true;
     public double Duration => Player != null && CurrentClip.Length>0 ? Player.GetAnimation(CurrentClip).Length : 0;
     public double Playhead => Player != null && CurrentClip.Length>0 ? Player.CurrentAnimationPosition : 0;
-    public double FrameStep => 1.0/(Motion?.Manifest.SourceFps??30);
+    public double FrameStep => 1.0 / DisplayFps;
+    public Core.Retarget.AssetReadiness? SourceReadiness { get; private set; }
+    private double _sourceRate = 30;
+    public double DisplayFps => Motion?.Manifest.SourceFps ?? _sourceRate;
+    public int TotalFrames => Duration > 0 ? Math.Max(1, (int)Math.Ceiling(Duration * DisplayFps - 1e-5) + 1) : 0;
+    public int CurrentFrame => TotalFrames == 0 ? 0 : Math.Clamp((int)Math.Round(Playhead * DisplayFps) + 1, 1, TotalFrames);
+    private double _speed = 1;
     private Node3D _stage = null!;
     private Camera3D _camera = null!;
     private Vector3 _target=new(0,0.9f,0);
@@ -28,6 +34,13 @@ public partial class Preview3DViewport : SubViewportContainer
     private bool _loop=true;
     private bool _clay=true;
     private BoneAttachment3D[] _attachments=[];
+    private BoneScreenLabels? _screenLabels;
+    public Vector2? ProjectLabel(Vector3 position)
+    {
+        if (_camera == null || !_camera.IsInsideTree() || _camera.IsPositionBehind(position) || View.Size.X == 0 || View.Size.Y == 0) return null;
+        var point = _camera.UnprojectPosition(position) * Size / (Vector2)View.Size;
+        return new Rect2(Vector2.Zero, Size).HasPoint(point) ? point : null;
+    }
 
     public override void _Ready()
     {
@@ -50,28 +63,37 @@ public partial class Preview3DViewport : SubViewportContainer
             grid.SurfaceAddVertex(new Vector3(-10,0,i));grid.SurfaceAddVertex(new Vector3(10,0,i));
         }
         grid.SurfaceEnd();
-        _stage.AddChild(new MeshInstance3D { Mesh=grid, MaterialOverride=new StandardMaterial3D {
-            ShadingMode=BaseMaterial3D.ShadingModeEnum.Unshaded,AlbedoColor=new Color("3c454c") } });
+        _grid = new MeshInstance3D { Mesh=grid, MaterialOverride=new StandardMaterial3D {
+            ShadingMode=BaseMaterial3D.ShadingModeEnum.Unshaded,AlbedoColor=new Color("3c454c") } };
+        _stage.AddChild(_grid);
         _camera=new Camera3D { Fov=38,Near=0.01f,Far=10000 };_stage.AddChild(_camera);
         Bones=new BoneInspection(this,_stage);
-        UpdateCamera();GuiInput+=HandleInput;Resized+=Redraw;VisibilityChanged+=()=>{if(IsVisibleInTree())Redraw();};
+        _screenLabels = new BoneScreenLabels { Name = "BoneScreenLabels", Preview = this, MouseFilter = MouseFilterEnum.Ignore, ClipContents = true };
+        AddChild(_screenLabels); _screenLabels.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+        BuildNavigation();
+        UpdateCamera();GuiInput+=HandleInput;Resized+=UpdateCamera;VisibilityChanged+=()=>{if(IsVisibleInTree())UpdateCamera();};
         SetProcess(false);
     }
     public void Clear()
     {
-        Bones.Clear();_baseline=null;Motion=null;_attachments=[];
+        ClearRetarget();
+        Bones.Clear();_baseline=null;Motion=null;_attachments=[];_sourceRate=30;SourceReadiness=null;
         if(Model!=null) { _stage.RemoveChild(Model);Model.QueueFree(); }
         Model=null;Player=null;Clips=[];CurrentClip="";BoneCount=0;MeshCount=0;
         SetProcess(false);Redraw();
     }
     public void LoadFile(string path)
     {
-        Clear();
-        if(MotionJson.IsMotion(path))
-        {
-            var motion=new MotionPlayback(path);AttachModel(motion.Root);Motion=motion;motion.Sync();Redraw();return;
-        }
-        AttachModel(SceneAsset.Load(path,out _));
+        using var source = new PreviewSource(path);
+        AttachSource(source);
+    }
+    public void AttachSource(PreviewSource source, bool notify = true)
+    {
+        AttachModel(source.TakeRoot());
+        Motion = source.Motion; _sourceRate = source.FrameRate; Motion?.Sync();
+        try { Core.Retarget.RetargetBaker.RejectAdditive(source.Path); }
+        catch (NotSupportedException e) { SourceReadiness = new(false, (SourceReadiness?.Errors ?? []).Append(e.Message).ToArray()); }
+        Redraw(); if (notify) SourceLoaded?.Invoke();
     }
     internal void AttachModel(Node3D root)
     {
@@ -79,9 +101,11 @@ public partial class Preview3DViewport : SubViewportContainer
         var nodes=Descendants(root).ToList();
         _attachments=nodes.OfType<BoneAttachment3D>().ToArray();
         Player=nodes.OfType<AnimationPlayer>().FirstOrDefault();
+        if (Player != null) Player.SpeedScale = (float)_speed;
         SetClay(_clay);
         BoneCount=nodes.OfType<Skeleton3D>().Sum(s=>s.GetBoneCount());MeshCount=nodes.OfType<MeshInstance3D>().Count();
         Clips=Player?.GetAnimationList().Where(n=>n!="RESET").ToArray()??[];
+        SourceReadiness = Core.Retarget.AssetReadiness.Inspect(root, Clips.Length > 0);
         Bones.Bind(root,Player,_baseline);
         if(Clips.Length>0) SelectClip(Clips[0]);
         FrameModel();
@@ -106,13 +130,23 @@ public partial class Preview3DViewport : SubViewportContainer
         if(Playing) Player.Pause(); else { if(Playhead>=Duration) Player.Seek(0,true);Player.Play(CurrentClip); }
         SetProcess(Playing);Redraw();
     }
-    public void Seek(double time) { if(Player==null||CurrentClip.Length==0)return;Player.Pause();Player.Seek(time,true);SetProcess(false);Redraw(); }
-    public void SetSpeed(double speed) { if(Player!=null)Player.SpeedScale=(float)speed; }
+    public void Seek(double time)
+    {
+        if(Player==null||CurrentClip.Length==0)return;
+        Player.Pause();
+        var animation = Player.GetAnimation(CurrentClip); var loop = animation.LoopMode;
+        animation.LoopMode = Animation.LoopModeEnum.None;
+        Player.Seek(Math.Clamp(time, 0, Duration), true);
+        animation.LoopMode = loop;
+        SetProcess(false);Redraw();
+    }
+    public void SetSpeed(double speed) { _speed = Math.Clamp(speed, .1, 3); if(Player!=null)Player.SpeedScale=(float)_speed; }
     public void SetLoop(bool loop) { _loop=loop;if(Player!=null&&CurrentClip.Length>0)Player.GetAnimation(CurrentClip).LoopMode=loop?Animation.LoopModeEnum.Linear:Animation.LoopModeEnum.None; }
     public void SetClay(bool enabled)
     {
         _clay=enabled;
         if (Model != null) ApplyClay(Model, enabled);
+        if (_comparison != null) ApplyClay(_comparison, enabled);
         Redraw();
     }
     internal static void ApplyClay(Node3D model, bool enabled)
@@ -122,7 +156,7 @@ public partial class Preview3DViewport : SubViewportContainer
                 mesh.MaterialOverride = enabled ? new StandardMaterial3D { AlbedoColor = new Color("a9b6c5"), Roughness = .8f } : null;
     }
     public override void _Process(double delta) {Redraw();if(!Playing)SetProcess(false);}
-    public void Redraw() { foreach(var attachment in _attachments)attachment.OnSkeletonUpdate();if(View!=null)View.RenderTargetUpdateMode=IsVisibleInTree()?SubViewport.UpdateMode.Once:SubViewport.UpdateMode.Disabled; }
+    public void Redraw() { SyncRetargetComparison();foreach(var attachment in _attachments)attachment.OnSkeletonUpdate();_screenLabels?.QueueRedraw();if(View!=null)View.RenderTargetUpdateMode=IsVisibleInTree()?SubViewport.UpdateMode.Once:SubViewport.UpdateMode.Disabled; }
     public void Zoom(float multiplier){_distance=Mathf.Clamp(_distance*multiplier,.05f,5000);UpdateCamera();}
     public void FocusPoint(Vector3 point){_target=point;UpdateCamera();}
     public void FrameModel()
@@ -134,7 +168,7 @@ public partial class Preview3DViewport : SubViewportContainer
             _distance=Mathf.Max(0.3f,size.Length()*1.7f);
         }
         else {_target=new Vector3(0,0.9f,0);_distance=4.5f;}
-        _yaw=0.5f;_pitch=0.16f;UpdateCamera();
+        _yaw=0.5f;_pitch=0.16f;_viewName="用户视图";UpdateCamera();
     }
     public static Aabb? CalculateWorldBounds(Node3D root)
     {
@@ -175,8 +209,15 @@ public partial class Preview3DViewport : SubViewportContainer
     }
     private void UpdateCamera()
     {
-        _camera.Position=_target+new Vector3(Mathf.Sin(_yaw)*Mathf.Cos(_pitch),Mathf.Sin(_pitch),Mathf.Cos(_yaw)*Mathf.Cos(_pitch))*_distance;
-        _camera.LookAt(_target);Redraw();
+        if(_camera==null || !_camera.IsInsideTree())return;
+        // Preserve the user's orbit/zoom while fitting the narrower field of view in portrait panels.
+        float aspect=Size.Y>0?Math.Max(.1f,Size.X/Size.Y):1;
+        _camera.Position=_target+new Vector3(Mathf.Sin(_yaw)*Mathf.Cos(_pitch),Mathf.Sin(_pitch),Mathf.Cos(_yaw)*Mathf.Cos(_pitch))*(_distance*Math.Max(1,1/aspect));
+        _camera.LookAt(_target);
+        _camera.Size = _distance * .65f;
+        _axisGizmo?.QueueRedraw();
+        if (_axisGizmo != null) _axisGizmo.TooltipText = _viewName + (Orthographic ? " · 正交" : " · 透视") + "\n拖动旋转；点击 X / Y / Z 切换轴向视图（Y 向上）";
+        Redraw();
     }
     private void HandleInput(InputEvent ev)
     {
@@ -189,9 +230,12 @@ public partial class Preview3DViewport : SubViewportContainer
         }
         if(ev is InputEventMouseMotion motion)
         {
-            if((motion.ButtonMask&MouseButtonMask.Right)!=0) {_yaw-=motion.Relative.X*0.008f;_pitch=Mathf.Clamp(_pitch+motion.Relative.Y*0.008f,-1.4f,1.4f);}
-            if((motion.ButtonMask&MouseButtonMask.Middle)!=0||((motion.ButtonMask&MouseButtonMask.Left)!=0&&motion.ShiftPressed)) _target+=(-_camera.Basis.X*motion.Relative.X+_camera.Basis.Y*motion.Relative.Y)*_distance*0.0015f;
-            if(motion.ButtonMask!=0)UpdateCamera();
+            bool middle = (motion.ButtonMask & MouseButtonMask.Middle) != 0;
+            bool left = (motion.ButtonMask & MouseButtonMask.Left) != 0;
+            if (middle && motion.CtrlPressed) Navigate("zoom", motion.Relative);
+            else if (middle && motion.ShiftPressed || left && motion.ShiftPressed) Navigate("pan", motion.Relative);
+            else if (middle || (motion.ButtonMask & MouseButtonMask.Right) != 0) Navigate("orbit", motion.Relative);
         }
+        if (ev is InputEventKey key && key.Pressed && !key.Echo && HandleViewKey(key)) AcceptEvent();
     }
 }

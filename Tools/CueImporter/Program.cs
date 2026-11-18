@@ -37,7 +37,7 @@ internal static class Program
                     row.type=export.x?.ClassIndex.Name??"Unknown";
                     if(row.type=="Skeleton"){row.status="dependency";continue;}
                     if(row.type!="AnimSequence")throw new NotSupportedException("Unsupported asset class: "+row.type);
-                    if(!((engine.Major==4&&engine.Minor==23)||(engine.Major==5&&engine.Minor is 0 or 6)))throw new NotSupportedException($"Editor animation reader is not validated for UE {engine.Major}.{engine.Minor}.");
+                    if(!((engine.Major==4&&engine.Minor is 23 or 27)||(engine.Major==5&&engine.Minor is 0 or 6)))throw new NotSupportedException($"Editor animation reader is not validated for UE {engine.Major}.{engine.Minor}.");
                     var anim=(UAnimSequence)package.ExportsLazy[export.i].Value;
                     row.skeleton=AssetCatalog.ImportPath(package,anim.Skeleton);
                     row.rootMotion=anim.bEnableRootMotion;row.forceRootLock=anim.bForceRootLock;row.additive=anim.AdditiveAnimType.ToString();row.notifies=anim.Notifies?.Length??0;

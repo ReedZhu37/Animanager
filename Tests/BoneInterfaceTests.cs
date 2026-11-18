@@ -37,13 +37,18 @@ public static class BoneInterfaceTests
         }
         async Task ClickControl(Control control)
         {
-            var body=(ScrollContainer)panel.GetParent();body.EnsureControlVisible(control);await Frames();
+            await ScrollTo(control);
             await Click(control.GetGlobalRect().GetCenter());
+        }
+        async Task ScrollTo(Control control)
+        {
+            for(var parent=control.GetParent();parent!=null;parent=parent.GetParent())
+                if(parent is ScrollContainer scroll){scroll.EnsureControlVisible(control);await Frames();}
         }
         async Task ClickBone(string name)
         {
             var item=Item(name);for(var p=item.GetParent();p!=null;p=p.GetParent())p.Collapsed=false;
-            ((ScrollContainer)panel.GetParent()).EnsureControlVisible(tree);tree.ScrollToItem(item);await Frames();
+            await ScrollTo(tree);tree.ScrollToItem(item);await Frames();
             var rect=tree.GetItemAreaRect(item);var local=new Vector2(Math.Min(tree.Size.X-20,rect.Position.X+90),rect.GetCenter().Y);
             Check(tree.GetItemAtPosition(local)==item,"mouse target resolves to "+name);
             await Click(tree.GetGlobalTransformWithCanvas()*local);
@@ -66,7 +71,7 @@ public static class BoneInterfaceTests
         }
         try
         {
-            owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,960);if(DisplayServer.GetName()!="headless")owner.GetWindow().GrabFocus();host.UsePreset("animation");await Frames(30);
+            owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,960);if(DisplayServer.GetName()!="headless")owner.GetWindow().GrabFocus();host.ShowPanel("bones");await Frames(30);
             Check(host.IsPanelVisible("bones")&&host.IsPanelVisible("preview"),"animation workspace exposes the bone panel beside preview");
             Check(trail.Disabled&&Find<Label>("BoneEmpty").Text.Contains("选择一个资产"),"unloaded panel has empty guidance and disabled trajectory");
             var legacy=new WorkspaceLayout();legacy.CompactOrder.Remove("bones");legacy.Hidden.Remove("bones");legacy.Normalize();
@@ -96,17 +101,17 @@ public static class BoneInterfaceTests
             var selectedItem=Item("RightFoot");ulong itemId=selectedItem.GetInstanceId();
             preview.TogglePlay();await Frames(25);Check(Item("RightFoot").GetInstanceId()==itemId,"playback updates pose text without rebuilding tree items");preview.TogglePlay();
             await Execute("preview seek 0.31");await Frames(30);Check(Find<Label>("BonePose").Text.Contains("0.31"),"scrubbing updates selected bone time in the panel");
-            Check(Math.Abs(Preview3DViewport.Descendants(host.Panel("preview")).OfType<HSlider>().Single().Value-.31)<.001,"paused Console scrubbing also synchronizes the preview timeline");
+            Check(Math.Abs(((Animanager.UI.Shell.PreviewStage)host.Panel("preview")).Timeline.Value-.31)<.001,"paused Console scrubbing also synchronizes the preview timeline");
             await Query("Foot");var selection=bones.Selected;var panelId=panel.GetInstanceId();
-            host.MovePanel("bones",host.Layout.GroupFor("preview")!.Id,DockEdge.Center);await Frames();
+            host.ShowPanel("inspector");await Frames();
             Check(panel.GetInstanceId()==panelId&&search.Text=="Foot"&&bones.Selected==selection,"docking preserves search, selection, and panel instance");
-            host.MovePanel("bones",host.Layout.GroupFor("preview")!.Id,DockEdge.Left);await Frames();
-            Check(host.Layout.GroupFor("bones")!=host.Layout.GroupFor("preview"),"bone panel undocks beside preview");
+            host.ShowPanel("bones");await Frames();
+            Check(host.IsPanelVisible("bones")&&host.IsPanelVisible("preview"),"bone tools remain beside preview");
             host.HidePanel("bones");await Frames();await Execute("bone select LeftHand");host.ShowPanel("bones");await Frames();
             Check(Find<Label>("BoneSelection").Text.Contains("LeftHand"),"hidden panel catches up with Console selection when restored");
-            var prefs=new WorkspacePreferences{Layout=host.Layout.Clone()};string path=Path.Combine(folder,"workspace.json");prefs.Save(path);
-            var restored=WorkspacePreferences.Load(path,out var error);host.Restore(restored.Layout);await Frames();
-            Check(error.Length==0&&host.Layout.GroupFor("bones")!=null&&panel.GetInstanceId()==panelId,"bone docking layout persists and restores without reloading preview");
+            var prefs=new WorkspacePreferences{AssetView="List",Scale=1.25};string path=Path.Combine(folder,"workspace.json");prefs.Save(path);
+            var restored=WorkspacePreferences.Load(path,out var error);host.RestorePanels();host.ShowPanel("bones");await Frames();
+            Check(error.Length==0&&restored.AssetView=="List"&&restored.Scale==1.25&&panel.GetInstanceId()==panelId,"browser settings persist and restoring panels retains the preview");
             await Execute("preview load StudioBot_Rig");
             Check(search.Text.Length==0&&tree.GetSelected()==null&&reference.Selected==0&&trail.Disabled&&Find<Label>("BoneStatus").Text.Contains("没有可用动画"),"asset switch clears stale filters and selection; static rig disables trajectory");
             await ClickBone("LeftFoot");Check(bones.Selected!=null&&trail.Disabled,"static rig remains selectable");
@@ -119,7 +124,7 @@ public static class BoneInterfaceTests
             Check(bones.Selected==new BoneId(1,1)&&Items().Count()==6,"Chinese search and duplicate names select the correct skeleton by identity");
             Check(reference.ItemCount==5&&reference.GetItemText(2)!=reference.GetItemText(4),"reference menu disambiguates identical names across skeletons");
             await Execute("preview load StudioBot_Walk");await Query("Foot");await ClickBone("LeftFoot");await ClickControl(trail);await bones.PendingSampling;await Frames();
-            host.UsePreset("animation");bones.SetXray(true);preview.Seek(.3);await Frames(25);
+            host.ShowPanel("bones");bones.SetXray(true);preview.Seek(.3);await Frames(25);
             if(DisplayServer.GetName()!="headless")await Screenshot("desktop.png");
             owner.GetWindow().Size=new(720,400);host.ShowPanel("bones");await Frames(30);
             Check(host.Compact&&host.IsPanelVisible("bones")&&search.Size.X>200&&tree.Size.Y>=170,"720 x 400 compact workspace keeps tree reachable");
@@ -130,7 +135,7 @@ public static class BoneInterfaceTests
                 Check(panel.Size.X<=host.Size.X&&reference.Size.X<=panel.Size.X+1,"bone controls stay within panel bounds at "+scale+"x scale");
             }
             if(DisplayServer.GetName()!="headless")await Screenshot("scaled-200.png");
-            owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,960);host.UsePreset("animation");await Frames(30);
+            owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,960);host.ShowPanel("bones");await Frames(30);
             preview.Seek(.3);await Frames();Check(bones.Selected==bones.Resolve("LeftFoot"),"resize and DPI changes retain bone selection");
             var report=$"PASS: {checks.Count} bone UI checks\n"+string.Join("\n",checks)+"\nDisplay server: "+DisplayServer.GetName();File.WriteAllText(Path.Combine(folder,"results.txt"),report);GD.Print(report+"\n"+folder);owner.GetTree().Quit(0);
         }

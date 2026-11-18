@@ -66,7 +66,7 @@ public static class MultiBoneInterfaceTests
         }
         try
         {
-            owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,1000);if(DisplayServer.GetName()!="headless")owner.GetWindow().GrabFocus();host.UsePreset("animation");await Frames(30);
+            owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,1000);if(DisplayServer.GetName()!="headless")owner.GetWindow().GrabFocus();host.ShowPanel("bones");await Frames(30);
             Check(pinButton.Disabled&&rootSource.Disabled&&rootMotion.Disabled,"unloaded panel disables pins and Root Motion");
             await api.ImportAsync([ProjectSettings.GlobalizePath("res://BuiltinAssets/Samples")]);await Execute("preview load StudioBot_Walk");
             Check(rootSource.ItemCount==2&&rootSource.GetItemText(1).Contains("Hips")&&rootSource.Selected==0&&rootMotion.Disabled,"root menu lists only parentless bones and requires an explicit source");
@@ -114,9 +114,9 @@ public static class MultiBoneInterfaceTests
             Check(bones.RootMotionEnabled&&bones.RootMotion!=null&&rootMotion.ButtonPressed&&Find<Label>("BoneRootInfo").Text.Contains("世界空间"),"Root Motion switch displays path and sampled status");
             await Execute("preview seek 0.31");Check(Find<Label>("BoneRootInfo").Text.Contains("当前位移"),"Root Motion panel reports displacement while scrubbing");
             var savedPins=bones.Pins.ToArray();var selected=bones.SelectedBones.ToArray();ulong panelId=panel.GetInstanceId();
-            host.MovePanel("bones",host.Layout.GroupFor("preview")!.Id,DockEdge.Center);await Frames(20);
-            host.MovePanel("bones",host.Layout.GroupFor("preview")!.Id,DockEdge.Left);await Frames(20);
-            Check(panel.GetInstanceId()==panelId&&bones.Pins.SequenceEqual(savedPins)&&bones.SelectedBones.SequenceEqual(selected)&&rootMotion.ButtonPressed,"docking retains pins, selection and Root Motion state");
+            host.ShowPanel("inspector");await Frames(20);
+            host.ShowPanel("bones");await Frames(20);
+            Check(panel.GetInstanceId()==panelId&&bones.Pins.SequenceEqual(savedPins)&&bones.SelectedBones.SequenceEqual(selected)&&rootMotion.ButtonPressed,"tool switching retains pins, selection and Root Motion state");
             host.HidePanel("bones");await Frames();await Execute("bone select_many \"LeftFoot,RightFoot\"");await Execute("rootmotion show false");
             host.ShowPanel("bones");await Frames(20);
             Check(!rootMotion.ButtonPressed&&Item("0:12").IsSelected(0)&&Item("0:15").IsSelected(0),"hidden panel catches up with Console multi-selection and Root Motion");
@@ -139,7 +139,7 @@ public static class MultiBoneInterfaceTests
 
             await Execute("preview load StudioBot_Walk");await Execute("bone select_many \"LeftFoot,RightFoot,LeftHand,RightHand\"");
             await ClickControl(pinButton);await Ready();await Choose(rootSource,1);await ClickControl(rootMotion);await Ready();bones.ShowSkeleton(true);preview.Seek(.3);await Frames();
-            host.UsePreset("animation");await Frames(30);await Query("Foot");
+            host.ShowPanel("bones");await Frames(30);await Query("Foot");
             Check(host.IsPanelVisible("bones")&&host.IsPanelVisible("preview")&&panel.Size.X<600,"multi-bone controls share the animation workspace with the live preview");
             Check(Find<ScrollContainer>("BonePinScroll").Size.Y<=181&&bones.Pins.Count==4,"long pin lists use bounded internal scrolling");
             await ScrollTo(search);await Screenshot("selection-desktop.png");

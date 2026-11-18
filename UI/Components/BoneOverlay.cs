@@ -7,15 +7,15 @@ namespace Animanager.UI.Components;
 public partial class BoneOverlay : Node3D
 {
     private readonly ImmediateMesh _bones=new(),_heading=new();
-    private readonly StandardMaterial3D _lines=Material(Colors.White,true);
-    private readonly Dictionary<BoneId,(MeshInstance3D Marker,Label3D Label)> _selected=[];
+    private readonly ShaderMaterial _lines=ScreenSpaceOverlay.Lines(true);
+    private readonly Dictionary<BoneId,(MeshInstance3D Marker,BoneLabelAnchor Label)> _selected=[];
     private readonly List<PathLayer> _paths=[];
     private PathLayer? _rootMotion;
     private RootMotionTrack? _motion;
     private BoneId? _primary;
     private BoneTrajectory? _primaryTrail;
     private float _radius=.018f;
-    private sealed record PathLayer(Node3D Root,ImmediateMesh Mesh,MeshInstance3D Current,Label3D Label,DisplayedBoneTrail? Data);
+    private sealed record PathLayer(Node3D Root,ImmediateMesh Mesh,MeshInstance3D Current,BoneLabelAnchor Label,DisplayedBoneTrail? Data);
     public bool ShowSkeleton { get; set; }
     public bool Xray { get; private set; }=true;
     public Vector3? SelectedWorldPosition=>_primary is {} id&&_selected.TryGetValue(id,out var selected)?selected.Marker.GlobalPosition:null;
@@ -32,28 +32,23 @@ public partial class BoneOverlay : Node3D
         AddChild(new MeshInstance3D{Name="SkeletonLines",Mesh=_bones,MaterialOverride=_lines,CastShadow=GeometryInstance3D.ShadowCastingSetting.Off});
         AddChild(new MeshInstance3D{Name="RootMotionHeading",Mesh=_heading,MaterialOverride=_lines,CastShadow=GeometryInstance3D.ShadowCastingSetting.Off});
     }
-    private static StandardMaterial3D Material(Color color,bool vertex=false)=>new()
-    {ShadingMode=BaseMaterial3D.ShadingModeEnum.Unshaded,AlbedoColor=color,VertexColorUseAsAlbedo=vertex,NoDepthTest=true};
     private MeshInstance3D Marker(Node parent,Color color,float size=1)
     {
-        var material=Material(color);material.NoDepthTest=Xray;
-        var marker=new MeshInstance3D{Mesh=new SphereMesh{Radius=1,Height=2,RadialSegments=12,Rings=6},MaterialOverride=material,
-            Scale=Vector3.One*_radius*size,CastShadow=GeometryInstance3D.ShadowCastingSetting.Off};
+        var marker=new MeshInstance3D{Mesh=new QuadMesh{Size=new(2,2)},MaterialOverride=ScreenSpaceOverlay.Marker(color,size,Xray),
+            CastShadow=GeometryInstance3D.ShadowCastingSetting.Off};
         parent.AddChild(marker);return marker;
     }
-    private Label3D Label(Node parent,string text)
+    private BoneLabelAnchor Label(Node parent,string text)
     {
-        var label=new Label3D{Text=text,Billboard=BaseMaterial3D.BillboardModeEnum.Enabled,NoDepthTest=Xray,
-            FontSize=32,OutlineSize=6,PixelSize=_radius*.2f};
+        var label=new BoneLabelAnchor{Text=text};
         parent.AddChild(label);return label;
     }
     public void SetXray(bool enabled)
     {
-        Xray=enabled;_lines.NoDepthTest=enabled;
+        Xray=enabled;ScreenSpaceOverlay.SetXray(_lines,enabled);
         foreach(var node in Preview3DViewport.Descendants(this))
         {
-            if(node is MeshInstance3D {MaterialOverride:BaseMaterial3D material})material.NoDepthTest=enabled;
-            if(node is Label3D label)label.NoDepthTest=enabled;
+            if(node is MeshInstance3D {MaterialOverride:ShaderMaterial material})ScreenSpaceOverlay.SetXray(material,enabled);
         }
     }
     public void SetScaleFromSkeletons(IReadOnlyList<SkeletonEntry> skeletons)
@@ -91,14 +86,14 @@ public partial class BoneOverlay : Node3D
         var mesh=new ImmediateMesh();root.AddChild(new MeshInstance3D{Mesh=mesh,MaterialOverride=_lines,CastShadow=GeometryInstance3D.ShadowCastingSetting.Off});
         if(samples.Length>1)
         {
-            mesh.SurfaceBegin(Mesh.PrimitiveType.Lines);
+            mesh.SurfaceBegin(Mesh.PrimitiveType.Triangles);
             for(int i=1;i<samples.Length;i++){Line(mesh,samples[i-1],samples[i],color);SegmentCount++;}
             mesh.SurfaceEnd();
         }
         Marker(root,new Color("58df98")).Position=samples[0];Marker(root,new Color("ff6f82")).Position=samples[^1];
         Label(root,"START").Position=samples[0]+Vector3.Up*_radius*3;
         Label(root,"END").Position=samples[^1]-Vector3.Up*_radius*3;
-        var label=Label(root,text);label.Modulate=color;
+        var label=Label(root,text);label.Tint=color;
         return new(root,mesh,Marker(root,Colors.White,.7f),label,data);
     }
     public void UpdatePose(BoneInspection inspection,double time)
@@ -122,7 +117,7 @@ public partial class BoneOverlay : Node3D
             {
                 var id=new BoneId(s,b);bool selected=selection.Contains(id);int parent=skeleton.GetBoneParent(b);
                 if(parent<0||(!ShowSkeleton&&!selected))continue;
-                if(!begun){_bones.SurfaceBegin(Mesh.PrimitiveType.Lines);begun=true;}
+                if(!begun){_bones.SurfaceBegin(Mesh.PrimitiveType.Triangles);begun=true;}
                 Line(_bones,inspection.WorldPose(new(s,parent)).Origin,inspection.WorldPose(id).Origin,selected?inspection.ColorFor(id):new Color("81939f"));
             }
         }
@@ -140,7 +135,7 @@ public partial class BoneOverlay : Node3D
         {
             var pose=inspection.WorldPose(_motion.Source);_rootMotion.Current.GlobalPosition=pose.Origin;
             _rootMotion.Label.GlobalPosition=pose.Origin+Vector3.Up*_radius*7;
-            _heading.SurfaceBegin(Mesh.PrimitiveType.Lines);
+            _heading.SurfaceBegin(Mesh.PrimitiveType.Triangles);
             // Keep heading arrows legible even for stationary, rotation-only clips.
             int stride=Math.Max(1,(_motion.Samples.Count-1)/12);
             for(int i=0;i<_motion.Samples.Count;i+=stride)
@@ -156,6 +151,6 @@ public partial class BoneOverlay : Node3D
         Line(_heading,tip,tip-forward*.25f+side,color);Line(_heading,tip,tip-forward*.25f-side,color);RootMotionHeadingCount++;
     }
     private static void Line(ImmediateMesh mesh,Vector3 a,Vector3 b,Color color)
-    {mesh.SurfaceSetColor(color);mesh.SurfaceAddVertex(a);mesh.SurfaceSetColor(color);mesh.SurfaceAddVertex(b);}
+    {ScreenSpaceOverlay.Segment(mesh,a,b,color);}
 }
 

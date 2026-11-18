@@ -4,6 +4,7 @@ using Animanager.UI.Components;
 using System.Text.Json;
 using Animanager.Core.Jobs;
 using Animanager.Core.Storage;
+using Animanager.Core.Models;
 using System.Collections.Concurrent;
 
 namespace Animanager.Core.Console;
@@ -55,6 +56,7 @@ public partial class ConsoleCommands : Node
         Bind("export scene",nameof(ExportScene),"Export loaded preview as GLB: export scene <folder>");
         Bind("export animations",nameof(ExportAnimations),"Export loaded preview as RES: export animations <folder>");
         RegisterConfiguredExportCommands();
+        RegisterRetargetCommands();
         Bind("pipeline blender",nameof(Blender),"Set Blender executable path for this session");
         Bind("job cancel",nameof(Cancel),"Cancel the active console import / conversion");
         Bind("job list",nameof(JobList),"Recent jobs, progress, and report locations");
@@ -108,7 +110,7 @@ public partial class ConsoleCommands : Node
         catch(Exception ex){Fail(ex);}
         finally{token.Dispose();_job=null;if(!_closing)_refresh();}
     }
-    public void Commands()=>Info("library current | library list | library create <path> <name> | library open <path_or_id>\nlibrary register <path> | library relocate <id> <path> | library check | library rebuild <path>\nlibrary backup <path> | library restore <backup> <destination> | library cache_preview | library cache_clear true\nasset rename <asset> <name> | asset tags_add <ids> <tags> | asset tags_remove <ids> <tags> | asset favorites <ids> <bool>\nasset trash <ids> | asset trash_list * | asset restore <ids> | asset purge <ids> true\ncollection list | collection create <name> | collection add <collection_id> <ids> | collection search <collection_id> *\nmotion inspect <asset> | motion grip <asset> <x,y,z> <degrees_x,y,z>\nmotion contact <asset> <start> <end> <state> | motion sample <seconds>\nmotion visible <asset> <bool> | motion reset <asset>\nuasset status | uasset inspect <path> | uasset import <path>\nasset list 0 | asset search \"Manny\" | asset inspect <name_or_id>\nbatch import <folder> | batch import_list <json> | batch scan <folder>\nexport fbx <name_or_id> <folder> | export plan <query_or_*> <folder>\nexport show last | export run last | batch export <query_or_*> <folder>\nbatch export_favorites <folder> | batch run <plan_id>\njob current | job list | job status last | job report last | job cancel\njob cancel_id <id> | job retry <id_or_last>\npreview load <name> | preview play | preview pause | preview seek 0.5\npreview clip <clip> | preview speed 1.0 | preview bones | preview material clay\nbone tree <query_or_*> | bone select <name_or_skeleton:bone> | bone info | bone focus | bone clear\nbone show true | bone xray true | trail show true | trail world | trail relative <bone> | trail rate 60 | trail status\nbone select_many \"LeftFoot,RightFoot\" | bone add <bone> | bone remove <bone> | bone selection\ntrail pin | trail pins | trail unpin <pin_id> | trail visible <pin_id> <bool> | trail clear_pins\nrootmotion source <root_bone> | rootmotion show true | rootmotion status | rootmotion sample 0.5\nexport scene <folder> | export animations <folder> | baseline import\nUse quotes and forward slashes in paths. Jobs run sequentially; failures do not stop the batch. help <command> shows typed arguments.\n"+ConfiguredExportHelp+"\n"+AssetBrowseHelp);
+    public void Commands()=>Info("library current | library list | library create <path> <name> | library open <path_or_id>\nlibrary register <path> | library relocate <id> <path> | library check | library rebuild <path>\nlibrary backup <path> | library restore <backup> <destination> | library cache_preview | library cache_clear true\nasset rename <asset> <name> | asset tags_add <ids> <tags> | asset tags_remove <ids> <tags> | asset favorites <ids> <bool>\nasset trash <ids> | asset trash_list * | asset restore <ids> | asset purge <ids> true\ncollection list | collection create <name> | collection add <collection_id> <ids> | collection search <collection_id> *\nmotion inspect <asset> | motion grip <asset> <x,y,z> <degrees_x,y,z>\nmotion contact <asset> <start> <end> <state> | motion sample <seconds>\nmotion visible <asset> <bool> | motion reset <asset>\nuasset status | uasset inspect <path> | uasset import <path>\nasset list 0 | asset search \"Manny\" | asset inspect <name_or_id>\nbatch import <folder> | batch import_list <json> | batch scan <folder>\nexport fbx <name_or_id> <folder> | export plan <query_or_*> <folder>\nexport show last | export run last | batch export <query_or_*> <folder>\nbatch export_favorites <folder> | batch run <plan_id>\njob current | job list | job status last | job report last | job cancel\njob cancel_id <id> | job retry <id_or_last>\npreview load <name> | preview play | preview pause | preview seek 0.5\npreview clip <clip> | preview speed 1.0 | preview bones | preview material clay\nbone tree <query_or_*> | bone select <name_or_skeleton:bone> | bone info | bone focus | bone clear\nbone show true | bone xray true | trail show true | trail world | trail relative <bone> | trail rate 60 | trail status\nbone select_many \"LeftFoot,RightFoot\" | bone add <bone> | bone remove <bone> | bone selection\ntrail pin | trail pins | trail unpin <pin_id> | trail visible <pin_id> <bool> | trail clear_pins\nrootmotion source <root_bone> | rootmotion show true | rootmotion status | rootmotion sample 0.5\nexport scene <folder> | export animations <folder> | baseline import\nUse quotes and forward slashes in paths. Jobs run sequentially; failures do not stop the batch. help <command> shows typed arguments.\n"+ConfiguredExportHelp+"\n"+AssetBrowseHelp+"\nretarget inspect <asset> <target> | retarget preview <asset> <target> | retarget presets\nretarget save <asset> <name> <options_json> | export asset <asset> fbx <folder> <options_with_Retarget>");
     public void Status()=>Guard(()=>Info(JsonSerializer.Serialize(new{assets=_sessionApi?.Search().Total??0,library=_sessionApi?.Storage.Root,libraryId=_libraries.Active?.Identity.Id,libraryName=_libraries.Active?.Identity.Name,blender=_sessionApi?.Blender.Executable,fbxExport=_sessionApi?.Blender.Available??false,jobRunning=JobRunning,selected=SelectedId})));
     public void Search(string query)=>Guard(()=>PrintSearch(query,0));
     public void List(int page)=>Guard(()=>PrintSearch("",Math.Max(0,page)));
@@ -118,15 +120,23 @@ public partial class ConsoleCommands : Node
     public void Favorite(string asset,bool enabled)=>Guard(()=>{_api.SetFavorite(asset,enabled);_refresh();Info("Favorite saved.");});
     public void Import(string path)=>BatchImport(path);
     public void Baselines()=>Import("res://BuiltinAssets/Baselines");
-    public void UassetStatus()=>Guard(()=>Info($"CUE4Parse available: {_api.Uasset.Available}\nUE 4.23 raw / UE 5.0 tagged AnimDataModel / UE 5.6 Sequencer Direct FK AnimSequence · automatic UE4 / UE5 standard skeleton recognition\nNodachi: fixed 161-bone character, independent prop tracks, grip and contact metadata (no IK). Source poses; full Skeleton dependency preserved as source data when supplied. Missing standard Skeleton substitutions are reported. Other UE versions / data models, Montage, blending, curves, events, cooked assets and retargeting are unsupported. No Unreal installation required.\nHelper: {_api.Uasset.Executable}"));
+    public void UassetStatus()=>Guard(()=>Info($"CUE4Parse available: {_api.Uasset.Available}\nUE 4.23 / 4.27 raw / UE 5.0 tagged AnimDataModel / UE 5.6 Sequencer Direct FK AnimSequence · automatic UE4 / UE5 standard skeleton recognition\nNodachi: fixed 161-bone character, independent prop tracks, grip and contact metadata (no IK). Source poses; full Skeleton dependency preserved as source data when supplied. Missing standard Skeleton substitutions are reported. Other UE versions / data models, Montage, blending, curves, events, cooked assets and retargeting are unsupported. No Unreal installation required.\nHelper: {_api.Uasset.Executable}"));
     public void UassetImport(string path)=>Guard(()=>StartPlan(_api.Planner.ImportUasset([Expand(path)])));
     public void UassetInspect(string path)=>Job(async ct=>{
         var output=Path.Combine(_api.Storage.Root,"uasset",Guid.NewGuid().ToString("N"));
         var report=await _api.Uasset.ConvertAsync(Expand(path),output,true,null,ct);
         Info($"CUE4Parse: {report.Items.Count(i=>i.Status=="supported")} supported, {report.Unsupported} unsupported, {report.Failed} failed. Profiles: {string.Join(", ",report.Items.Where(i=>i.Status=="supported").GroupBy(i=>i.Profile).Select(g=>g.Key+"="+g.Count()))}. Substituted Skeleton: {report.Items.Count(i=>i.Status=="supported"&&i.DependencySubstituted)}.\nReport: {report.ReportPath}\n"+string.Join("\n",report.Items.Where(i=>i.Status is "unsupported" or "failed").Take(15).Select(i=>i.Source+": "+i.Error)));
     });
+    public Func<AssetItem, CancellationToken, Task>? PreviewLoader { get; set; }
     public void Load(string asset)=>Job(async ct=>{
-        var a=_api.Find(asset);var path=await _api.Storage.AcquireLocalFileAsync(a.VirtualPath,ct);
+        var a=_api.Find(asset);
+        if (PreviewLoader != null)
+        {
+            await PreviewLoader(a, ct); ct.ThrowIfCancellationRequested();
+            if (SelectedId != a.Id) throw new IOException("Preview was not changed; see the viewport message for the failure or cancellation reason.");
+            Info("Preview ready: " + a.Name); return;
+        }
+        var path=await _api.Storage.AcquireLocalFileAsync(a.VirtualPath,ct);
         _preview.LoadFile(path);SelectedId=a.Id;var type=_preview.Clips.Length>0?"Animation":"Model";
         if(type!=a.Type){_api.SetAssetType(a.Id,type);a.Type=type;}
         _selection(a);
@@ -189,7 +199,7 @@ public partial class ConsoleCommands : Node
         try{using var activity=_api.BeginActivity();var result=await _api.Jobs.WaitAsync(id);Info(Summary(result));if(!_closing)_refresh();}
         catch(Exception ex){Fail(ex);}
     }
-    private static string Summary(JobRecord r)=>$"{r.Id} | {r.Kind} | {r.State} | {r.Finished}/{r.Total}\nSucceeded {r.Succeeded}; skipped {r.Skipped}; failed {r.Failed}; cancelled {r.Cancelled}\n"+(r.Kind==JobKind.ImportUasset?$"Animations: {r.Items.Sum(i=>i.ImportedAssets)} added, {r.Items.Sum(i=>i.DuplicateAssets)} duplicate, {r.Items.Sum(i=>i.UnsupportedAssets)} unsupported\n":"")+$"Report: {r.ReportPath}";
+    private static string Summary(JobRecord r)=>$"{r.Id} | {r.Kind} | {r.State} | {r.Finished}/{r.Total}\nSucceeded {r.Succeeded}; skipped {r.Skipped}; failed {r.Failed}; cancelled {r.Cancelled}\n"+(r.Kind is JobKind.Import or JobKind.ImportUasset?$"Animations: {r.Items.Sum(i=>i.ImportedAssets)} added, {r.Items.Sum(i=>i.DuplicateAssets)} duplicate, {r.Items.Sum(i=>i.UnsupportedAssets)} unsupported\n":"")+$"Report: {r.ReportPath}";
     private void OnJobChanged(JobUpdate update)=>_updates.Enqueue(update);
     public override void _Process(double delta)
     {

@@ -41,8 +41,7 @@ public static class StandardUassetTests
             Check(preview.Bones.Trajectory!=null&&preview.Bones.Status=="Ready","UE5 skeleton is available to the shared bone and trajectory API");
             await Execute($"uasset import \"{fixture.Replace('\\','/')}\"");job=api.Jobs.Get(api.Jobs.LatestId!);
             Check(job.State==JobState.Completed&&job.Items.Sum(i=>i.DuplicateAssets)==2&&api.Search().Total==count+2,"repeated mixed import deduplicates both families");
-            var method=owner.GetType().GetMethod("Import",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!;
-            await (Task)method.Invoke(owner,[new[]{fixture},true])!;job=api.Jobs.Get(api.Jobs.LatestId!);
+            await ((Animanager.UI.MainShell)owner).Import([fixture],true,autoCharacters:false);job=api.Jobs.Get(api.Jobs.LatestId!);
             Check(job.State==JobState.Completed&&job.Items.Sum(i=>i.DuplicateAssets)==2,"App directory import uses the same automatic profile pipeline");
             if(api.Blender.Available)
             {

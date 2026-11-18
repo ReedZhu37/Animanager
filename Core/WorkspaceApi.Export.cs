@@ -28,6 +28,24 @@ public sealed partial class WorkspaceApi
         var output = Path.Combine(staging, "result" + extension);
         try
         {
+            if (options?.Retarget != null)
+            {
+                var baked = await Retarget.RetargetBaker.BakeAsync(source, options, progress, ct);
+                try
+                {
+                    var player = UI.Components.Preview3DViewport.Descendants(baked.Root).OfType<AnimationPlayer>().Single();
+                    if (kind == JobKind.ExportRes)
+                        ExportService.WriteLibrary(output, player.GetAnimationList().Select(c => new KeyValuePair<string, Animation>(c, player.GetAnimation(c))));
+                    else
+                    {
+                        var scene = kind == JobKind.ExportFbx ? Path.Combine(staging, "retargeted.glb") : output;
+                        ExportService.WriteScene(scene, baked.Root, baked.SampleFps, baked.HasProp, player.GetAnimationList().Length);
+                        if (kind == JobKind.ExportFbx) await Blender.ConvertAsync(scene, output, progress, ct);
+                    }
+                }
+                finally { baked.Root.Free(); }
+            }
+            else
             if (kind == JobKind.ExportFbx)
             {
                 var motion = MotionJson.IsMotion(source);

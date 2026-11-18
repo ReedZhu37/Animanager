@@ -65,7 +65,7 @@ public sealed partial class WorkspaceApi
         });
     }
 
-    private static IEnumerable<string> ParseTags(string text) =>
+    internal static IEnumerable<string> ParseTags(string text) =>
         text.Split([' ', ',', '，', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
     public Storage.AssetCollection CreateCollection(string name)

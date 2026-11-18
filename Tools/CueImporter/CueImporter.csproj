@@ -9,6 +9,8 @@
   <ItemGroup>
     <Compile Include="../../Core/Motion/MotionDocument.cs" Link="Motion/MotionDocument.cs" />
     <Compile Include="../../Core/Motion/MotionGlb.cs" Link="Motion/MotionGlb.cs" />
+    <Compile Include="../../Core/Storage/IStorageProvider.cs" Link="Storage/IStorageProvider.cs" />
+    <Compile Include="../../Core/Storage/LocalStorageProvider.cs" Link="Storage/LocalStorageProvider.cs" />
     <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.4" />
     <ProjectReference Include="../../.runtime/CUE4Parse/CUE4Parse/CUE4Parse.csproj" />
     <Content Include="Baseline/*" CopyToOutputDirectory="PreserveNewest" />

@@ -18,8 +18,8 @@ internal sealed class AssetBrowseCache(LocalStorageProvider storage, Action<Acti
     public const string DirectoryName = "preview-cache";
     private const string VersionDirectory = DirectoryName + "/v1/";
     private const string AttributesDirectory = VersionDirectory + "attributes/";
-    private const string ThumbnailsDirectory = VersionDirectory + "thumbnails/";
-    internal const int ThumbnailWidth = 160, ThumbnailHeight = 112;
+    private const string ThumbnailsDirectory = DirectoryName + "/v2/thumbnails/";
+    internal const int ThumbnailWidth = 240, ThumbnailHeight = 168;
     private const int MaxCacheFileSize = 1024 * 1024;
     private sealed record CachedAttributes(string SourceStamp, AssetAttributes Attributes);
     private ConcurrentDictionary<string, CachedAttributes> _attributes = new(StringComparer.Ordinal);
@@ -28,7 +28,7 @@ internal sealed class AssetBrowseCache(LocalStorageProvider storage, Action<Acti
     public static bool IsCacheFile(string path)
     {
         path = path.Replace('\\', '/');
-        return OwnedFile(AttributesDirectory, ".json") || OwnedFile(ThumbnailsDirectory, ".png");
+        return OwnedFile(AttributesDirectory, ".json") || OwnedFile(ThumbnailsDirectory, ".png") || OwnedFile(VersionDirectory + "thumbnails/", ".png");
 
         bool OwnedFile(string folder, string extension)
         {

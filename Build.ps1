@@ -23,7 +23,7 @@ if ($LASTEXITCODE -ne 0 -or (Select-String -LiteralPath $exportLog -Pattern '^ER
 if (-not (Get-ChildItem -LiteralPath $output -Filter Animanager.dll -Recurse)) { throw 'Export did not contain the application assembly' }
 & (Join-Path $PSScriptRoot 'Tools\Build-CueImporter.ps1') -Output (Join-Path $output 'Importers\Cue4Parse')
 # Raw files used by System.IO / Blender are intentionally shipped outside the PCK.
-foreach ($folder in @('Baselines','Samples','Scripts')) {
+foreach ($folder in @('Baselines','Samples','Scripts','Retarget')) {
     $target = Join-Path $output "BuiltinAssets\$folder"
     New-Item -ItemType Directory -Path $target -Force | Out-Null
     Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot "BuiltinAssets\$folder") -File |

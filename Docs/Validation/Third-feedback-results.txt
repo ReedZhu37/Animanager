@@ -1,0 +1,28 @@
+PASS folder scan preserves UE dependency root and deduplicates overlapping directories
+PASS mixed directory imports GLB and reports broken uasset without suppressing successes
+PASS empty directory has an explicit failure dialog
+PASS ordinary folder import automatically selects the uasset reader
+PASS Dodge UE4.27 imports all 58 AnimSequence assets
+PASS 77 non-sequence resources have explicit unsupported reasons
+PASS visible import summary reports counts and detailed report location
+PASS 58 converted clips preserve independent UE4.27 source position, rotation and scale samples
+PASS reimport reports all 58 duplicates without adding new assets
+PASS all original Dodge packages remain byte-for-byte unchanged
+PASS imported Dodge animation previews on the configured UE5 character
+PASS search covers the full library and starts at page one
+PASS last-page button reaches the final five of 125 search results
+PASS first-page button resets the page and scroll position
+PASS list header stays pinned to the top after scrolling
+PASS pinned header accepts sort clicks at its visible position
+PASS keyboard scroll leaves the selected row below the pinned header
+PASS asset search matches names across pages and synchronizes the global field
+PASS typing in the asset search applies the debounced query without Enter
+PASS asset search supports Chinese tags
+PASS empty search disables boundary navigation
+PASS global search synchronizes the asset panel and clearing restores results
+PASS search and page boundaries remain visible at 200 percent
+PASS compact toolbar leaves room for asset rows below the fixed header
+PASS rendered line thickness and endpoint size stay constant when zooming
+PASS orthographic projection retains line and point pixel size
+PASS resizing the viewport retains line and point pixel size
+PASS fixed-width line respects X-ray and normal depth occlusion

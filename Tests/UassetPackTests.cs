@@ -14,7 +14,7 @@ public static class UassetPackTests
         var output=Path.Combine(api.Storage.Root,"pack-validation");Directory.CreateDirectory(output);
         try
         {
-            owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,960);owner.Workspace.UsePreset("animation");
+            owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,960);owner.Workspace.ShowPanel("bones");
             var assets=api.Database.SearchAll();
             var chosen=new[]{assets.First(a=>a.Name.EndsWith("__AS_Idle_Seq")),assets.First(a=>a.Name.EndsWith("__AS_Combo_Attack_01_All_Seq")),assets.First(a=>a.Name.Contains("__07_Roll__"))};
             for(int i=0;i<chosen.Length;i++)

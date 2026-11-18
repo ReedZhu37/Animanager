@@ -1,0 +1,8 @@
+{
+  "source": "Epic Games official locally installed UE template",
+  "engine": "5.8.4-58902052+++UE5+Release-5.8",
+  "asset": "/Game/Mannequin/Character/Mesh/SK_Mannequin_Female",
+  "file": "UE4_Mannequin_Female.fbx",
+  "sha256": "0ee5004d330d91a75c010bbe0c233f0fd83fe7b8726fd56fbd79c519a36db0f8",
+  "geometry": "Original female mannequin geometry, skeleton and skin; no retargeting"
+}

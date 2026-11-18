@@ -73,6 +73,19 @@ public static class AssetBrowseTests
             "combined attribute filters operate across all matches before pagination");
         var unknownPage = await api.BrowseAssetsAsync("Browse", "All", AssetAttributeFilter.Parse("browse-rig", "..2", "unknown"));
         check(unknownPage.Total == 1 && unknownPage.Items.Single().Asset.Id == unknown.Id, "unknown FPS is searchable independently of numeric FPS");
+        var durationSort = await api.BrowseAssetsAsync("Browse", "All", new(), new AssetSort(AssetSortField.Duration), pageSize: 1);
+        check(durationSort.Items.Single().Asset.Name == "Browse_Long" && durationSort.Total == 5,
+            "duration sorting orders all matches before limiting the page");
+        foreach (bool descending in new[] { false, true })
+        {
+            var sorted = await api.BrowseAssetsAsync("Browse", "All", new(), new AssetSort(AssetSortField.Fps, descending));
+            check(sorted.Items.Last().Asset.Id == unknown.Id, "unknown FPS sorts last in direction " + descending);
+        }
+        var metadataPage = await api.BrowseAssetsAsync("Browse", "All", new());
+        check(metadataPage.Items.All(r => r.Attributes != null), "unfiltered browsing supplies card metadata");
+        var byName = await api.BrowseAssetsAsync("Browse", "All", new(), new AssetSort(AssetSortField.Name, false));
+        check(byName.Items.Select(r => r.Asset.Name).SequenceEqual(clips.Select(c => c.Item1).Order(StringComparer.Ordinal)),
+            "database sorting uses the requested name order");
 
         api.SetFavorites([fast.Id], true);
         var collection = api.CreateCollection("P1 browse checks");
@@ -140,12 +153,26 @@ public static class AssetBrowseTests
         var fps = Control<LineEdit>(owner, "AssetFpsFilter");
         var apply = Control<Button>(owner, "AssetApplyFilters");
         var clear = Control<Button>(owner, "AssetClearFilters");
-        var rows = Control<ItemList>(owner, "AssetRows");
+        var rows = Control<Animanager.UI.Shell.AssetBrowser>(owner, "AssetBrowser");
         var search = Control<LineEdit>(owner, "AssetSearch");
         search.Text = "Browse";
         commands.Load(fast.Id);
         await commands.PendingTask;
-        check(owner.SelectedAssetIds.SequenceEqual([fast.Id]) && rows.ItemCount == 4, "the app selects an asset and shows the unfiltered search results");
+        await WaitUntil(owner,()=>rows.Count==4);
+        check(owner.SelectedAssetIds.SequenceEqual([fast.Id]) && rows.Count == 4, "the app selects an asset and shows the unfiltered search results");
+        commands.Tags(fast.Id, "browse_tag,中文标签");
+        await owner.PendingBrowse;
+        var tagButton = Preview3DViewport.Descendants(owner.Workspace.Panel("navigation")).OfType<Button>().Single(b => b.Text == "中文标签 1");
+        tagButton.EmitSignal(BaseButton.SignalName.Pressed);
+        await owner.PendingBrowse;
+        check(search.Text == "中文标签" && rows.Count == 1 && rows.Row(0)!.Id == fast.Id,
+            "sidebar tags reflect real library metadata and filter through the shared search");
+        search.Text = "Browse"; search.EmitSignal(LineEdit.SignalName.TextChanged, "Browse");
+        await WaitUntil(owner,()=>rows.Count==4);
+        var anchor = rows.Selection.Anchor;
+        rows.SetMode(Animanager.UI.Shell.AssetBrowser.ViewMode.List);
+        rows.SetMode(Animanager.UI.Shell.AssetBrowser.ViewMode.Grid);
+        check(rows.Selection.Anchor == anchor && rows.Selection.Contains(fast.Id), "grid/list toggles preserve selection and range anchor");
         toggle.EmitSignal(BaseButton.SignalName.Pressed);
         await WaitUntil(owner, () => skeleton.ItemCount > 3);
         skeleton.Select(Enumerable.Range(0, skeleton.ItemCount).Single(i => skeleton.GetItemText(i) == "browse-rig"));
@@ -154,11 +181,12 @@ public static class AssetBrowseTests
         apply.EmitSignal(BaseButton.SignalName.Pressed);
         fps.Text = "未知";
         apply.EmitSignal(BaseButton.SignalName.Pressed);
-        await WaitUntil(owner, () => rows.ItemCount == 1 && rows.GetItemText(0).Contains(unknown.Name));
-        check(owner.SelectedAssetIds.SequenceEqual([fast.Id]) && rows.GetSelectedItems().Length == 0,
+        await WaitUntil(owner, () => rows.Count == 1 && rows.Row(0)!.Name.Contains(unknown.Name));
+        check(owner.SelectedAssetIds.SequenceEqual([fast.Id]) && rows.Rows.Count(r=>rows.Selection.Contains(r.Id)) == 0,
             "latest UI attribute filter wins and preserves a selection outside the result");
         clear.EmitSignal(BaseButton.SignalName.Pressed);
-        check(rows.ItemCount == 4 && rows.GetSelectedItems().Length == 1 && owner.SelectedAssetIds.SequenceEqual([fast.Id]),
+        await WaitUntil(owner,()=>rows.Count==4);
+        check(rows.Count == 4 && rows.Rows.Count(r=>rows.Selection.Contains(r.Id)) == 1 && owner.SelectedAssetIds.SequenceEqual([fast.Id]),
             "clearing UI attributes restores the search rows and their selected state");
 
         var alternate = Path.Combine(Path.GetDirectoryName(api.Storage.Root)!, "asset-browse-switch-" + Guid.NewGuid().ToString("N"));
@@ -170,7 +198,7 @@ public static class AssetBrowseTests
         commands.LibraryOpen(entry.Id);
         await pending;
         for (int i = 0; i < 6; i++) await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
-        check(owner.Libraries.Active?.Identity.Id == entry.Id && rows.ItemCount == 0 && fps.Text.Length == 0 && owner.SelectedAssetIds.Length == 0,
+        check(owner.Libraries.Active?.Identity.Id == entry.Id && rows.Count == 0 && fps.Text.Length == 0 && owner.SelectedAssetIds.Length == 0,
             "switching libraries cancels older browse results and resets their attribute controls");
     }
 
@@ -204,9 +232,9 @@ public static class AssetBrowseTests
         owner.GetWindow().Mode = Window.ModeEnum.Windowed;
         owner.GetWindow().Size = new(1440, 960);
         owner.DisplayScale.SetScale(1);
-        owner.Workspace.UsePreset("browse");
+        owner.Workspace.RestorePanels();
         owner.Workspace.ShowPanel("assets");
-        var list = Control<ItemList>(owner, "AssetRows");
+        var list = Control<Animanager.UI.Shell.AssetBrowser>(owner, "AssetBrowser");
         await WaitUntil(owner, () => list.IsVisibleInTree() && list.Size.Y > 80);
         var candidates = api.Database.SearchAll();
         var asset = candidates.FirstOrDefault(a => a.SourceFormat == ".motion");
@@ -226,7 +254,7 @@ public static class AssetBrowseTests
         search.Text = asset.Name;
         commands.Load(asset.Id);
         await commands.PendingTask;
-        var preview = Preview3DViewport.Descendants(owner).OfType<Preview3DViewport>().Single();
+        var preview = ((Animanager.UI.Shell.PreviewStage)owner.Workspace.Panel("preview")).Viewport;
         var previewModel = preview.Model!.GetInstanceId();
         double playhead = Math.Min(.2, preview.Duration * .5);
         preview.Seek(playhead);
@@ -235,8 +263,8 @@ public static class AssetBrowseTests
         using var saved = new Image();
         check(saved.LoadPngFromBuffer(api.ReadAssetThumbnail(request)!) == Error.Ok && HasSubject(saved),
             "visible asset row generates a thumbnail with a rendered subject and replaces a corrupt cache file");
-        var row = Enumerable.Range(0, list.ItemCount).First(i => list.GetItemText(i).Contains(asset.Name));
-        using var assigned = list.GetItemIcon(row).GetImage();
+        var row = Enumerable.Range(0, list.Count).First(i => list.Row(i)!.Name.Contains(asset.Name));
+        using var assigned = list.Row(row)!.Thumbnail!.GetImage();
         check(HasSubject(assigned), "the rendered thumbnail appears on the asset row");
         check(preview.Model?.GetInstanceId() == previewModel && Math.Abs(preview.Playhead - playhead) < .01 &&
             Math.Abs(preview.Player!.SpeedScale - 2) < .001, "rendering thumbnails preserves the active preview model, playback speed and playhead");

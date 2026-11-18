@@ -1,4 +1,5 @@
 using Godot;
+using Animanager.UI.Shell;
 
 namespace Animanager.UI.Workspace;
 
@@ -10,6 +11,7 @@ public partial class DockWorkspace : Control
     public string? MaximizedPanel { get; private set; }
     public bool DragActive { get; private set; }
     public event Action? LayoutChanged;
+    public event Action? ViewChanged;
     public event Action<string>? Notice;
     private readonly Dictionary<string,(string Title,Control Content)> _panels=[];
     private readonly List<DockGroupView> _groups=[];
@@ -31,12 +33,12 @@ public partial class DockWorkspace : Control
         content.Name="Panel_"+id;content.SizeFlagsHorizontal=SizeFlags.ExpandFill;content.SizeFlagsVertical=SizeFlags.ExpandFill;
         _panels[id]=(title,content);_parking.AddChild(content);
     }
-    public void Initialize(WorkspaceLayout layout){Layout=layout;Layout.Normalize();Rebuild();}
+    public void Initialize(WorkspaceLayout layout){Layout=layout;Layout.Normalize(_panels.Keys);Rebuild();}
     public string Title(string id)=>_panels.TryGetValue(id,out var p)?p.Title:id;
     public Control Panel(string id)=>_panels[id].Content;
     public bool IsPanelVisible(string id)=>_panels[id].Content.IsVisibleInTree();
     public void UsePreset(string preset){Layout.Preset(preset);MaximizedPanel=null;Changed();}
-    public void Restore(WorkspaceLayout layout){Layout=layout.Clone();Layout.Normalize();MaximizedPanel=null;Changed();}
+    public void Restore(WorkspaceLayout layout){Layout=layout.Clone();Layout.Normalize(_panels.Keys);MaximizedPanel=null;Changed();}
     public void ShowPanel(string panel){Layout.Show(panel);MaximizedPanel=null;Changed();}
     public void HidePanel(string panel)
     {
@@ -84,14 +86,17 @@ public partial class DockWorkspace : Control
     }
     public static Vector2 RequiredSize(DockNode node)
     {
-        if(node.IsGroup)return new Vector2(node.Panels.Contains("preview")?260:190,node.Panels.Contains("preview")?230:150);
+        if(node.IsGroup)return GroupMinimum(node);
         var a=RequiredSize(node.First!);var b=RequiredSize(node.Second!);
         return node.Axis=="h"?new(a.X+b.X+8,Math.Max(a.Y,b.Y)):new(Math.Max(a.X,b.X),a.Y+b.Y+8);
     }
+    internal static Vector2 GroupMinimum(DockNode node) => new(
+        node.Panels.Select(id => id switch { "preview" => 354, "inspector" or "bones" or "retarget" => 316, "navigation" => 234, "assets" => 340, _ => 260 }).DefaultIfEmpty(260).Max(),
+        node.Panels.Contains("preview") ? 300 : node.Panels.Contains("assets") ? 180 : 160);
     private bool NeedsCompact()
     {
         var needed=RequiredSize(Layout.Root);float margin=Compact?24:0;
-        return Size.X<Math.Max(1000,needed.X)+margin||Size.Y<Math.Max(360,needed.Y)+margin;
+        return Size.X<needed.X+margin||Size.Y<needed.Y+margin;
     }
     private void CheckMode(){if(NeedsCompact()!=Compact)QueueRebuild();}
     private void Changed(){LayoutChanged?.Invoke();QueueRebuild();}
@@ -111,6 +116,7 @@ public partial class DockWorkspace : Control
             render.Active=render.Panels.Contains(Layout.CompactActive)?Layout.CompactActive:render.Panels.First();
         }
         var control=Build(render);_surface.AddChild(control);control.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);_built=true;
+        ViewChanged?.Invoke();
         Callable.From(()=>{if(IsInstanceValid(focus)&&focus!.IsVisibleInTree())focus.GrabFocus();}).CallDeferred();
     }
     private Control Build(DockNode node)
@@ -161,8 +167,8 @@ public partial class DockGroupView : Control
     public DockNode Data { get; set; }=null!;
     public List<DockTab> Tabs { get; }=[];
     private HBoxContainer _header=null!;
-    private ScrollContainer _body=null!;
-    public override Vector2 _GetMinimumSize()=>new(180,140);
+    private Control _body=null!;
+    public override Vector2 _GetMinimumSize()=> Host != null && !Host.Compact && Host.MaximizedPanel == null ? DockWorkspace.GroupMinimum(Data) : new(180,140);
     public override void _Ready()
     {
         ClipContents=true;MouseFilter=MouseFilterEnum.Pass;
@@ -174,17 +180,25 @@ public partial class DockGroupView : Control
             var tab=new DockTab{Host=Host,PanelId=id,Text=Host.Title(id),ToggleMode=true,ButtonPressed=id==Data.Active,TooltipText="拖动标签调整布局 · "+Host.Title(id),CustomMinimumSize=new(0,30),ThemeTypeVariation="DockTab"};
             tab.Pressed+=()=>Host.Select(id);row.AddChild(tab);Tabs.Add(tab);
         }
-        var menu=new MenuButton{Text="⋮",CustomMinimumSize=new(28,30),TooltipText="面板操作",FocusMode=FocusModeEnum.All};_header.AddChild(menu);
+        var menu=new MenuButton{Text="⋮",CustomMinimumSize=new(32,32),TooltipText="面板操作：最大化、隐藏、停靠",FocusMode=FocusModeEnum.All,ThemeTypeVariation="DockTab"};_header.AddChild(menu);
         var popup=menu.GetPopup();popup.AddItem("最大化 / 恢复",0);popup.AddItem("隐藏面板",1);popup.AddSeparator();
         popup.AddItem("移动到左侧",2);popup.AddItem("移动到右侧",3);popup.AddItem("移动到上方",4);popup.AddItem("移动到下方",5);popup.AddItem("合并到资产标签组",6);
         popup.IdPressed+=id=>{var panel=Data.Active;switch(id){case 0:Host.Maximize(panel);break;case 1:Host.HidePanel(panel);break;case 2:Host.MoveBeside(panel,DockEdge.Left);break;case 3:Host.MoveBeside(panel,DockEdge.Right);break;case 4:Host.MoveBeside(panel,DockEdge.Top);break;case 5:Host.MoveBeside(panel,DockEdge.Bottom);break;case 6:Host.MoveBeside(panel,DockEdge.Center);break;}};
         menu.AboutToPopup+=()=>{foreach(var id in new[]{2,3,4,5,6})popup.SetItemDisabled(popup.GetItemIndex(id),Host.Compact||Host.MaximizedPanel!=null);};
-        _body=new ScrollContainer{HorizontalScrollMode=ScrollContainer.ScrollMode.Disabled,VerticalScrollMode=ScrollContainer.ScrollMode.Auto};AddChild(_body);
-        Host.Mount(Data.Active,_body);Resized+=Arrange;Arrange();
+        // Panels that already own scrolling need the full body, not another ScrollContainer.
+        bool scrollContent = Data.Active is "bones" or "retarget" or "export" or "jobs";
+        var padding = Surfaces.Padding(Data.Active is "inspector" or "navigation" ? 0 : Tokens.Space.Md);
+        if (scrollContent)
+        {
+            var scroll = new ScrollContainer { HorizontalScrollMode=ScrollContainer.ScrollMode.Disabled };
+            AddChild(scroll); _body=scroll; padding.SizeFlagsHorizontal=SizeFlags.ExpandFill; scroll.AddChild(padding);
+        }
+        else { AddChild(padding); _body=padding; }
+        Host.Mount(Data.Active,padding);Resized+=Arrange;Arrange();
     }
-    private void Arrange(){_header.Position=new(4,2);_header.Size=new(Math.Max(0,Size.X-8),36);_body.Position=new(8,42);_body.Size=new(Math.Max(0,Size.X-16),Math.Max(0,Size.Y-50));QueueRedraw();}
+    private void Arrange(){_header.Position=new(8,4);_header.Size=new(Math.Max(0,Size.X-16),36);_body.Position=new(1,44);_body.Size=new(Math.Max(0,Size.X-2),Math.Max(0,Size.Y-45));QueueRedraw();}
     public void FocusActive()=>Tabs.FirstOrDefault(t=>t.PanelId==Data.Active)?.GrabFocus();
-    public override void _Draw(){DrawStyleBox(StudioTheme.Box(StudioTheme.Surface,0,4,StudioTheme.Border),new Rect2(Vector2.Zero,Size));DrawLine(new(0,38),new(Size.X,38),StudioTheme.Border);}
+    public override void _Draw(){DrawStyleBox(Surfaces.Fill(Tokens.Panel,Tokens.Radius.Control,0,0,Tokens.Line),new Rect2(Vector2.Zero,Size));DrawLine(new(1,43),new(Size.X-1,43),Tokens.Line);}
 }
 
 public partial class DockTab : Button
@@ -193,7 +207,14 @@ public partial class DockTab : Button
     public string PanelId { get; set; }="";
     public override Variant _GetDragData(Vector2 atPosition)
     {
-        var label=new Label{Text="  "+Text+"  ",Modulate=StudioTheme.Accent};SetDragPreview(label);Host.BeginDrag(PanelId);return "animanager-panel:"+PanelId;
+        var label=new Label{Text=Text,Modulate=Tokens.Accent};
+        label.AddThemeStyleboxOverride("normal",Surfaces.Fill(Tokens.Raised,Tokens.Radius.Control,12,8,Tokens.Accent));
+        SetDragPreview(label);Host.BeginDrag(PanelId);return "animanager-panel:"+PanelId;
+    }
+    public override void _GuiInput(InputEvent ev)
+    {
+        if(ev is InputEventMouseButton{ButtonIndex:MouseButton.Left,Pressed:true,DoubleClick:true})
+        {Host.Maximize(PanelId);AcceptEvent();}
     }
 }
 
@@ -212,7 +233,7 @@ public partial class DockDropOverlay : Control
         var global=GetGlobalTransform()*atPosition;
         _target=Host.Groups.FirstOrDefault(g=>g.GetGlobalRect().HasPoint(global));if(_target==null){QueueRedraw();return false;}
         var rect=_target.GetGlobalRect();var local=global-rect.Position;_edge=DockEdge.Center;_index=-1;
-        if(local.Y<40)
+        if(local.Y<44)
         {
             _index=_target.Tabs.FindIndex(t=>global.X<t.GetGlobalRect().GetCenter().X);
             if(_index<0)_index=_target.Tabs.Count;
@@ -237,8 +258,8 @@ public partial class DockDropOverlay : Control
     }
     public override void _Draw()
     {
-        if(_target==null)return;var color=StudioTheme.Accent;color.A=.2f;DrawRect(_highlight.Grow(-3),color);DrawRect(_highlight.Grow(-3),StudioTheme.Accent,false,2);
+        if(_target==null)return;var color=Tokens.Accent;color.A=.2f;DrawRect(_highlight.Grow(-3),color);DrawRect(_highlight.Grow(-3),Tokens.Accent,false,2);
         var title=_edge switch{DockEdge.Left=>"停靠左侧",DockEdge.Right=>"停靠右侧",DockEdge.Top=>"停靠上方",DockEdge.Bottom=>"停靠下方",_=>"加入标签组"};
-        DrawString(GetThemeDefaultFont(),_highlight.Position+new Vector2(14,62),title,HorizontalAlignment.Left,-1,14,StudioTheme.Text);
+        DrawString(GetThemeDefaultFont(),_highlight.Position+new Vector2(14,62),title,HorizontalAlignment.Left,-1,14,Tokens.Text);
     }
 }

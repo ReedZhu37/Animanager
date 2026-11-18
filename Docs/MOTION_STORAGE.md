@@ -1,6 +1,6 @@
 # Nodachi 人体与武器独立轨道
 
-2026-11-14。本轮实现 [动画存储规划](ANIMATION_STORAGE_PLAN.md) 的 Nodachi 首期：固定 UE5 人体、独立刚性武器轨道、握持配置和接触记录。跨骨架重定向、IK 接触求解和自动识别松手区间尚未实现。
+2026-11-14。本轮实现 [动画存储规划](ANIMATION_STORAGE_PLAN.md) 的 Nodachi 首期：固定 UE5 人体、独立刚性武器轨道、握持配置和接触记录。标准 UE4 / UE5 跨骨架重定向现已接入，见 [Retarget](RETARGET.md)；IK 接触求解和自动识别松手区间尚未实现。
 
 ## 保存与播放
 

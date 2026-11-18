@@ -13,6 +13,20 @@ public static partial class ExportService
         var path=Path.Combine(folder,safeName+(animationOnly?".res":".glb"));
         for(int index=2;File.Exists(path);index++)path=Path.Combine(folder,$"{safeName}_{index}"+(animationOnly?".res":".glb"));
         if(!animationOnly&&preview.Motion is {} motion)return Animanager.Core.Motion.MotionExport.Glb(motion.ManifestPath,path);
+        if (!animationOnly && preview.AppliedRetarget != null)
+        {
+            var copy = (Node3D)preview.Model.Duplicate();
+            try
+            {
+                copy.Transform = Transform3D.Identity;
+                foreach (var skeleton in Preview3DViewport.Descendants(copy).OfType<Skeleton3D>()) skeleton.ResetBonePoses();
+                foreach (var mesh in Preview3DViewport.Descendants(copy).OfType<MeshInstance3D>())
+                    if (!mesh.HasMeta("animanager_prop_visual")) mesh.MaterialOverride = null;
+                WriteScene(path, copy, 1 / preview.FrameStep, copy.HasNode(Retarget.RetargetBaker.PropNodeName), preview.Clips.Length);
+                return path;
+            }
+            finally { copy.Free(); }
+        }
         Error error;
         if(animationOnly)
         {

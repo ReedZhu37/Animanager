@@ -23,12 +23,24 @@ public enum DockEdge { Center, Left, Right, Top, Bottom }
 /// <summary>UI-independent layout operations; invalid persisted trees are normalized before rendering.</summary>
 public sealed class WorkspaceLayout
 {
-    public static readonly string[] PanelIds=["navigation","assets","preview","inspector","export","jobs","bones"];
+    public static readonly string[] PanelIds=["navigation","assets","preview","inspector","export","jobs","bones","retarget"];
     public int Version { get; set; }=1;
     public DockNode Root { get; set; }=DefaultRoot("browse");
     public List<string> Hidden { get; set; }=["jobs","bones"];
     public List<string> CompactOrder { get; set; }=PanelIds.ToList();
     public string CompactActive { get; set; }="assets";
+    public static WorkspaceLayout Studio()
+    {
+        var layout = new WorkspaceLayout
+        {
+            Root = DockNode.Split("v", .56f,
+                DockNode.Split("h", .17f, DockNode.Group("navigation"),
+                    DockNode.Split("h", .72f, DockNode.Group("preview"), DockNode.Group("inspector", "bones", "retarget"))),
+                DockNode.Group("assets")),
+            CompactActive = "assets"
+        };
+        layout.Normalize(); return layout;
+    }
     public static DockNode DefaultRoot(string preset)=>preset switch
     {
         "animation"=>DockNode.Split("h",.28f,DockNode.Group("bones","assets","navigation"),DockNode.Group("preview","inspector","export")),
@@ -95,8 +107,9 @@ public sealed class WorkspaceLayout
         node.First=node.First==null?null:Remove(node.First,panel);node.Second=node.Second==null?null:Remove(node.Second,panel);
         return node.First==null?node.Second:node.Second==null?node.First:node;
     }
-    public void Normalize()
+    public void Normalize(IEnumerable<string>? allowedPanels = null)
     {
+        var allowed = (allowedPanels ?? PanelIds).ToHashSet();
         var seen=new HashSet<string>();var nodeIds=new HashSet<string>();int count=0;
         DockNode? Clean(DockNode? n,int depth)
         {
@@ -109,13 +122,13 @@ public sealed class WorkspaceLayout
                 return n.First==null?n.Second:n.Second==null?n.First:n;
             }
             n.Axis="";n.First=null;n.Second=null;
-            n.Panels=(n.Panels??[]).Where(p=>PanelIds.Contains(p)&&seen.Add(p)).ToList();
+            n.Panels=(n.Panels??[]).Where(p=>allowed.Contains(p)&&seen.Add(p)).ToList();
             if(n.Panels.Count==0)return null;
             if(!n.Panels.Contains(n.Active))n.Active=n.Panels[0];return n;
         }
         Root=Clean(Root,0)??DockNode.Group("assets");
-        Hidden=PanelIds.Except(Root.AllPanels()).ToList();
-        CompactOrder=(CompactOrder??[]).Where(PanelIds.Contains).Distinct().Concat(PanelIds).Distinct().ToList();
+        Hidden=allowed.Except(Root.AllPanels()).ToList();
+        CompactOrder=(CompactOrder??[]).Where(allowed.Contains).Distinct().Concat(allowed).Distinct().ToList();
         if(!Root.AllPanels().Contains(CompactActive))CompactActive=Root.AllPanels().First();Version=1;
     }
     public WorkspaceLayout Clone()=>JsonSerializer.Deserialize<WorkspaceLayout>(JsonSerializer.Serialize(this))!;
@@ -125,9 +138,13 @@ public sealed class WorkspacePreferences
 {
     public int Version { get; set; }=1;
     public WorkspaceLayout Layout { get; set; }=new();
+    public WorkspaceLayout? DockLayout { get; set; }
     public Dictionary<string,WorkspaceLayout> SavedLayouts { get; set; }=[];
     public double Scale { get; set; } // 0 = system; otherwise total UI scale.
     public bool Comfortable { get; set; }
+    public string AssetView { get; set; } = "Grid";
+    public Animanager.Core.Browse.AssetSortField SortField { get; set; }
+    public bool SortDescending { get; set; } = true;
     public int Width { get; set; }=1440;
     public int Height { get; set; }=900;
     public int X { get; set; }
@@ -157,8 +174,11 @@ public sealed class WorkspacePreferences
             var p=JsonSerializer.Deserialize<WorkspacePreferences>(File.ReadAllText(path))??throw new IOException("Empty layout");
             if(p.Version!=1)throw new IOException("Unsupported workspace version");
             p.Layout??=new();p.Layout.Normalize();p.SavedLayouts??=[];
+            p.DockLayout?.Normalize();
             foreach(var key in p.SavedLayouts.Keys.ToArray()){if(p.SavedLayouts[key]==null)p.SavedLayouts.Remove(key);else p.SavedLayouts[key].Normalize();}
             if(!double.IsFinite(p.Scale)||p.Scale<1||p.Scale>2)p.Scale=0;
+            if(p.AssetView is not ("Grid" or "List"))p.AssetView="Grid";
+            if(!Enum.IsDefined(p.SortField))p.SortField=Animanager.Core.Browse.AssetSortField.Imported;
             return p;
         }
         catch(Exception ex) when(ex is JsonException or IOException or UnauthorizedAccessException)

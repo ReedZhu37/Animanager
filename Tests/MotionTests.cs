@@ -15,7 +15,7 @@ public static class MotionTests
         var folder=Path.Combine(api.Storage.Root,"motion-validation");Directory.CreateDirectory(folder);
         try
         {
-            owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,960);owner.Workspace.UsePreset("animation");
+            owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,960);owner.Workspace.ShowPanel("bones");
             var asset=api.Database.SearchAll().First(a=>a.SourceFormat==".motion"&&a.Name.EndsWith("__AS_Combo_Attack_03_All_Seq"));
             commands.Load(asset.Id);await commands.PendingTask;if(preview.Motion==null)throw new Exception(commands.LastResult);
             preview.SetLoop(false);preview.Seek(2.1);var initial=preview.Motion.Prop.GlobalTransform;preview.TogglePlay();

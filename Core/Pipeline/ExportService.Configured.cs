@@ -106,7 +106,7 @@ public static partial class ExportService
         }
     }
 
-    private static void WriteLibrary(string output, IEnumerable<KeyValuePair<string, Animation>> clips)
+    internal static void WriteLibrary(string output, IEnumerable<KeyValuePair<string, Animation>> clips)
     {
         using var library = new AnimationLibrary();
         foreach (var (clip, animation) in clips)
@@ -121,7 +121,7 @@ public static partial class ExportService
         if (result != Error.Ok) throw new IOException("动画库导出失败：" + result);
     }
 
-    private static void WriteScene(string output, Node3D root, double? fps, bool worldSpaceProp, int clips)
+    internal static void WriteScene(string output, Node3D root, double? fps, bool worldSpaceProp, int clips)
     {
         using var document = new GltfDocument();
         using var state = new GltfState();

@@ -47,4 +47,7 @@ public sealed class UassetResult
     public string Profile{get;set;}="";public string Encoding{get;set;}="";public string SkeletonSource{get;set;}="";public bool DependencySubstituted{get;set;}public int SkeletonBones{get;set;}public int PreviewBones{get;set;}
     public string Source{get;set;}="";public string Status{get;set;}="";public string Error{get;set;}="";public string Output{get;set;}="";public string OutputSha256{get;set;}="";
 }
-public sealed record UassetImportOutcome(int Added,int Skipped,int Unsupported,string ReportPath,List<string> Errors);
+public sealed record UassetImportOutcome(int Added,int Skipped,int Unsupported,string ReportPath,List<string> Errors)
+{
+    public List<string> Warnings { get; init; }=[];
+}

@@ -64,7 +64,7 @@ public partial class DisplayScaleController : Node
         // The minimum is in logical UI units, then bounded by the actual monitor.
         // A small display still wins, so no window is forced beyond its usable area.
         var scale=window.ContentScaleFactor;
-        window.MinSize=new Vector2I(Math.Min(usable.Size.X,(int)Math.Ceiling(720*scale)),Math.Min(usable.Size.Y,(int)Math.Ceiling(400*scale)));
+        window.MinSize=new Vector2I(Math.Min(usable.Size.X,Math.Min(1024,(int)Math.Ceiling(720*scale))),Math.Min(usable.Size.Y,Math.Min(700,(int)Math.Ceiling(400*scale))));
         if(window.Mode!=Window.ModeEnum.Windowed)return;
         var rect=ClampRect(new(window.Position,window.Size),usable);
         if(center)rect.Position=usable.Position+(usable.Size-rect.Size)/2;

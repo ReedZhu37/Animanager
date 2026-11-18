@@ -19,8 +19,25 @@ internal static class SourceSamples
         {
             var package=AssetCatalog.Load(asset,out _);int index=Array.FindIndex(package.ExportMap,e=>e.ClassIndex.Name=="AnimSequence");
             if(index<0)continue;
-            if(package.Summary.SavedByEngineVersion is not {Major:5,Minor:0})throw new NotSupportedException("Reference sampler is for tagged UE5.0 DataModels.");
             var anim=(UAnimSequence)package.ExportsLazy[index].Value;
+            if(package.Summary.SavedByEngineVersion is {Major:4,Minor:23 or 27})
+            {
+                var names=anim.GetOrDefault<FName[]>("AnimationTrackNames",[]);
+                var raw=anim.RawAnimationData??throw new InvalidDataException("Source raw tracks are missing.");
+                int count4=anim.NumFrames;
+                var samples4=new[]{0,(count4-1)/4,(count4-1)/2,(count4-1)*3/4,count4-1}.Distinct().Select(frame=>new
+                {
+                    frame,time=(double)anim.SequenceLength*frame/(count4-1),bones=raw.Select((t,i)=>
+                    {
+                        var p=t.PosKeys[Math.Min(frame,t.PosKeys.Length-1)];var q=t.RotKeys[Math.Min(frame,t.RotKeys.Length-1)];
+                        var s=t.ScaleKeys.Length==0?new[]{1f,1f,1f}:new[]{t.ScaleKeys[Math.Min(frame,t.ScaleKeys.Length-1)].X,t.ScaleKeys[Math.Min(frame,t.ScaleKeys.Length-1)].Y,t.ScaleKeys[Math.Min(frame,t.ScaleKeys.Length-1)].Z};
+                        return new{name=names[i].Text,p=new[]{p.X,p.Y,p.Z},r=new[]{q.X,q.Y,q.Z,q.W},s};
+                    }).ToArray()
+                }).ToArray();
+                rows.Add(new{source=asset.Relative,name=Path.ChangeExtension(asset.Relative,null).Replace('\\','/').Replace("/","__"),duration=anim.SequenceLength,frames=count4,samples=samples4});
+                continue;
+            }
+            if(package.Summary.SavedByEngineVersion is not {Major:5,Minor:0})throw new NotSupportedException("Reference sampler supports UE4.23/4.27 raw tracks and tagged UE5.0 DataModels.");
             var model=anim.GetOrDefault<FPackageIndex>("DataModel")!.Load()!;
             var count=model.GetOrDefault<int>("NumberOfKeys");var duration=model.GetOrDefault<float>("PlayLength");
             var tracks=model.GetOrDefault<FStructFallback[]>("BoneAnimationTracks",[]);

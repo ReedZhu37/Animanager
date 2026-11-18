@@ -15,18 +15,39 @@ public sealed partial class WorkspaceApi
     internal int BrowseCacheRevision => Volatile.Read(ref _browseCacheRevision);
 
     public Task<AssetBrowsePage> BrowseAssetsAsync(string query, string category, AssetAttributeFilter filter,
-        int page = 0, int pageSize = 60, CancellationToken cancellationToken = default) => Task.Run(() =>
+        int page = 0, int pageSize = 60, CancellationToken cancellationToken = default) =>
+        BrowseAssetsAsync(query, category, filter, AssetSort.Default, page, pageSize, cancellationToken);
+
+    public Task<AssetBrowsePage> BrowseAssetsAsync(string query, string category, AssetAttributeFilter filter,
+        AssetSort sort, int page = 0, int pageSize = 60, CancellationToken cancellationToken = default) => Task.Run(() =>
     {
         ArgumentOutOfRangeException.ThrowIfNegative(page);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
-        if (!filter.IsActive)
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!filter.IsActive && !sort.NeedsAttributes)
         {
-            var result = Database.Search(query, category, page, pageSize);
-            return new AssetBrowsePage(result.Items.Select(asset => new AssetBrowseRow(asset, null)).ToArray(), result.Total, page);
+            var result = Database.Search(query, category, sort, page, pageSize);
+            return new AssetBrowsePage(result.Items.Select(asset => new AssetBrowseRow(asset,
+                BrowseCache.ReadAttributes(asset, cancellationToken))).ToArray(), result.Total, page);
         }
         var matches = FilterAssets(query, category, filter, cancellationToken);
+        if (sort.NeedsAttributes)
+            matches = matches.Select(row => row.Attributes != null ? row : row with
+                { Attributes = BrowseCache.ReadAttributes(row.Asset, cancellationToken) }).ToList();
+        object? Value(AssetBrowseRow row) => sort.Field switch
+        {
+            AssetSortField.Duration => row.Attributes?.Duration, AssetSortField.Fps => row.Attributes?.SourceFps,
+            AssetSortField.Name => row.Asset.Name, AssetSortField.Size => row.Asset.Size,
+            AssetSortField.Favorite => row.Asset.Favorite, _ => row.Asset.ImportedAt
+        };
+        var known = matches.OrderBy(row => Value(row) == null);
+        var comparer = Comparer<object?>.Create((a, b) => a is string x && b is string y
+            ? StringComparer.Ordinal.Compare(x, y) : Comparer<object?>.Default.Compare(a, b));
+        var ordered = sort.Descending ? known.ThenByDescending(Value, comparer) : known.ThenBy(Value, comparer);
+        matches = ordered.ThenBy(row => row.Asset.Name, StringComparer.Ordinal).ThenBy(row => row.Asset.Id, StringComparer.Ordinal).ToList();
         long start = (long)page * pageSize;
-        var items = start >= matches.Count ? [] : matches.Skip((int)start).Take(pageSize).ToArray();
+        var items = start >= matches.Count ? [] : matches.Skip((int)start).Take(pageSize)
+            .Select(row => row.Attributes != null ? row : row with { Attributes = BrowseCache.ReadAttributes(row.Asset, cancellationToken) }).ToArray();
         return new AssetBrowsePage(items, matches.Count, page);
     }, cancellationToken);
 

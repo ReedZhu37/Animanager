@@ -56,13 +56,13 @@ public partial class BoneTreePanel : VBoxContainer
         _locate=Button("定位选中",Locate);_locate.Name="BoneLocate";actions.AddChild(_locate);
         _clear=Button("清除",()=>Act(Bones.ClearSelection));_clear.Name="BoneClear";actions.AddChild(_clear);
         _selected=Wrapped("尚未选中骨骼",false);_selected.Name="BoneSelection";AddChild(_selected);
+        _trail=Toggle(this,"显示选中骨骼轨迹","BoneTrail",Bones.ShowTrail);
+        _trail.TooltipText="显示当前选中骨骼的运动轨迹；也可在视口的选中骨骼旁直接开关。";
         _pose=Wrapped("");_pose.Name="BonePose";AddChild(_pose);
         var display=new HFlowContainer();AddChild(display);
         _skeleton=Toggle(display,"显示骨架","BoneShow",Bones.ShowSkeleton);
         _xray=Toggle(display,"穿透显示","BoneXray",Bones.SetXray);
         AddChild(new HSeparator());
-        _trail=Toggle(this,"显示选中骨骼轨迹","BoneTrail",Bones.ShowTrail);
-        _trail.TooltipText="控制所有选中骨骼的轨迹；固定轨迹和 Root Motion 独立显示。";
         AddChild(Label("参考空间",true,12));
         _reference=new OptionButton{Name="BoneReference",FitToLongestItem=false,SizeFlagsHorizontal=SizeFlags.ExpandFill,CustomMinimumSize=new(0,32)};AddChild(_reference);
         _reference.TooltipText="世界空间保留角色整体移动；相对空间抵消指定骨骼的位移、旋转与缩放。";

@@ -4,7 +4,9 @@
 
 ## 使用
 
-在「导入」中选择 `.uasset / ZIP` 文件类型，选择原始 ZIP 即可。也可以把 ZIP / 单个 `.uasset` 拖入窗口。目录批量导入使用「文件 → 导入 .uasset 文件夹 · UE4 / UE5」。支持在同一目录 / ZIP 中混合 UE4 与 UE5 素材；推荐连同引用的 Skeleton 一起导入，保留原 Content 目录结构。
+在「导入」中选择 `.uasset / ZIP` 文件类型，选择原始 ZIP 即可。也可以把 ZIP、单个 `.uasset` 或整个文件夹拖入窗口。「导入文件夹」现在自动发现目录中的 uasset，支持与 GLB、FBX 等文件混合；专用「导入 .uasset 文件夹」入口继续保留。扫描会把包含 uasset 的输入目录作为一个转换任务，保留 Skeleton 依赖的目录结构。
+
+导入开始时打开任务面板，完成后显示结果窗口：新增、重复、不支持及失败任务数，按原因归类的提示，以及完整报告位置。重复文件明确提示已存在；空目录和损坏文件明确报错。搜索或筛选不会被导入自动清空，结果窗口会提示新资产可能被当前条件隐藏。
 
 Limbo Console（F12）：
 
@@ -27,6 +29,7 @@ job retry last
 | 输入 / 能力 | 当前行为 |
 | --- | --- |
 | UE 4.23 编辑器 AnimSequence 原始轨道 | 识别 UE4 Mannequin；386 段 Movement 动画已与 UE FBX 对比 |
+| UE 4.27 编辑器 AnimSequence 原始轨道 | Dodge_Animations 的 58 段序列全部入库；19,720 个骨骼局部变换采样与独立读取的源数据对照通过 |
 | UE 5.0 编辑器 AnimDataModel | Nodachi 全部 740 段通过源关键帧与 App 核对；详见 [NODACHI_IMPORT.md](NODACHI_IMPORT.md) |
 | UE 5.6 编辑器 AnimationSequencerDataModel | 读取单轨、单区段、Direct FKControlRig 的线性源变换通道；Manny Idle 已与 UE FBX 对比 |
 | 附带 Skeleton | 按骨骼名称、父子层级与绑定姿态识别 UE4 / UE5 标准家族；无固定资源路径或轨道顺序要求 |
