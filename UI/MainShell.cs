@@ -67,6 +67,7 @@ public partial class MainShell : Control
                 if (startup.Error.Length > 0) { ShowLibraryDialog(); SetStatus(startup.Error); }
                 return;
             }
+            if(OS.GetCmdlineUserArgs().Contains("--motion-similarity-test")){await Tests.MotionSimilarityTests.Run(this,_preview,_api);return;}
             if(OS.GetCmdlineUserArgs().Contains("--third-feedback-test")){await Tests.ThirdFeedbackTests.Run(this,_preview,_api,_commands);return;}
             if(OS.GetCmdlineUserArgs().Contains("--second-feedback-test")){await Tests.SecondFeedbackTests.Run(this,_preview,_api,_commands);return;}
             if(OS.GetCmdlineUserArgs().Contains("--feedback-test")){await Tests.FeedbackTests.Run(this,_preview,_api,_commands);return;}
@@ -181,6 +182,18 @@ public partial class MainShell : Control
     {
         if(_libraryLoading||index<0||index>=_browseRows.Length||_browseRows[index].Asset.Trashed)return;
         var row = _browseRows[index];
+        if (_motionReference is { } reference)
+        {
+            if (_publishedMotionReference != reference || _browseRequest != null) return;
+            var hit = _motionRows[_page * AssetPageSize + index].Hit;
+            var audition = new MotionAudition();
+            AddChild(audition);
+            audition.PopupCenteredClamped(new(760, 520));
+            _ = audition.Prepare(reference.Library.Api.Storage.Resolve(reference.Asset.VirtualPath), reference.Clip,
+                reference.Asset.Name, reference.Start, reference.End, row.Library.Api.Storage.Resolve(row.Asset.VirtualPath),
+                hit.Clip, row.Asset.Name, hit.Start, hit.End);
+            return;
+        }
         var key = AssetKey(row.Library, row.Asset.Id);
         if (!_workspace.IsPanelVisible("preview")) _workspace.ShowPanel("preview");
         if (_selectedKey == key && (_previewAssetId == key ||

@@ -1,4 +1,4 @@
-param([ValidateSet('Prototype','Pipeline','Batch','Interface','Bones','BoneUI','MultiBones','MultiBoneUI','LibraryP0','ExportOptions','AssetBrowse','P1','Retarget','Characters','Feedback','SecondFeedback','ThirdFeedback','All')][string]$Suite = 'Prototype')
+param([ValidateSet('Prototype','Pipeline','Batch','Interface','Bones','BoneUI','MultiBones','MultiBoneUI','LibraryP0','ExportOptions','AssetBrowse','MotionSimilarity','P1','Retarget','Characters','Feedback','SecondFeedback','ThirdFeedback','All')][string]$Suite = 'Prototype')
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 $env:DOTNET_CLI_HOME = Join-Path $PSScriptRoot '.runtime\dotnet'
@@ -22,13 +22,14 @@ $modes = switch ($Suite) {
     'LibraryP0' { 'library-p0-test' }
     'ExportOptions' { 'export-options-test' }
     'AssetBrowse' { 'asset-browse-test' }
+    'MotionSimilarity' { 'motion-similarity-test' }
     'P1' { 'export-options-test'; 'asset-browse-test' }
     'Retarget' { 'retarget-test' }
     'Characters' { 'character-test' }
     'Feedback' { 'feedback-test' }
     'SecondFeedback' { 'second-feedback-test' }
     'ThirdFeedback' { 'third-feedback-test' }
-    'All' { 'self-test'; 'pipeline-test'; 'batch-test'; 'interface-test'; 'bone-test'; 'bone-ui-test'; 'multi-bone-test'; 'multi-bone-ui-test'; 'library-p0-test'; 'export-options-test'; 'asset-browse-test'; 'retarget-test'; 'character-test'; 'feedback-test'; 'second-feedback-test'; 'third-feedback-test' }
+    'All' { 'self-test'; 'pipeline-test'; 'batch-test'; 'interface-test'; 'bone-test'; 'bone-ui-test'; 'multi-bone-test'; 'multi-bone-ui-test'; 'library-p0-test'; 'export-options-test'; 'asset-browse-test'; 'motion-similarity-test'; 'retarget-test'; 'character-test'; 'feedback-test'; 'second-feedback-test'; 'third-feedback-test' }
 }
 foreach ($mode in $modes) {
     & $engine --headless --path $PSScriptRoot --log-file (Join-Path $PSScriptRoot ".runtime\$mode.log") -- "--$mode" "--data-dir=$PSScriptRoot\.runtime\$mode-library"

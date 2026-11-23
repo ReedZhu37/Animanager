@@ -98,7 +98,7 @@ public partial class MainShell
         var defaultRoot = RuntimePaths.DefaultLibraryRoot();
         var uniqueTests = args.Any(a => a is "--shell-visual-test" or "--pipeline-test" or "--batch-test" or "--interface-test" or "--smoke-test"
             or "--bone-test" or "--bone-ui-test" or "--multi-bone-test" or "--multi-bone-ui-test" or "--library-p0-test"
-            or "--export-options-test" or "--asset-browse-test" or "--retarget-test" or "--character-test" or "--third-feedback-test");
+            or "--export-options-test" or "--asset-browse-test" or "--retarget-test" or "--character-test" or "--third-feedback-test" or "--motion-similarity-test");
         var probe = args.Any(a => a.StartsWith("--retarget-probe=") || a.StartsWith("--retarget-demo="));
         var test = uniqueTests || probe || args.Any(a => a.StartsWith("--") && (a.Contains("-test") || a.Contains("-render") || a.StartsWith("--cue-")));
         var registry = test
@@ -619,6 +619,8 @@ public partial class MainShell
         if (_closing) return;
 
         string id = library.Identity.Id;
+        if (_motionReference?.Library == library) ClearMotionFilter();
+        else if (_motionStart?.Library == library) _motionStart = null;
         _libraries.CloseLibrary(id);
         if (_plainAssetKeyLibrary == library) _plainAssetKeyLibrary = null;
         if (_assetLibraryFilter == id) _assetLibraryFilter = null;

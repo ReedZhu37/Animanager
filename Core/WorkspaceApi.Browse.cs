@@ -18,7 +18,7 @@ public sealed partial class WorkspaceApi
 {
     private AssetBrowseCache? _browseCache;
     private int _browseCacheRevision;
-    private AssetBrowseCache BrowseCache => LazyInitializer.EnsureInitialized(ref _browseCache,
+    internal AssetBrowseCache BrowseCache => LazyInitializer.EnsureInitialized(ref _browseCache,
         () => new AssetBrowseCache(Storage, write => TryWriteBrowseCache(write)));
     internal int BrowseCacheRevision => Volatile.Read(ref _browseCacheRevision);
 

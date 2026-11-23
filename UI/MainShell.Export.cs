@@ -217,7 +217,9 @@ public partial class MainShell
 
             if (scope == 2)
             {
-                selected = await Task.WhenAll(browseScopes.Select(async source => (source.Library, Ids:
+                selected = _publishedMotionReference != null
+                    ? _motionRows.GroupBy(m => m.Row.Library).Select(group => (group.Key, group.Select(m => m.Row.Asset.Id).ToArray())).ToArray()
+                    : await Task.WhenAll(browseScopes.Select(async source => (source.Library, Ids:
                     (await source.Library.Api.GetMatchingAssetsAsync(query, source.Category, filter, cancellation.Token, tags, source.MemberIdsJson))
                     .Select(asset => asset.Id).ToArray())));
             }

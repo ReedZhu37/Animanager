@@ -173,7 +173,7 @@ public partial class MainShell
         _attributeToggle = Button("筛选", () => { _workspace.ShowPanel("filters"); LoadSkeletonOptions(); });
         _attributeToggle.Name = "AssetAttributeFilters";
         _attributeToggle.CustomMinimumSize = new(50, Tokens.Size.Control);
-        _attributeToggle.TooltipText = "按标签、骨架、时长或帧率筛选";
+        _attributeToggle.TooltipText = "按标签、动作相似度、骨架、时长或帧率筛选";
         StyleAssetToolbarButton(_attributeToggle);
         browseTools.AddChild(_attributeToggle);
         _sortControl = new OptionButton { Name = "AssetSort", FitToLongestItem = false, CustomMinimumSize = new(88, Tokens.Size.Control) };
@@ -515,7 +515,7 @@ public partial class MainShell
         if(_closing)return;SaveWorkspace();_closing=true;CancelAssetBrowse();SetStatus("正在保存并停止任务…");
         _importCancellation?.Cancel();_exportCancellation?.Cancel();_pluginCancellation?.Cancel();
         _retargetCancellation?.Cancel();StopRequest(ref _retargetSourceRequest);StopRequest(ref _comparisonRequest);
-        await Task.WhenAll(PendingAssetPreview, PendingRetargetPreview, PendingAnimationComparison, _pendingRetargetSource, _pluginTask, StopLibraryPreviewWarmupAsync());
+        await Task.WhenAll(PendingAssetPreview, PendingRetargetPreview, PendingAnimationComparison, PendingBrowse, _pendingRetargetSource, _pluginTask, StopLibraryPreviewWarmupAsync());
         _characterCache.Dispose();
         _previewTargets.Dispose();
         await Task.WhenAll(_jobLibraries.Select(api => api.Jobs.ShutdownAsync()));

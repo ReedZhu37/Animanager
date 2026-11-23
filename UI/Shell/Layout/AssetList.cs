@@ -290,6 +290,7 @@ public partial class AssetList : Control
         float nameWidth = _widths[0] - (ThumbWidth + 22);
         if (closed) nameWidth = Math.Max(20, SourceButtonRect(index).Position.X - nameX - 8);
         string libraryLabel = closed ? "库未打开 · " + row.LibraryName : row.LibraryName;
+        if (row.MotionLabel.Length > 0) libraryLabel = row.MotionLabel;
         float libraryWidth = libraryLabel.Length == 0 ? 0 : Math.Min(nameWidth * .4f,
             Typography.Width(Typography.Regular, libraryLabel, Type.Micro) + 8);
         var nameColour = closed ? Tokens.Text3 : selected ? Tokens.Text : Tokens.Text.Alpha(.94f);
@@ -416,7 +417,7 @@ public partial class AssetList : Control
         if (button.ButtonIndex == MouseButton.Left && HeaderRect.HasPoint(button.Position))
         {
             int column = ColumnAt(button.Position);
-            if (column < 0) return;
+            if (column < 0 || _sortKey == "motion") return;
             var definition = _columns[column];
             if (definition.SortKey.Length == 0) return;
             bool descending = definition.SortKey == _sortKey ? !_sortDescending : false;

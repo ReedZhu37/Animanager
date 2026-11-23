@@ -10,6 +10,7 @@ public sealed class AssetCardModel
     public string LibraryName = "";
     public string MetaLine = "";      // "FBX · 2.5 MB"
     public string DetailLine = "";    // "2.0s · 60fps · UE5_Manny"
+    public string MotionLabel = "";
     public bool IsAnimation;
     public bool Trashed;
     internal string? ClosedLibraryId;

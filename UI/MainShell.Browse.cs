@@ -72,7 +72,7 @@ public partial class MainShell
         if (query != _search.Text) { ApplyAssetSearch(); return; }
         ResetThumbnailRows();
         _thumbnailRenderAfter = Time.GetTicksMsec() + 120;
-        RequestAssetBrowse(scopes, query, filter, tags, destination, closedRows: _publishedClosedRows);
+        RequestAssetBrowse(scopes, query, filter, tags, destination, closedRows: _publishedClosedRows, reuseMotionRanking: true);
     }
 
     private OptionButton BuildAssetLibraryScope()
@@ -167,6 +167,7 @@ public partial class MainShell
         _thumbnailsEnabled = DisplayServer.GetName() != "headless";
         _attributePanel = column;
         BuildTagFilterControls(column);
+        BuildMotionFilter(column);
         column.AddChild(new HSeparator());
         column.AddChild(Label("资产属性", false, 13));
         _skeletonFilter = new OptionButton { Name = "AssetSkeletonFilter", FitToLongestItem = false, CustomMinimumSize = new(0, 32) };
@@ -291,7 +292,11 @@ public partial class MainShell
 
     private void ResetAssetFilters(bool refresh)
     {
-        var changed = _attributeFilter.IsActive || _selectedTags.Count > 0;
+        var changed = _attributeFilter.IsActive || _selectedTags.Count > 0 || _motionReference != null;
+        ClearMotionFilter();
+        _customMotionWindow = false;
+        _motionWindow.SetValueNoSignal(1);
+        _motionMinimum.SetValueNoSignal(0);
         _attributeFilter = new();
         _selectedTags.Clear();
         _tagMatchMode.Select(0);
@@ -306,6 +311,9 @@ public partial class MainShell
     {
         switch (key)
         {
+            case "motion":
+                ClearMotionFilter();
+                break;
             case "tags":
                 _selectedTags.Clear();
                 break;
@@ -397,6 +405,8 @@ public partial class MainShell
         _tagPicker.Disabled = tagCount == 0 && !_tagSections.Any(section => section.Tags.Length > 0);
         _tagPicker.Text = tagCount == 0 ? "选择标签 ▾" : $"已选 {tagCount} 个标签 ▾";
         var chips = new List<(string Key, string Label)>();
+        if (_motionReference is { } motion)
+            chips.Add(("motion", (motion.Start == motion.End ? "姿势 · " : "片段 · ") + motion.Asset.Name));
         if (tagCount > 0)
         {
             string mode = tagCount == 1 ? "标签" : _tagMatchMode.Selected == 0 ? "标签交集" : "标签并集";
@@ -468,13 +478,17 @@ public partial class MainShell
             ? scopes.Select(scope => scope.Library).ToArray() : [];
         _nextDurationProgress = 0;
         _sortControl.SetItemText((int)AssetSortField.LibraryMix, scopes.Length > 1 ? "按库混合" : "默认顺序");
+        _sortControl.Disabled = _motionReference != null;
+        _browser.List.SetSort(_motionReference != null ? "motion" : _sort.Key, _sort.Descending);
+        _sortControl.Text = _motionReference == null ? _sortControl.GetItemText((int)_sort.Field) : "按相似度";
         _sortControl.TooltipText = scopes.Length > 1 && _sort.Field == AssetSortField.LibraryMix ? "各来源库交错显示" :
             _sort.Descending ? "降序；点击列表表头可切换方向" : "升序；点击列表表头可切换方向";
+        if (_motionReference != null) _sortControl.TooltipText = "当前按动作相似度从高到低排列";
         var tags = CurrentAssetTagFilter();
         bool sameView = _publishedBrowseView == (_category, _assetLibraryFilter, _browseLibraryRevision, _sort, _page) &&
             _publishedBrowseScope.Query == _search.Text && _publishedBrowseScope.Filter == _attributeFilter &&
             AssetTagFilter.Equivalent(_publishedBrowseScope.Tags, tags);
-        if (!sameView)
+        if (!sameView || _motionReference != null || _publishedMotionReference != _motionReference)
         {
             FilteredAssetCount = _onlineFilteredAssetCount = 0;
             _browseRows = [];
@@ -487,41 +501,63 @@ public partial class MainShell
 
     private void RequestAssetBrowse(LibraryBrowseScope[] scopes, string query, AssetAttributeFilter filter,
         AssetTagFilter? tags, int page, AppCollection? collection = null, string? locateKey = null,
-        ClosedCollectionAsset[]? closedRows = null)
+        ClosedCollectionAsset[]? closedRows = null, bool reuseMotionRanking = false)
     {
         _count.Text = "正在读取…";
         _firstPage.Disabled = _lastPage.Disabled = _previous.Disabled = _next.Disabled = true;
         var request = new CancellationTokenSource();
         _browseRequest = request;
-        _pendingBrowse = RefreshAssetBrowseAsync(scopes, query, filter, tags, _sort, page, collection, locateKey, closedRows, request);
+        _pendingBrowse = RefreshAssetBrowseAsync(scopes, query, filter, tags, _sort, page, collection, locateKey, closedRows, reuseMotionRanking, request);
     }
 
     private LibrarySession[] LoadedLibraries() => _libraries.OpenLibraries();
 
+    private MotionReference? _publishedMotionReference;
+
     private async Task RefreshAssetBrowseAsync(LibraryBrowseScope[] scopes, string query, AssetAttributeFilter filter,
         AssetTagFilter? tags, AssetSort sort, int page, AppCollection? collection, string? locateKey,
-        ClosedCollectionAsset[]? closedRows, CancellationTokenSource request)
+        ClosedCollectionAsset[]? closedRows, bool reuseMotionRanking, CancellationTokenSource request)
     {
         try
         {
-            if (locateKey != null && SelectionLibrary(locateKey) is { } library)
-            {
-                int index = await WorkspaceApi.FindAssetBrowseIndexAsync(scopes, library, SelectionAssetId(locateKey),
-                    query, filter, sort, tags, request.Token);
-                if (index >= 0) page = index / AssetPageSize;
-            }
             var token = request.Token;
-            var closed = closedRows != null || collection == null ? Task.FromResult(closedRows ?? []) :
-                Task.Run(() => ReadClosedCollectionAssets(collection, scopes, query, filter, sort, tags, token), token);
-            var online = WorkspaceApi.BrowseLibrariesAsync(scopes, query, filter, sort, page, AssetPageSize, token, tags);
-            await Task.WhenAll(closed, online);
-            var result = await online;
-            var unavailable = await closed;
-            int last = Math.Max(0, (result.Total + unavailable.Length - 1) / AssetPageSize);
-            if (page > last)
+            LibraryAssetPage result;
+            ClosedCollectionAsset[] unavailable;
+            if (_motionReference is { } reference)
             {
-                page = last;
-                result = await WorkspaceApi.BrowseLibrariesAsync(scopes, query, filter, sort, page, AssetPageSize, token, tags);
+                if (!reuseMotionRanking)
+                {
+                    var ranked = await RankMotionRows(reference, scopes, query, filter, tags, token);
+                    token.ThrowIfCancellationRequested();
+                    if (_closing || !ReferenceEquals(request, _browseRequest) || query != _search.Text) return;
+                    _motionRows = ranked.Rows;
+                    _motionSkipped = ranked.Skipped;
+                }
+                int index = locateKey == null ? -1 : Array.FindIndex(_motionRows, m => AssetKey(m.Row.Library, m.Row.Asset.Id) == locateKey);
+                page = index >= 0 ? index / AssetPageSize : Math.Clamp(page, 0, Math.Max(0, (_motionRows.Length - 1) / AssetPageSize));
+                result = await ReadMotionPage(_motionRows, page, token);
+                unavailable = [];
+            }
+            else
+            {
+                if (locateKey != null && SelectionLibrary(locateKey) is { } library)
+                {
+                    int index = await WorkspaceApi.FindAssetBrowseIndexAsync(scopes, library, SelectionAssetId(locateKey),
+                        query, filter, sort, tags, token);
+                    if (index >= 0) page = index / AssetPageSize;
+                }
+                var closed = closedRows != null || collection == null ? Task.FromResult(closedRows ?? []) :
+                    Task.Run(() => ReadClosedCollectionAssets(collection, scopes, query, filter, sort, tags, token), token);
+                var online = WorkspaceApi.BrowseLibrariesAsync(scopes, query, filter, sort, page, AssetPageSize, token, tags);
+                await Task.WhenAll(closed, online);
+                result = await online;
+                unavailable = await closed;
+                int last = Math.Max(0, (result.Total + unavailable.Length - 1) / AssetPageSize);
+                if (page > last)
+                {
+                    page = last;
+                    result = await WorkspaceApi.BrowseLibrariesAsync(scopes, query, filter, sort, page, AssetPageSize, token, tags);
+                }
             }
             if (!_closing && ReferenceEquals(_browseRequest, request) && query == _search.Text)
             {
@@ -554,6 +590,14 @@ public partial class MainShell
             if (!_closing && ReferenceEquals(_browseRequest, request))
             {
                 _count.Text = "筛选失败";
+                if (_motionReference != null)
+                {
+                    _motionRows = [];
+                    _browseRows = [];
+                    _browser.SetRows([]);
+                    FilteredAssetCount = _onlineFilteredAssetCount = 0;
+                    SyncAssetSelection();
+                }
                 _empty.Text = ex.Message;
                 _empty.Visible = true;
                 _firstPage.Disabled = _previous.Disabled = _page == 0;
@@ -573,6 +617,7 @@ public partial class MainShell
         _page = page;
         _publishedBrowseView = (_category, _assetLibraryFilter, _browseLibraryRevision, _sort, _page);
         _publishedBrowseScope = (scopes, query, filter, tags);
+        _publishedMotionReference = _motionReference;
         _publishedClosedRows = closedRows;
         _onlineFilteredAssetCount = result.Total;
         FilteredAssetCount = result.Total + closedRows.Length;
@@ -580,15 +625,16 @@ public partial class MainShell
         bool showLibrary = LoadedLibraries().Length > 1 || closedRows.Length > 0;
         // Open members retain their existing sort order, followed by the unavailable members.
         var closedPage = closedRows.Skip(Math.Max(0, page * AssetPageSize - result.Total)).Take(AssetPageSize - _browseRows.Length);
-        _browser.SetRows(_browseRows.Select(row => CardModel(row.Asset, row.Attributes,
-            showLibrary ? row.Library.Identity.Name : "", AssetKey(row.Library, row.Asset.Id))).Concat(closedPage.Select(ClosedCardModel)));
+        _browser.SetRows(_browseRows.Select((row, index) => BrowseCard(row, index, showLibrary)).Concat(closedPage.Select(ClosedCardModel)));
         _count.Text = $"{FilteredAssetCount:N0} 个结果" + (closedRows.Length > 0 ? $" · {closedRows.Length:N0} 项来源库未打开" : "");
+        if (_motionReference != null && _motionSkipped > 0) _count.Text += $" · {_motionSkipped:N0} 项无法比较";
         _pageLabel.Text = $"{_page + 1} / {Math.Max(1, ((long)FilteredAssetCount + AssetPageSize - 1) / AssetPageSize)}";
         _firstPage.Disabled = _previous.Disabled = _page == 0;
         _lastPage.Disabled = _next.Disabled = ((long)_page + 1) * AssetPageSize >= FilteredAssetCount;
         _empty.Visible = FilteredAssetCount == 0;
         _empty.Text = CurrentCollection is { Members.Length: 0 } ? "集合为空\n可将资产拖入侧栏中的集合。" :
             CategoryIncludesMountedLibraries && scopes.Length == 0 ? "尚未打开资产库\n从「库管理」打开或新建资产库。" :
+            _motionReference != null ? "没有匹配的动作\n可降低最低相似度、扩大搜索时间或调整筛选范围。" :
             filter.IsActive || tags != null ? "没有符合条件的资产\n调整筛选条件或搜索词。" :
             query.Length > 0 ? "没有匹配的资产\n试试其他名称或标签。" : "这里还没有资产\n导入文件，或载入内置示例。";
         SyncAssetSelection();
@@ -632,7 +678,7 @@ public partial class MainShell
     private void ProcessAssetBrowse()
     {
         if(_closing||_api==null||_browser==null)return;
-        if (_browseRequest != null && _durationProgressLibraries.Length > 0 && Time.GetTicksMsec() >= _nextDurationProgress)
+        if (_motionReference == null && _browseRequest != null && _durationProgressLibraries.Length > 0 && Time.GetTicksMsec() >= _nextDurationProgress)
         {
             _nextDurationProgress = Time.GetTicksMsec() + 200;
             int completed = 0, total = 0;

@@ -19,6 +19,7 @@ internal sealed class AssetBrowseCache(LocalStorageProvider storage, Action<Acti
     private const string VersionDirectory = DirectoryName + "/v1/";
     private const string AttributesDirectory = VersionDirectory + "attributes/";
     private const string ThumbnailsDirectory = DirectoryName + "/v2/thumbnails/";
+    private const string MotionDirectory = VersionDirectory + "motion-samples/";
     internal const int ThumbnailWidth = 240, ThumbnailHeight = 168;
     private const int MaxCacheFileSize = 1024 * 1024;
     private sealed record CachedAttributes(string SourceStamp, AssetAttributes Attributes);
@@ -28,7 +29,8 @@ internal sealed class AssetBrowseCache(LocalStorageProvider storage, Action<Acti
     public static bool IsCacheFile(string path)
     {
         path = path.Replace('\\', '/');
-        return OwnedFile(AttributesDirectory, ".json") || OwnedFile(ThumbnailsDirectory, ".png") || OwnedFile(VersionDirectory + "thumbnails/", ".png");
+        return OwnedFile(AttributesDirectory, ".json") || OwnedFile(ThumbnailsDirectory, ".png") ||
+            OwnedFile(MotionDirectory, ".bin") || OwnedFile(VersionDirectory + "thumbnails/", ".png");
 
         bool OwnedFile(string folder, string extension)
         {
@@ -108,7 +110,7 @@ internal sealed class AssetBrowseCache(LocalStorageProvider storage, Action<Acti
         return attributes;
     }
 
-    internal AssetThumbnailRequest PrepareThumbnail(AssetItem asset)
+    private (string Source, string Hash) SourceIdentity(AssetItem asset)
     {
         var source = storage.Resolve(asset.VirtualPath);
         var fingerprint = new StringBuilder(asset.FileHash).Append('\n').Append(Stamp(source));
@@ -126,7 +128,30 @@ internal sealed class AssetBrowseCache(LocalStorageProvider storage, Action<Acti
             foreach (var dependency in ImportService.ReadDependencies(source, ".gltf"))
                 fingerprint.Append('\n').Append(dependency.Relative).Append('\n').Append(Stamp(dependency.Source));
         }
-        return new(source, ThumbnailsDirectory + Hash(fingerprint.ToString()) + ".png");
+        return (source, Hash(fingerprint.ToString()));
+    }
+
+    internal AssetThumbnailRequest PrepareThumbnail(AssetItem asset)
+    {
+        var id = SourceIdentity(asset);
+        return new(id.Source, ThumbnailsDirectory + id.Hash + ".png");
+    }
+
+    internal (string Source, string Cache) PrepareMotion(AssetItem asset)
+    {
+        var id = SourceIdentity(asset);
+        return (id.Source, MotionDirectory + id.Hash + ".bin");
+    }
+
+    internal MotionSamples[]? ReadMotion(string key)
+    {
+        var bytes = ReadCache(key, MotionSampleCodec.MaxBytes);
+        return bytes == null ? null : MotionSampleCodec.Decode(bytes);
+    }
+
+    internal void SaveMotion(string key, MotionSamples[] samples)
+    {
+        if (MotionSampleCodec.Encode(samples) is { } bytes) WriteCache(key, bytes);
     }
 
     internal byte[]? ReadThumbnail(AssetThumbnailRequest request)
@@ -140,12 +165,12 @@ internal sealed class AssetBrowseCache(LocalStorageProvider storage, Action<Acti
 
     internal void SaveThumbnail(AssetThumbnailRequest request, byte[] bytes) => WriteCache(request.CachePath, bytes);
 
-    private byte[]? ReadCache(string relative)
+    private byte[]? ReadCache(string relative, int maxBytes = MaxCacheFileSize)
     {
         try
         {
             using var stream = File.Open(storage.Resolve(relative), FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
-            if (stream.Length <= 0 || stream.Length > MaxCacheFileSize) return null;
+            if (stream.Length <= 0 || stream.Length > maxBytes) return null;
             var bytes = new byte[(int)stream.Length];
             stream.ReadExactly(bytes);
             return bytes;
