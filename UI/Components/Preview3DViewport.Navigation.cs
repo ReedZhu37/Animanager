@@ -9,9 +9,17 @@ public partial class Preview3DViewport
     public float CameraDistance => _distance;
     public bool Orthographic => _camera.Projection == Camera3D.ProjectionType.Orthogonal;
     private AxisGizmo? _axisGizmo;
+    private HBoxContainer _comparisonTools = null!;
+    private CheckButton _showComparisonNames = null!;
+    private HBoxContainer _selectedBoneTools = null!;
     private string _viewName = "用户视图";
     private MeshInstance3D? _grid;
 
+    internal Button LocateAssetButton { get; } = new()
+    {
+        Name = "LocatePreviewAsset", Text = "定位", TooltipText = "在当前资产筛选结果中定位", Visible = false,
+        FocusMode = FocusModeEnum.None
+    };
     public event Action? SettingsRequested;
     public bool ClayEnabled => _clay;
     public bool GridVisible => _grid?.Visible == true;
@@ -23,6 +31,22 @@ public partial class Preview3DViewport
         AddChild(overlay); overlay.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         var settings = new Button { Name = "ViewportSettings", Text = "⚙", TooltipText = "视口设置 · 预览角色、显示与导航", FocusMode = FocusModeEnum.None, CustomMinimumSize = new(28, 26), Position = new(8, 8), Visible = SettingsRequested != null };
         settings.Pressed += () => SettingsRequested?.Invoke(); overlay.AddChild(settings);
+        BuildWeaponPreview(overlay);
+        var assetTools = new HBoxContainer { Position = new(8, 40), MouseFilter = MouseFilterEnum.Ignore };
+        overlay.AddChild(assetTools);
+        assetTools.AddChild(LocateAssetButton);
+        var comparisonTools = _comparisonTools = new HBoxContainer
+        {
+            Name = "ComparisonTools", MouseFilter = MouseFilterEnum.Ignore, Visible = false
+        };
+        assetTools.AddChild(comparisonTools);
+        var exit = new Button { Name = "ExitAnimationComparison", Text = "退出对比" };
+        exit.Pressed += () => ComparisonExitRequested?.Invoke();
+        comparisonTools.AddChild(exit);
+        _showComparisonNames = new CheckButton { Name = "ShowComparisonNames", Text = "名称", ButtonPressed = true };
+        _showComparisonNames.Toggled += _ => UpdateComparisonNames();
+        comparisonTools.AddChild(_showComparisonNames);
+        BuildComparisonOrder(comparisonTools, overlay);
         var tools = new HBoxContainer { Name = "DragNavigation", GrowHorizontal = GrowDirection.Begin }; overlay.AddChild(tools);
         tools.SetAnchorsPreset(LayoutPreset.TopRight);
         tools.OffsetLeft = -144; tools.OffsetRight = -4; tools.OffsetTop = 104; tools.OffsetBottom = 132;
@@ -32,8 +56,8 @@ public partial class Preview3DViewport
         _axisGizmo = new AxisGizmo(this) { Name = "AxisGizmo", TooltipText = "拖动旋转视图；点击 X / Y / Z 切换轴向视图（Y 向上）" };
         overlay.AddChild(_axisGizmo); _axisGizmo.SetAnchorsPreset(LayoutPreset.TopRight);
         _axisGizmo.OffsetLeft = -100; _axisGizmo.OffsetRight = -4; _axisGizmo.OffsetTop = 4; _axisGizmo.OffsetBottom = 100;
-        var selectedTools = new HBoxContainer { Name = "SelectedBoneTools", Visible = false, Position = new(8, 40) };
-        overlay.AddChild(selectedTools);
+        var selectedTools = _selectedBoneTools = new HBoxContainer { Name = "SelectedBoneTools", Visible = false, MouseFilter = MouseFilterEnum.Ignore };
+        assetTools.AddChild(selectedTools);
         var boneName = new Label { Name = "SelectedBoneName", CustomMinimumSize = new(0, 24), TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis };
         boneName.AddThemeFontSizeOverride("font_size", 12); selectedTools.AddChild(boneName);
         var trail = new CheckButton { Name = "SelectedBoneTrail", Text = "轨迹", FocusMode = FocusModeEnum.None, TooltipText = "显示选中骨骼的运动轨迹；选择其他骨骼后自动更新" };
@@ -48,7 +72,7 @@ public partial class Preview3DViewport
         void SelectionChanged()
         {
             syncing = true;
-            selectedTools.Visible = Bones.Selected != null;
+            UpdateComparisonNavigation();
             boneName.Text = Bones.Selected is { } id ? Bones.Name(id) : "";
             boneName.TooltipText = boneName.Text;
             trail.Disabled = CurrentClip.Length == 0;
@@ -66,6 +90,19 @@ public partial class Preview3DViewport
             boneName.Size = new(Math.Clamp(Size.X - 270, 30, 140), 24);
             _axisGizmo.QueueRedraw();
         };
+    }
+
+    private void UpdateComparisonNavigation()
+    {
+        _comparisonTools.Visible = AssetComparison != null;
+        _selectedBoneTools.Visible = AssetComparison == null && Bones.Selected != null;
+    }
+
+    private void UpdateComparisonNames()
+    {
+        if (AssetComparison == null) return;
+        foreach (var label in AssetComparison.Labels) label.Visible = _showComparisonNames.ButtonPressed;
+        Redraw();
     }
 
     public void Navigate(string tool, Vector2 relative)

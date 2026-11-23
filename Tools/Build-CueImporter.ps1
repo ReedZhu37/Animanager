@@ -34,5 +34,5 @@ Copy-Item (Join-Path $source 'NOTICE') (Join-Path $Output 'CUE4Parse-NOTICE.txt'
 Copy-Item $patch (Join-Path $Output 'CUE4Parse-local-changes.patch')
 Copy-Item (Join-Path $workspace 'BuiltinAssets\Baselines\README.md') (Join-Path $Output 'Baseline\EPIC-PROVENANCE.md')
 Copy-Item (Join-Path $workspace 'BuiltinAssets\Baselines\provenance.json') (Join-Path $Output 'Baseline\epic-provenance.json')
-[IO.File]::WriteAllText((Join-Path $Output 'SOURCE.txt'),"CUE4Parse https://github.com/FabianFG/CUE4Parse`nRevision: $revision`nAnimanager importer protocol 3. Nodachi rigid-prop motion schema 1. Local patch: ue50-tagged-raw-track-v1 (CUE4Parse-local-changes.patch). Validated UE4.23/4.27 raw, UE5.0 tagged AnimDataModel and UE5.6 Sequencer Direct FK source animations; automatic standard skeleton profiles.`n")
+[IO.File]::WriteAllText((Join-Path $Output 'SOURCE.txt'),"CUE4Parse https://github.com/FabianFG/CUE4Parse`nRevision: $revision`nAnimanager importer protocol 3. Nodachi rigid-prop motion schema 1. Local patch: ue50-tagged-raw-track-v1 (CUE4Parse-local-changes.patch). Validated UE4.18/4.21/4.23/4.27 raw, UE5.0 tagged and UE5.1 native AnimDataModel, and UE5.6 Sequencer Direct FK source animations. Automatic standard skeleton profiles.`n")
 Write-Output "CUE_IMPORTER_READY: $Output"

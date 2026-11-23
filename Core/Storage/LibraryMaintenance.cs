@@ -134,7 +134,9 @@ public sealed class LibraryMaintenance(WorkspaceApi api)
             if (catalog.Revision != current.Revision || !catalog.Assets.SequenceEqual(current.Assets) ||
                 catalog.Collections.Length != current.Collections.Length ||
                 catalog.Collections.Zip(current.Collections).Any(pair => pair.First.Id != pair.Second.Id ||
-                    pair.First.Name != pair.Second.Name || !pair.First.AssetIds.SequenceEqual(pair.Second.AssetIds)))
+                    pair.First.Name != pair.Second.Name || pair.First.ParentId != pair.Second.ParentId ||
+                    !pair.First.AssetIds.SequenceEqual(pair.Second.AssetIds) ||
+                    !pair.First.LinkedAssets.SequenceEqual(pair.Second.LinkedAssets)))
                 throw new InvalidDataException("磁盘上的持久清单与当前会话不一致。");
         });
         foreach (var asset in db.Snapshot().Assets)

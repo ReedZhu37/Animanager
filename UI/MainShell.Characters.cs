@@ -59,7 +59,7 @@ public partial class MainShell
                 _characterChoice.SetItemTooltip(i, entry.Compatible ? $"{entry.Bones} 骨骼 · {entry.Family}" : entry.Reason);
             }
             _characterChoice.Select(Math.Max(0, Array.FindIndex(_characterEntries, c => c.Id == _previewCharacterId) + 1));
-            _characterStatus.Text = _previewCharacterId.Length == 0 ? "使用动画自带的角色" : "选择动画后自动应用 · " + _characters.Find(_previewCharacterId).Name;
+            _characterStatus.Text = _previewCharacterId.Length == 0 ? "使用动画自带的角色" : "选择动画后自动应用 · " + _characterEntries.First(c => c.Id == _previewCharacterId).Name;
         }
         if (_retargetTarget != null)
         {
@@ -73,7 +73,14 @@ public partial class MainShell
             }
         }
     }
-    private CharacterEntry RetargetCharacter => _characters.Find(_retargetTarget.GetSelectedMetadata().AsString());
+    private CharacterEntry RetargetCharacter
+    {
+        get
+        {
+            string selectedId = _retargetTarget.GetSelectedMetadata().AsString();
+            return _characterEntries.First(c => c.Id == selectedId);
+        }
+    }
     private void SetRetargetCharacter(string id)
     {
         for (int i = 0; i < _retargetTarget.ItemCount; i++)
@@ -87,8 +94,8 @@ public partial class MainShell
             _retargetCancellation?.Cancel();
             _characters.Select(id); _previewCharacterId = id; RefreshCharacterChoices();
             if (id.Length > 0) { SetRetargetCharacter(id); _retargetTargetHash = ""; }
-            if (_selected == null) return;
-            if (_previewAssetId != _selected.Id) { await PreviewAssetAsync(_selected); return; }
+            if (_selected == null || _selectedLibrary == null) return;
+            if (_previewAssetId != _selectedKey) { await PreviewAssetAsync(_selectedLibrary, _selected); return; }
             if (id.Length == 0) { RestoreRetargetSource(); return; }
             await ApplyCharacterForSource();
         }
@@ -201,7 +208,7 @@ public partial class MainShell
         _characterDetails.TooltipText = _characterDetails.Text;
         _characterModel.Clear(); _characterModel.AttachModel(_characters.Load(entry));
     });
-    internal async Task ImportCharacters(string[] paths)
+    internal async Task ImportCharacters(string[] paths, bool showDialog = true)
     {
         if (_importingCharacter) return;
         _importingCharacter = true; string selected = ""; var errors = new List<string>();
@@ -214,7 +221,8 @@ public partial class MainShell
                 if (_closing) return;
                 try { selected = _characters.Import(path).Id; } catch (Exception e) { errors.Add(Path.GetFileName(path) + "：" + e.Message); }
             }
-            RefreshCharactersDialog(selected); PopupFit(_charactersDialog, new(840, 590));
+            RefreshCharactersDialog(selected);
+            if (showDialog) PopupFit(_charactersDialog, new(840, 590));
             if (selected.Length > 0 && _characters.Find(selected).Compatible)
             { PendingRetargetPreview = SelectPreviewCharacterAsync(selected); await PendingRetargetPreview; }
             if (errors.Count > 0) _characterDetails.Text = string.Join("\n", errors);

@@ -127,9 +127,18 @@ public static class FeedbackTests
             await api.ImportAsync([source]); commands.Load("source"); await commands.PendingTask;
             await owner.ImportCharacters([customPath]);
             Check(owner.PreviewCharacterId == entry.Id && preview.AppliedRetarget?.Character?.Id == entry.Id, "imported Ready character automatically becomes active target");
+            ((Window)owner.FindChild("CharacterLibrary", true, false)!).Hide();
             await owner.SelectPreviewCharacterAsync("ue4-mannequin");
-            await owner.Import([entry.ModelPath]);
-            Check(owner.PreviewCharacterId == entry.Id, "ordinary mesh import also registers and selects the Ready character");
+            string meshPath = Path.Combine(folder, "MeshOnly.glb");
+            var meshOnly = new MeshInstance3D { Name = "Mesh", Mesh = new BoxMesh() };
+            try { ExportService.WriteScene(meshPath, meshOnly, null, false, 0); } finally { meshOnly.Free(); }
+            int characters = owner.Characters.List().Length;
+            await owner.Import([entry.ModelPath, meshPath]);
+            Check(owner.PreviewCharacterId == entry.Id && api.Search().Total == 1,
+                "ordinary mesh import can select a Ready character without adding it to the animation library");
+            var imported = api.Jobs.Get(api.Jobs.LatestId!);
+            Check(imported.Failed == 0 && imported.Items.Sum(item => item.ExcludedWithoutAnimationAssets) == 2 &&
+                owner.Characters.List().Length == characters, "ordinary import skips an unrigged mesh in both libraries");
             var stage = (PreviewStage)owner.Workspace.Panel("preview");
             stage.SpeedControl.Value = 1.35;
             Check(Math.Abs(preview.Player!.SpeedScale - 1.35) < .001, "continuous speed slider controls actual player");

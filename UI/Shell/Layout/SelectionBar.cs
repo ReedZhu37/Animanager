@@ -3,7 +3,7 @@ using Godot;
 namespace Animanager.UI.Shell;
 
 /// <summary>
-/// Selection bar that replaces the filter chip row once more than one asset is selected.
+/// Contextual actions shown once more than one asset is selected.
 /// Actions are container-based buttons, so their glyph and label never overlap.
 /// </summary>
 public partial class SelectionBar : PanelContainer
@@ -11,8 +11,8 @@ public partial class SelectionBar : PanelContainer
     public event Action<string>? ActionRequested;
 
     private readonly Label _count;
-    private readonly List<Control> _normalActions = [];
-    private readonly List<Control> _trashActions = [];
+    private readonly List<Button> _normalActions = [];
+    private readonly List<Button> _trashActions = [];
 
     public SelectionBar()
     {
@@ -92,6 +92,12 @@ public partial class SelectionBar : PanelContainer
         foreach (var action in _normalActions) action.Visible = !trash;
         foreach (var action in _trashActions) action.Visible = trash;
     }
+
+    public void SetEditingEnabled(bool enabled)
+    {
+        foreach (var action in _normalActions) action.Disabled = !enabled;
+        foreach (var action in _trashActions) action.Disabled = !enabled;
+    }
 }
 
 /// <summary>Filter chip with a removal affordance.</summary>
@@ -102,7 +108,7 @@ public partial class FilterChip : Button
     public FilterChip(string key, string label)
     {
         Key = key;
-        Text = label + "  ✕";
+        Text = Typography.Fit(Typography.Regular, label, Type.Caption, 220) + "  ✕";
         CustomMinimumSize = new Vector2(0, 24);
         ThemeTypeVariation = "Chip";
         AddThemeFontSizeOverride("font_size", Type.Caption);
@@ -117,6 +123,7 @@ public partial class FilterBar : HFlowContainer
     public event Action? Cleared;
 
     private readonly Button _clear;
+    private bool _expanded = true;
 
     public FilterBar()
     {
@@ -127,6 +134,12 @@ public partial class FilterBar : HFlowContainer
         _clear.Pressed += () => Cleared?.Invoke();
         AddChild(_clear);
         _clear.Hide();
+    }
+
+    public void SetExpanded(bool expanded)
+    {
+        _expanded = expanded;
+        Visible = expanded && _clear.Visible;
     }
 
     public void SetFilters(IEnumerable<(string Key, string Label)> filters)
@@ -148,6 +161,6 @@ public partial class FilterBar : HFlowContainer
         }
         _clear.Visible = any;
         MoveChild(_clear, -1);
-        Visible = any;
+        Visible = any && _expanded;
     }
 }

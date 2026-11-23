@@ -188,6 +188,11 @@ public partial class DockGroupView : Control
         // Panels that already own scrolling need the full body, not another ScrollContainer.
         bool scrollContent = Data.Active is "bones" or "retarget" or "export" or "jobs";
         var padding = Surfaces.Padding(Data.Active is "inspector" or "navigation" ? 0 : Tokens.Space.Md);
+        if (Data.Active == "assets")
+        {
+            padding.AddThemeConstantOverride("margin_top", Tokens.Space.Xs);
+            padding.AddThemeConstantOverride("margin_bottom", Tokens.Space.Xs);
+        }
         if (scrollContent)
         {
             var scroll = new ScrollContainer { HorizontalScrollMode=ScrollContainer.ScrollMode.Disabled };

@@ -28,7 +28,14 @@ public sealed partial class WorkspaceApi
         }
     }
 
-    internal void Retire() { lock (_activityGate) _retired = true; }
+    internal void Retire()
+    {
+        lock (_activityGate)
+        {
+            _retired = true;
+            _durationIndex?.Dispose();
+        }
+    }
 
     private sealed class ActivityLease(Action release) : IDisposable
     {
@@ -57,21 +64,23 @@ public sealed partial class WorkspaceApi
     {
         var tags = ParseTags(text).ToArray();
         if (tags.Length == 0) throw new ArgumentException("请输入至少一个标签。");
-        Edit(ids, a =>
-        {
-            var current = ParseTags(a.Tags);
-            var comparer = StringComparer.OrdinalIgnoreCase;
-            return a with { Tags = string.Join(" ", add ? current.Union(tags, comparer) : current.Except(tags, comparer)) };
-        });
+        Edit(ids, a => a with { Tags = add ? MergeTags(a.Tags, tags)
+            : string.Join(" ", ParseTags(a.Tags).Except(tags, StringComparer.OrdinalIgnoreCase)) });
     }
+
+    internal void AddAssetTags(IReadOnlyDictionary<string, string[]> additions) =>
+        Edit(additions.Keys.ToArray(), asset => asset with { Tags = MergeTags(asset.Tags, additions[asset.Id]) });
+
+    private static string MergeTags(string current, IEnumerable<string> tags) =>
+        string.Join(" ", ParseTags(current).Union(tags, StringComparer.OrdinalIgnoreCase));
 
     internal static IEnumerable<string> ParseTags(string text) =>
         text.Split([' ', ',', '，', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-    public Storage.AssetCollection CreateCollection(string name)
+    public Storage.AssetCollection CreateCollection(string name, string? parentId = null)
     {
         using var activity = BeginActivity();
-        return Database.CreateCollection(name);
+        return Database.CreateCollection(name, parentId);
     }
 
     public void RenameCollection(string id, string name)
@@ -86,9 +95,11 @@ public sealed partial class WorkspaceApi
         Database.DeleteCollection(id);
     }
 
-    public void SetCollectionMembership(string id, string[] ids, bool add)
+    public void SetCollectionMembership(string id, string[] ids, bool add) => SetCollectionMembership(id, ids, [], add);
+
+    internal void SetCollectionMembership(string id, string[] ids, Storage.CollectionAssetLink[] links, bool add)
     {
         using var activity = BeginActivity();
-        Database.SetMembership(id, ids, add);
+        Database.SetMembership(id, ids, links, add);
     }
 }

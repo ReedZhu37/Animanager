@@ -1,5 +1,6 @@
 using Animanager.Core.Retarget;
 using Godot;
+using Animanager.UI.Components;
 using static Animanager.UI.Controls.AppControls;
 
 namespace Animanager.UI;
@@ -8,6 +9,7 @@ public partial class MainShell
 {
     private OptionButton _retargetTarget = null!, _retargetView = null!, _retargetSaved = null!, _retargetBone = null!;
     private CheckBox _retargetEnabled = null!, _retargetInPlace = null!, _retargetProps = null!;
+    private Button _retargetSave = null!;
     private SpinBox _retargetScale = null!, _retargetHeight = null!;
     private SpinBox[] _retargetAngles = [];
     private Label _retargetInfo = null!;
@@ -56,7 +58,9 @@ public partial class MainShell
         _retargetBone.ItemSelected += _ => { _retargetOffsetBone = _retargetBone.GetSelectedMetadata().AsString(); DisplayRetargetAngles(); };
         _retargetView = new OptionButton { Name = "RetargetView", FitToLongestItem = false };
         foreach (string label in new[] { "源动画", "目标角色", "并排对比" }) _retargetView.AddItem(label);
-        _retargetView.Select(1); _retargetView.ItemSelected += i => _preview.SetRetargetView((int)i); column.AddChild(_retargetView);
+        _retargetView.Select(1);
+        _retargetView.ItemSelected += i => _pendingRetargetSource = ChangeRetargetView((int)i);
+        column.AddChild(_retargetView);
         var actions = new HFlowContainer(); column.AddChild(actions);
         var apply = Button("应用并预览", () => PendingRetargetPreview = ApplyRetargetPreview(), true); apply.Name = "RetargetApply"; actions.AddChild(apply);
         actions.AddChild(Button("取消计算", () => _retargetCancellation?.Cancel()));
@@ -66,7 +70,7 @@ public partial class MainShell
         _retargetSaved = new OptionButton { Name = "RetargetPresets", FitToLongestItem = false }; column.AddChild(_retargetSaved);
         _retargetSaved.ItemSelected += i => { try { if (i > 0) SetRetargetOptions(_retargetPresets[(int)i - 1].Options.Snapshot()); } catch (Exception e) { _retargetInfo.Text = e.Message; } };
         _retargetName = Input("预设名称"); _retargetName.Name = "RetargetPresetName"; column.AddChild(_retargetName);
-        var save = Button("保存预设与当前资产配置", SaveRetargetPreset); save.Name = "RetargetSave"; column.AddChild(save);
+        _retargetSave = Button("保存预设与当前资产配置", SaveRetargetPreset); _retargetSave.Name = "RetargetSave"; column.AddChild(_retargetSave);
         column.AddChild(Button("前往导出", () => _workspace.ShowPanel("export")));
         _preview.SourceLoaded += () => { _retargetCancellation?.Cancel(); _retargetEnabled.ButtonPressed = false; };
         RefreshRetargetPresets();
@@ -105,7 +109,7 @@ public partial class MainShell
     private void RefreshRetargetPresets()
     {
         if (_retargetSaved == null) return;
-        try { _retargetPresets = _api?.RetargetPresets.List() ?? []; }
+        try { _retargetPresets = (_selectedLibrary?.Api ?? _api)?.RetargetPresets.List() ?? []; }
         catch (Exception e) { _retargetPresets = []; _retargetInfo.Text = "预设读取失败：" + e.Message; }
         _retargetSaved.Clear(); _retargetSaved.AddItem("选择已保存预设…");
         foreach (var preset in _retargetPresets) _retargetSaved.AddItem(preset.Name);
@@ -117,15 +121,18 @@ public partial class MainShell
         _retargetInPlace.ButtonPressed = false; _retargetScale.Value = 1; _retargetHeight.Value = 0; _retargetProps.ButtonPressed = true;
         _retargetInfo.Text = "选择动画后应用配置。脚底及双手接触 IK 尚未启用。"; _retargetInfo.TooltipText = "";
         _retargetName.Text = "";
-        try { if (_selected != null && _api.RetargetPresets.ForAsset(_selected.Id) is { } options) SetRetargetOptions(options); }
+        try { if (_selected != null && _selectedLibrary?.Api.RetargetPresets.ForAsset(_selected.Id) is { } options) SetRetargetOptions(options); }
         catch (Exception e) { _retargetInfo.Text = e.Message; }
         RefreshRetargetPresets();
     }
     private async Task ApplyRetargetPreview()
     {
-        if (_api == null || _selected == null || _previewAssetId != _selected.Id) { SetStatus("请先预览一个动画资产。"); return; }
+        if (_selectedLibrary == null || _selected == null || _previewAssetId != _selectedKey) { SetStatus("请先预览一个动画资产。"); return; }
+        EndAnimationComparison();
+        StopRequest(ref _retargetSourceRequest);
         _retargetCancellation?.Cancel(); using var cancellation = new CancellationTokenSource(); _retargetCancellation = cancellation;
-        var api = _api; string id = _selected.Id;
+        var api = _selectedLibrary.Api; string id = _selected.Id;
+        var key = _selectedKey;
         bool wasPlaying = _preview.Playing;
         try
         {
@@ -134,7 +141,7 @@ public partial class MainShell
             _characterStatus.Text = "正在应用角色 · " + RetargetCharacter.Name;
             var result = await _characterCache.Get(api.Storage.Resolve(api.Find(id).VirtualPath), options,
                 () => api.PreviewRetargetAsync(id, options, cancellation.Token), cancellation.Token);
-            if (_closing || _api != api || _selected?.Id != id || cancellation.IsCancellationRequested) { result.Root.Free(); return; }
+            if (_closing || _selectedKey != key || cancellation.IsCancellationRequested) { result.Root.Free(); return; }
             _preview.AttachRetarget(result, options, api.Storage.Resolve(api.Find(id).VirtualPath), _retargetView.Selected);
             SetRetargetOptions(options);
             _previewCharacterId = options.Character?.Id ?? options.TargetRig;
@@ -149,7 +156,7 @@ public partial class MainShell
         catch (OperationCanceledException) { if (_retargetCancellation == cancellation) _retargetInfo.Text = "已取消，保留当前预览。"; }
         catch (Exception e)
         {
-            if (_retargetCancellation != cancellation || cancellation.IsCancellationRequested || _selected?.Id != id || _api != api) return;
+            if (_retargetCancellation != cancellation || cancellation.IsCancellationRequested || _selectedKey != key) return;
             _retargetEnabled.ButtonPressed = false;
             _stage.SetLoadStatus("重定向失败，保留当前预览。" + e.Message);
             _retargetInfo.Text = "无法重定向：" + e.Message;
@@ -164,24 +171,72 @@ public partial class MainShell
         _retargetInfo.Text = _preview.RetargetSummary;
         _retargetInfo.TooltipText = _preview.RetargetDiagnostics;
     }
+
+    private CancellationTokenSource? _retargetSourceRequest;
+    private Task _pendingRetargetSource = Task.CompletedTask;
+
+    private async Task ChangeRetargetView(int mode)
+    {
+        EndAnimationComparison();
+        bool wasLoading = _retargetSourceRequest != null;
+        StopRequest(ref _retargetSourceRequest);
+        if (_retargetCancellation is { IsCancellationRequested: false })
+        {
+            _retargetView.Select(_preview.RetargetViewMode);
+            return;
+        }
+        if (mode == 1 || _preview.DeferredRetargetSource is not { } path)
+        {
+            _preview.SetRetargetView(mode);
+            if (wasLoading) _stage.SetLoadStatus("");
+            return;
+        }
+        var library = SelectionLibrary(_previewAssetId);
+        if (library == null) return;
+        var model = _preview.Model;
+        string key = _previewAssetId;
+        using var request = new CancellationTokenSource();
+        _retargetSourceRequest = request;
+        _stage.SetLoadStatus("正在加载原动画…");
+        try
+        {
+            using var activity = library.Api.BeginActivity();
+            using var source = await PreviewSource.LoadAsync(path, request.Token, fullTracks: true);
+            if (_closing || request.IsCancellationRequested || _previewAssetId != key || _preview.Model != model) return;
+            _preview.AttachRetargetSource(source);
+            _preview.SetRetargetView(mode);
+            _stage.SetLoadStatus("");
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception e)
+        {
+            if (_retargetSourceRequest != request) return;
+            _retargetView.Select(_preview.RetargetViewMode);
+            _stage.SetLoadStatus("无法加载原动画 · " + e.Message);
+        }
+        finally { if (_retargetSourceRequest == request) _retargetSourceRequest = null; }
+    }
     private void SaveRetargetPreset()
     {
         try
         {
             if (_selected == null) throw new InvalidOperationException("请选择源动画。");
-            using var activity = _api.BeginActivity();
-            var options = _api.InspectRetarget(_selected.Id, ReadRetargetOptions());
-            _api.RetargetPresets.Save(_retargetName.Text, options); _api.RetargetPresets.Associate(_selected.Id, options);
+            var api = _selectedLibrary!.Api;
+            using var activity = api.BeginActivity();
+            var options = api.InspectRetarget(_selected.Id, ReadRetargetOptions());
+            api.RetargetPresets.Save(_retargetName.Text, options); api.RetargetPresets.Associate(_selected.Id, options);
             SetRetargetOptions(options); RefreshRetargetPresets(); SetStatus("已保存重定向配置。");
         }
         catch (Exception e) { _retargetInfo.Text = e.Message; }
     }
     private void RestoreRetargetSource()
     {
+        EndAnimationComparison();
+        StopRequest(ref _retargetSourceRequest);
         _retargetCancellation?.Cancel();
         _previewCharacterId = ""; _characters.Select(""); RefreshCharacterChoices();
-        if (_selected == null) return;
-        try { _preview.LoadFile(_api.Storage.Resolve(_selected.VirtualPath)); _retargetEnabled.ButtonPressed = false; _retargetInfo.Text = "已恢复源动画。"; UpdateTransport(); }
+        if (_selected == null || _selectedLibrary == null) return;
+        try { _preview.LoadFile(_selectedLibrary.Api.Storage.Resolve(_selected.VirtualPath)); _retargetEnabled.ButtonPressed = false; _retargetInfo.Text = "已恢复源动画。"; UpdateTransport(); }
         catch (Exception e) { _retargetInfo.Text = e.Message; }
     }
 }

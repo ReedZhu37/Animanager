@@ -23,13 +23,17 @@ public static class PipelineTests
         try
         {
             await Execute("app status");Check(commands.LastResult.Contains("fbxExport"),"Limbo registers and dispatches typed C# command");
-            await Execute("baseline import");Check(api.Search("UE").Total==4,"official UE baseline FBX import");
+            await Execute("baseline import");
+            var import=api.Jobs.Get(api.Jobs.LatestId!);
+            Check(api.Search("UE").Total==1&&import.Failed==0&&import.Skipped==4,"FBX import skips four static reference files with empty takes");
+            Check(api.Find("UE5_Manny_Idle").Tags=="无位移","FBX import tags genuine skeletal animation with no root displacement");
             foreach(var name in new[]{"UE4_Mannequin","UE5_Manny","UE5_Quinn","UE5_Manny_Idle"})
             {
-                await Execute("preview load "+name);
+                preview.LoadFile(RuntimePaths.Bundled("BuiltinAssets/Baselines/"+name+".fbx"));
                 Check(preview.MeshCount>0&&preview.BoneCount>50,name+" native FBX meshes and skeleton");
                 records.Add(new{name,bones=preview.BoneCount,meshes=preview.MeshCount,clips=preview.Clips,height=Height()});
             }
+            await Execute("preview load UE5_Manny_Idle");
             Check(preview.Clips.Length>0&&preview.Duration>0,"Epic FBX animation imported");
             var duration=preview.Duration;var height=Height();
             var skeleton=Preview3DViewport.Descendants(preview.Model!).OfType<Skeleton3D>().First();
@@ -37,8 +41,8 @@ public static class PipelineTests
             await Execute("preview seek 0");var pose=Enumerable.Range(0,skeleton.GetBoneCount()).Select(skeleton.GetBonePose).ToArray();
             await Execute($"preview seek {(duration*.4).ToString(System.Globalization.CultureInfo.InvariantCulture)}");
             Check(Enumerable.Range(0,skeleton.GetBoneCount()).Any(i=>!skeleton.GetBonePose(i).IsEqualApprox(pose[i])),"official animation drives bone pose");
-            await Execute("asset tags UE5_Manny \"baseline official\"");Check(api.Search("official").Total==1,"console quoted string arguments");
-            await Execute("asset favorite UE5_Manny true");Check(api.Find("UE5_Manny").Favorite,"console boolean argument");
+            await Execute("asset tags UE5_Manny_Idle \"baseline official\"");Check(api.Search("official").Total==1,"console quoted string arguments");
+            await Execute("asset favorite UE5_Manny_Idle true");Check(api.Find("UE5_Manny_Idle").Favorite,"console boolean argument");
             await Execute("preview play");Check(preview.Playing,"console starts animation");
             await Execute("preview pause");Check(!preview.Playing,"console pauses animation");
             await Execute($"export fbx UE5_Manny_Idle \"{root.Replace('\\','/')}\"");

@@ -150,7 +150,8 @@ public static class ThemeFactory
         theme.SetFontSize("font_size", "PopupMenu", Type.Body);
         theme.SetConstant("v_separation", "PopupMenu", Tokens.Space.Sm - 2);
 
-        theme.SetStylebox("panel", "AcceptDialog", Surfaces.Fill(Tokens.Raised, Tokens.Radius.Popup, 14, 14, Tokens.LineStrong));
+        // As in Godot's default theme, fill the entire dialog client area.
+        theme.SetStylebox("panel", "AcceptDialog", Surfaces.Fill(Tokens.Raised, radius: 0, padX: 14, padY: 14));
 
         theme.SetStylebox("panel", "ItemList", Surfaces.Fill(Tokens.Panel, Tokens.Radius.Control));
         theme.SetStylebox("selected", "ItemList", Surfaces.Fill(Tokens.Active, Tokens.Radius.Control, 4, 4));

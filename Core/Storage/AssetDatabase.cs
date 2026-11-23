@@ -1,14 +1,25 @@
 using Animanager.Core.Models;
 using Animanager.Core.Motion;
 using Microsoft.Data.Sqlite;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Animanager.Core.Storage;
 
-public sealed record AssetCollection(string Id, string Name, string[] AssetIds);
-public sealed record AssetCatalog(int Version, string Revision, AssetItem[] Assets, AssetCollection[] Collections);
+public sealed record AssetCollection(string Id, string Name, string[] AssetIds)
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ParentId { get; init; }
+    public CollectionAssetLink[] LinkedAssets { get; init; } = [];
+}
+public sealed record CollectionAssetLink(string LibraryId, string AssetId);
+public sealed record AssetTagGroup(string Id, string Name, string[] Tags);
+public sealed record AssetCatalog(int Version, string Revision, AssetItem[] Assets, AssetCollection[] Collections)
+{
+    public AssetTagGroup[] TagGroups { get; init; } = [];
+}
 
-public sealed class AssetDatabase
+public sealed partial class AssetDatabase
 {
     private const string Schema = """
         CREATE TABLE assets (
@@ -112,12 +123,37 @@ public sealed class AssetDatabase
             throw new InvalidDataException("持久资产清单损坏：" + path);
         var ids = catalog.Assets.Select(a => a.Id).ToHashSet();
         if (catalog.Collections.Any(c => c == null || !Guid.TryParseExact(c.Id, "N", out _) ||
-                string.IsNullOrWhiteSpace(c.Name) || c.AssetIds == null || c.AssetIds.Distinct().Count() != c.AssetIds.Length || c.AssetIds.Any(id => !ids.Contains(id))) ||
+                string.IsNullOrWhiteSpace(c.Name) || c.AssetIds == null || c.AssetIds.Distinct().Count() != c.AssetIds.Length || c.AssetIds.Any(id => !ids.Contains(id)) ||
+                c.LinkedAssets == null || c.LinkedAssets.Any(link => !ValidCollectionLink(link)) ||
+                c.LinkedAssets.Distinct().Count() != c.LinkedAssets.Length) ||
             catalog.Collections.Select(c => c.Id).Distinct().Count() != catalog.Collections.Length ||
-            catalog.Collections.Select(c => c.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != catalog.Collections.Length)
+            catalog.Collections.Select(c => c.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != catalog.Collections.Length ||
+            !ValidCollectionParents(catalog.Collections))
             throw new InvalidDataException("持久清单的集合关系损坏：" + path);
+        var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (catalog.TagGroups == null || catalog.TagGroups.Any(group => group == null || !Guid.TryParseExact(group.Id, "N", out _) ||
+                string.IsNullOrWhiteSpace(group.Name) || group.Tags == null || group.Tags.Any(tag => !IsTagToken(tag) || !tags.Add(tag))) ||
+            catalog.TagGroups.Select(group => group.Id).Distinct().Count() != catalog.TagGroups.Length ||
+            catalog.TagGroups.Select(group => group.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != catalog.TagGroups.Length)
+            throw new InvalidDataException("持久清单的标签组损坏：" + path);
         return catalog;
     }
+
+    private static bool ValidCollectionParents(AssetCollection[] collections)
+    {
+        var children = collections.ToLookup(c => c.ParentId);
+        var pending = new Queue<AssetCollection>(children[null]);
+        int visited = 0;
+        while (pending.TryDequeue(out var parent))
+        {
+            visited++;
+            foreach (var child in children[parent.Id]) pending.Enqueue(child);
+        }
+        return visited == collections.Length;
+    }
+
+    private static bool ValidCollectionLink(CollectionAssetLink? link) => link != null &&
+        Guid.TryParseExact(link.LibraryId, "N", out _) && !string.IsNullOrWhiteSpace(link.AssetId);
 
     private void SaveCatalog(AssetCatalog catalog) => MotionJson.Atomic(_catalogPath, catalog);
 
@@ -134,14 +170,22 @@ public sealed class AssetDatabase
     public AssetCatalog Snapshot()
     {
         lock (_gate)
-            return _catalog with { Assets = _catalog.Assets.Select(a => a with { }).ToArray(), Collections = Collections() };
+            return _catalog with { Assets = _catalog.Assets.Select(a => a with { }).ToArray(), Collections = Collections(), TagGroups = TagGroups() };
     }
 
     public AssetCollection[] Collections()
     {
         lock (_gate)
-            return _catalog.Collections.Select(c => c with { AssetIds = c.AssetIds.ToArray() }).ToArray();
+            return _catalog.Collections.Select(c => c with { AssetIds = c.AssetIds.ToArray(), LinkedAssets = c.LinkedAssets.ToArray() }).ToArray();
     }
+
+    private AssetTagGroup[] TagGroups()
+    {
+        lock (_gate)
+            return _catalog.TagGroups.Select(group => group with { Tags = group.Tags.ToArray() }).ToArray();
+    }
+
+    internal static bool IsTagToken(string? tag) => tag != null && WorkspaceApi.ParseTags(tag).SequenceEqual([tag]);
 
     public string[] ExistingIds(IEnumerable<string> ids, bool trash)
     {
@@ -149,6 +193,22 @@ public sealed class AssetDatabase
         {
             var requested = ids.ToHashSet();
             return _catalog.Assets.Where(a => a.Trashed == trash && requested.Contains(a.Id)).Select(a => a.Id).ToArray();
+        }
+    }
+
+    internal Dictionary<string, int> BrowseCategoryCounts()
+    {
+        lock (_gate)
+        {
+            var counts = new Dictionary<string, int> { ["All"] = 0, ["Animation"] = 0, ["Model"] = 0, ["Favorites"] = 0, ["Trash"] = 0 };
+            foreach (var asset in _catalog.Assets)
+            {
+                if (asset.Trashed) { counts["Trash"]++; continue; }
+                counts["All"]++;
+                if (asset.Type is "Model" or "Animation") counts[asset.Type]++;
+                if (asset.Favorite) counts["Favorites"]++;
+            }
+            return counts;
         }
     }
 
@@ -177,12 +237,14 @@ public sealed class AssetDatabase
         }
     }
 
-    public bool Insert(AssetItem asset)
+    public bool Insert(AssetItem asset) => Insert(asset, null);
+
+    internal bool Insert(AssetItem asset, StoredDuration? duration)
     {
         lock (_gate)
         {
             if (_catalog.Assets.Any(a => a.Id == asset.Id || a.FileHash == asset.FileHash)) return false;
-            Commit(_catalog with { Assets = [.. _catalog.Assets, asset with { }] });
+            Commit(_catalog with { Assets = [.. _catalog.Assets, asset with { }] }, duration);
             return true;
         }
     }
@@ -199,11 +261,12 @@ public sealed class AssetDatabase
         }
     }
 
-    public AssetCollection CreateCollection(string name)
+    public AssetCollection CreateCollection(string name, string? parentId = null)
     {
         lock (_gate)
         {
-            var collection = new AssetCollection(NewId(), CollectionName(name), []);
+            if (parentId != null) GetCollection(parentId);
+            var collection = new AssetCollection(NewId(), CollectionName(name), []) { ParentId = parentId };
             Commit(_catalog with { Collections = [.. _catalog.Collections, collection] });
             return collection;
         }
@@ -223,19 +286,26 @@ public sealed class AssetDatabase
     {
         lock (_gate)
         {
-            GetCollection(id);
-            Commit(_catalog with { Collections = _catalog.Collections.Where(c => c.Id != id).ToArray() });
+            var collection = GetCollection(id);
+            var remaining = _catalog.Collections.Where(c => c.Id != id)
+                .Select(c => c.ParentId == id ? c with { ParentId = collection.ParentId } : c).ToArray();
+            Commit(_catalog with { Collections = remaining });
         }
     }
 
-    public void SetMembership(string id, string[] ids, bool add)
+    public void SetMembership(string id, string[] ids, bool add) => SetMembership(id, ids, [], add);
+
+    internal void SetMembership(string id, string[] ids, CollectionAssetLink[] links, bool add)
     {
         lock (_gate)
         {
             var collection = GetCollection(id);
-            RequireAssets(ids, false);
-            var members = add ? collection.AssetIds.Union(ids) : collection.AssetIds.Except(ids);
-            var replacement = collection with { AssetIds = members.ToArray() };
+            if (ids.Length > 0 || links.Length == 0) RequireAssets(ids, false);
+            if (links.Any(link => !ValidCollectionLink(link))) throw new ArgumentException("集合包含无效的资产引用。");
+            var members = (add ? collection.AssetIds.Union(ids) : collection.AssetIds.Except(ids)).ToArray();
+            var linked = (add ? collection.LinkedAssets.Union(links) : collection.LinkedAssets.Except(links)).ToArray();
+            if (collection.AssetIds.SequenceEqual(members) && collection.LinkedAssets.SequenceEqual(linked)) return;
+            var replacement = collection with { AssetIds = members, LinkedAssets = linked };
             Commit(_catalog with { Collections = _catalog.Collections.Select(c => c.Id == id ? replacement : c).ToArray() });
         }
     }
@@ -274,15 +344,17 @@ public sealed class AssetDatabase
         return result;
     }
 
-    private void Commit(AssetCatalog next)
+    private void Commit(AssetCatalog next, StoredDuration? duration = null)
     {
         var previous = _catalog;
-        if (previous.Assets.SequenceEqual(next.Assets) && previous.Collections.SequenceEqual(next.Collections)) return;
+        if (previous.Assets.SequenceEqual(next.Assets) && previous.Collections.SequenceEqual(next.Collections) &&
+            previous.TagGroups.SequenceEqual(next.TagGroups)) return;
         if (!IndexExistsAtRevision()) RebuildIndex();
         next = next with { Revision = NewId() };
         using var db = Open(_path);
         using var transaction = db.BeginTransaction();
         Project(db, transaction, next, previous);
+        if (duration != null) WriteDurations(db, transaction, [duration]);
         SaveCatalog(next);
         _catalog = next;
         try { transaction.Commit(); }
@@ -435,41 +507,59 @@ public sealed class AssetDatabase
     public (List<AssetItem> Items, int Total) Search(string query = "", string category = "All", int page = 0, int pageSize = 60)
         => Search(query, category, Animanager.Core.Browse.AssetSort.Default, page, pageSize);
 
-    public (List<AssetItem> Items, int Total) Search(string query, string category, Animanager.Core.Browse.AssetSort sort, int page = 0, int pageSize = 60)
+    public (List<AssetItem> Items, int Total) Search(string query, string category, Animanager.Core.Browse.AssetSort sort, int page = 0, int pageSize = 60) =>
+        Search(query, category, sort, page, pageSize, null);
+
+    internal (List<AssetItem> Items, int Total) Search(string query, string category, Animanager.Core.Browse.AssetSort sort,
+        int page, int pageSize, string? memberIdsJson)
     {
-        lock (_gate)
+        lock (_gate) return SearchIndex(_path, query, category, sort, page, pageSize, memberIdsJson);
+    }
+
+    internal static List<AssetItem> SearchClosedCollectionMembers(LocalStorageProvider storage, string query, string memberIdsJson) =>
+        SearchIndex(storage.Resolve(IndexName), query, "All", Animanager.Core.Browse.AssetSort.Default, 0, int.MaxValue, memberIdsJson).Items;
+
+    private static (List<AssetItem> Items, int Total) SearchIndex(string path, string query, string category,
+        Animanager.Core.Browse.AssetSort sort, int page, int pageSize, string? memberIdsJson)
+    {
+        using var db = Open(path, SqliteOpenMode.ReadOnly);
+        using var cmd = db.CreateCommand();
+        var tokens = Regex.Matches(query, @"[\p{L}\p{N}_]+").Select(m => "\"" + m.Value + "\"*").ToArray();
+        var where = """
+            WHERE trashed=($cat='Trash') AND ($cat IN ('All','Trash') OR ($cat='Favorites' AND favorite=1)
+                OR type=$cat OR id IN (SELECT asset FROM collection_assets WHERE collection=$cat))
+            """;
+        if (memberIdsJson != null)
         {
-            using var db = Open(_path, SqliteOpenMode.ReadOnly);
-            using var cmd = db.CreateCommand();
-            var tokens = Regex.Matches(query, @"[\p{L}\p{N}_]+").Select(m => "\"" + m.Value + "\"*").ToArray();
-            var where = """
-                WHERE trashed=($cat='Trash') AND ($cat IN ('All','Trash') OR ($cat='Favorites' AND favorite=1)
-                    OR type=$cat OR id IN (SELECT asset FROM collection_assets WHERE collection=$cat))
-                """;
-            if (!string.IsNullOrWhiteSpace(query))
-            {
-                where += " AND (name LIKE $q ESCAPE '!' OR tags LIKE $q ESCAPE '!'";
-                cmd.Parameters.AddWithValue("$q", "%" + query.Replace("!", "!!").Replace("%", "!%").Replace("_", "!_") + "%");
-                if (tokens.Length > 0)
-                {
-                    where += " OR id IN (SELECT id FROM asset_search WHERE asset_search MATCH $fts)";
-                    cmd.Parameters.AddWithValue("$fts", string.Join(" AND ", tokens));
-                }
-                where += ")";
-            }
-            cmd.Parameters.AddWithValue("$cat", category);
-            cmd.CommandText = "SELECT count(*) FROM assets " + where;
-            int total = Convert.ToInt32(cmd.ExecuteScalar());
-            cmd.CommandText = "SELECT " + AssetColumns + ",trashed FROM assets " + where + " ORDER BY " + sort.SqlOrder + " LIMIT $limit OFFSET $offset";
-            cmd.Parameters.AddWithValue("$limit", pageSize);
-            cmd.Parameters.AddWithValue("$offset", (long)page * pageSize);
-            using var reader = cmd.ExecuteReader();
-            var items = new List<AssetItem>();
-            while (reader.Read()) items.Add(ReadAsset(reader, true));
-            return (items, total);
+            where += " AND id IN (SELECT value FROM json_each($members))";
+            cmd.Parameters.AddWithValue("$members", memberIdsJson);
         }
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            where += " AND (name LIKE $q ESCAPE '!' OR tags LIKE $q ESCAPE '!'";
+            cmd.Parameters.AddWithValue("$q", "%" + query.Replace("!", "!!").Replace("%", "!%").Replace("_", "!_") + "%");
+            if (tokens.Length > 0)
+            {
+                where += " OR id IN (SELECT id FROM asset_search WHERE asset_search MATCH $fts)";
+                cmd.Parameters.AddWithValue("$fts", string.Join(" AND ", tokens));
+            }
+            where += ")";
+        }
+        cmd.Parameters.AddWithValue("$cat", category);
+        cmd.CommandText = "SELECT count(*) FROM assets " + where;
+        int total = Convert.ToInt32(cmd.ExecuteScalar());
+        cmd.CommandText = "SELECT " + AssetColumns + ",trashed FROM assets " + where + " ORDER BY " + sort.SqlOrder + " LIMIT $limit OFFSET $offset";
+        cmd.Parameters.AddWithValue("$limit", pageSize);
+        cmd.Parameters.AddWithValue("$offset", (long)page * pageSize);
+        using var reader = cmd.ExecuteReader();
+        var items = new List<AssetItem>();
+        while (reader.Read()) items.Add(ReadAsset(reader, true));
+        return (items, total);
     }
 
     // Batch export must not inherit the UI's page limit.
     public List<AssetItem> SearchAll(string query = "", string category = "All") => Search(query, category, 0, int.MaxValue).Items;
+
+    internal List<AssetItem> SearchAll(string query, string category, string? memberIdsJson) =>
+        Search(query, category, Animanager.Core.Browse.AssetSort.Default, 0, int.MaxValue, memberIdsJson).Items;
 }

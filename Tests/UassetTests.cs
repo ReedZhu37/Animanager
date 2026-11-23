@@ -27,11 +27,15 @@ public static class UassetTests
             Check(api.Search().Total==count,"inspection does not import assets");
             await Execute($"uasset import \"{zip.Replace('\\','/')}\"");
             var job=api.Jobs.Get(api.Jobs.LatestId!);
-            Check(job.State==JobState.Completed&&job.Items.Sum(i=>i.ImportedAssets)==386&&job.Items.Sum(i=>i.UnsupportedAssets)==6,"Limbo imports the original ZIP through the durable batch queue");
-            Check(api.Search().Total==count+386&&api.Search("uasset","Animation").Total==386,"all 386 clips are indexed as animations with provenance tags");
+            const int retained=198, inPlace=188;
+            Check(job.State==JobState.Completed&&job.Items.Sum(i=>i.ImportedAssets)==retained&&job.Items.Sum(i=>i.ExcludedInPlaceAssets)==inPlace&&job.Items.Sum(i=>i.UnsupportedAssets)==6,"Limbo imports the original ZIP and reports excluded InPlace variants");
+            Check(api.Search().Total==count+retained&&api.Search("uasset","Animation").Total==retained
+                &&api.Search("InPlace","Animation").Total==0,"retained clips are indexed with provenance tags");
             Check(File.Exists(job.Items[0].Output)&&File.Exists(Path.Combine(Path.GetDirectoryName(job.Items[0].Output)!,"import-report.json")),"source hashes, skipped classes and library mappings are retained");
-            foreach(var name in new[]{"MovementAnimsetPro__RootMotion__WalkFwdLoop","MovementAnimsetPro__InPlace__WalkFwdLoop","MovementAnimsetPro__AimOffsets__Idle_U"})
+            foreach(var name in new[]{"MovementAnimsetPro__RootMotion__WalkFwdLoop","MovementAnimsetPro__AimOffsets__Idle_U"})
             {
+                Check(WorkspaceApi.ParseTags(api.Find(name).Tags).Contains(name.Contains("__RootMotion__")?"水平位移":"无位移"),
+                    "import retains the displacement tag alongside source provenance: "+name);
                 await Execute("preview load "+name);preview.SetLoop(false);
                 Check(preview.BoneCount==68&&preview.MeshCount==1&&preview.Clips.Length==1,"preview loads "+name);
                 var sk=Preview3DViewport.Descendants(preview.Model!).OfType<Skeleton3D>().First();var root=sk.FindBone("root");preview.Seek(0);var start=sk.GlobalTransform*sk.GetBoneGlobalPose(root).Origin;
@@ -39,7 +43,7 @@ public static class UassetTests
                 Check(name.Contains("__RootMotion__")?Math.Abs(travel-1.7416954)<.001:travel<.001,"root displacement is preserved: "+name);
             }
             await Execute($"batch import \"{zip.Replace('\\','/')}\"");job=api.Jobs.Get(api.Jobs.LatestId!);
-            Check(job.State==JobState.Completed&&job.Items.Sum(i=>i.DuplicateAssets)==386&&api.Search().Total==count+386,"standard batch import routes ZIPs and skips all duplicates");
+            Check(job.State==JobState.Completed&&job.Items.Sum(i=>i.DuplicateAssets)==retained&&job.Items.Sum(i=>i.ExcludedInPlaceAssets)==inPlace&&api.Search().Total==count+retained,"standard batch import routes ZIPs and reports both kinds of skips");
             var fixtures=Path.Combine(api.Storage.Root,"fixtures");Directory.CreateDirectory(fixtures);
             var good=Path.Combine(fixtures,"WalkFwdLoop.uasset");var bad=Path.Combine(fixtures,"broken.uasset");
             using(var archive=ZipFile.OpenRead(zip)){var entry=archive.Entries.Single(e=>e.FullName.EndsWith("/RootMotion/WalkFwdLoop.uasset"));entry.ExtractToFile(good);}
@@ -52,10 +56,9 @@ public static class UassetTests
             for(int i=0;i<100&&api.Jobs.Get(cancel).State==JobState.Queued;i++)await Task.Delay(10);
             Check(api.Jobs.Get(cancel).State==JobState.Running,"cancellation test reaches a running converter");
             api.Jobs.Cancel(cancel);job=await api.Jobs.WaitAsync(cancel);
-            Check(job.State==JobState.Cancelled&&api.Search().Total==count+386,"cancellation stops the helper without adding partial assets");
+            Check(job.State==JobState.Cancelled&&api.Search().Total==count+retained,"cancellation stops the helper without adding partial assets");
             // Exercise the actual GUI handler, including its ZIP routing and job status rendering.
-            var method=owner.GetType().GetMethod("Import",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance)!;
-            await (Task)method.Invoke(owner,[new[]{good},false])!;
+            await ((Animanager.UI.MainShell)owner).Import([good],false,autoCharacters:false);
             Check(api.Jobs.Get(api.Jobs.LatestId!).State==JobState.Completed,"GUI import uses the same tested independent backend");
             var unsafeZip=Path.Combine(fixtures,"unsafe.zip");
             using(var archive=ZipFile.Open(unsafeZip,ZipArchiveMode.Create)){using var entry=archive.CreateEntry("../escape.uasset").Open();entry.Write([0,1,2,3]);}

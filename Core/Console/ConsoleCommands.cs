@@ -29,7 +29,7 @@ public partial class ConsoleCommands : Node
     public bool JobRunning=>_job!=null||_scan!=null||_sessionApi?.LibraryBusy==true;
     public Task PendingTask { get; private set; }=Task.CompletedTask;
     public void Initialize(WorkspaceApi? api,Preview3DViewport preview,Action refresh,Action<Models.AssetItem> selection,
-        LibraryManager libraries,Action beforeSwitch,Action<LibrarySession> activate)
+        LibraryManager libraries,Action beforeSwitch,Func<Func<Task<LibrarySession>>,Task> switchLibrary,Action<LibrarySession> activate)
     {
         _preview=preview;_refresh=refresh;_selection=selection;_console=GetNode("/root/LimboConsole");
         Bind("app commands",nameof(Commands),"List Animanager hacking commands");
@@ -40,7 +40,7 @@ public partial class ConsoleCommands : Node
         Bind("asset inspect",nameof(Inspect),"Inspect by exact unique name or full ID");
         Bind("asset tags",nameof(Tags),"Set tags: asset tags <id_or_name> <tags>");
         Bind("asset favorite",nameof(Favorite),"Set favorite: asset favorite <id_or_name> <bool>");
-        RegisterLibraryCommands(libraries,beforeSwitch,activate);
+        RegisterLibraryCommands(libraries,beforeSwitch,switchLibrary,activate);
         RegisterAssetBrowseCommands();
         Bind("preview load",nameof(Load),"Load an asset by exact unique name or ID");
         Bind("preview play",nameof(Play),"Play the selected clip");
@@ -78,14 +78,9 @@ public partial class ConsoleCommands : Node
         Bind("uasset status",nameof(UassetStatus),"Independent CUE4Parse importer capabilities and baseline profile");
         Bind("uasset inspect",nameof(UassetInspect),"Read .uasset / ZIP / directory and report support; no assets imported");
         Bind("uasset import",nameof(UassetImport),"Batch import .uasset / ZIP / directory with automatic UE4 / UE5 standard skeleton recognition");
-        SetKey("limbo_console_toggle",Key.Quoteleft);SetKey("limbo_auto_complete_reverse",Key.Tab,shift:true);SetKey("limbo_console_search_history",Key.R,ctrl:true);
         _console.Call("add_argument_autocomplete_source","preview load",0,Callable.From(()=>_sessionApi?.Search().Items.Select(a=>a.Name).ToArray()??[]));
         ChangeLibrary(api);
         Info("Ready. Press ` or F12. Run: app commands");
-    }
-    private static void SetKey(string action,Key key,bool shift=false,bool ctrl=false)
-    {
-        if(InputMap.HasAction(action))return;InputMap.AddAction(action);InputMap.ActionAddEvent(action,new InputEventKey{Keycode=key,ShiftPressed=shift,CtrlPressed=ctrl});
     }
     private void Bind(string command,string method,string description)=>_console.Call("register_command",new Callable(this,method),command,description);
     private void Write(string value)
@@ -120,7 +115,7 @@ public partial class ConsoleCommands : Node
     public void Favorite(string asset,bool enabled)=>Guard(()=>{_api.SetFavorite(asset,enabled);_refresh();Info("Favorite saved.");});
     public void Import(string path)=>BatchImport(path);
     public void Baselines()=>Import("res://BuiltinAssets/Baselines");
-    public void UassetStatus()=>Guard(()=>Info($"CUE4Parse available: {_api.Uasset.Available}\nUE 4.23 / 4.27 raw / UE 5.0 tagged AnimDataModel / UE 5.6 Sequencer Direct FK AnimSequence · automatic UE4 / UE5 standard skeleton recognition\nNodachi: fixed 161-bone character, independent prop tracks, grip and contact metadata (no IK). Source poses; full Skeleton dependency preserved as source data when supplied. Missing standard Skeleton substitutions are reported. Other UE versions / data models, Montage, blending, curves, events, cooked assets and retargeting are unsupported. No Unreal installation required.\nHelper: {_api.Uasset.Executable}"));
+    public void UassetStatus()=>Guard(()=>Info($"CUE4Parse available: {_api.Uasset.Available}\nUE 4.18 / 4.21 / 4.23 / 4.27 raw · UE 5.0 tagged and 5.1 native AnimDataModel · UE 5.6 Sequencer Direct FK AnimSequence\nAutomatic UE4 / UE5 standard skeleton recognition. Nodachi: fixed 161-bone character, independent prop tracks, grip and contact metadata (no IK). Source poses; missing standard Skeleton substitutions are reported. Runtime root locking, Montage, blending, curves, events, cooked assets and retargeting are unsupported. No Unreal installation required.\nHelper: {_api.Uasset.Executable}"));
     public void UassetImport(string path)=>Guard(()=>StartPlan(_api.Planner.ImportUasset([Expand(path)])));
     public void UassetInspect(string path)=>Job(async ct=>{
         var output=Path.Combine(_api.Storage.Root,"uasset",Guid.NewGuid().ToString("N"));
@@ -142,9 +137,9 @@ public partial class ConsoleCommands : Node
         _selection(a);
         Info($"Loaded {a.Name}: {_preview.MeshCount} meshes, {_preview.BoneCount} bones; clips: "+string.Join(", ",_preview.Clips));
     });
-    public void Play()=>Guard(()=>{if(!_preview.Playing)_preview.TogglePlay();Info(_preview.Playing?"Playing":"No animation loaded");});
-    public void Pause()=>Guard(()=>{if(_preview.Playing)_preview.TogglePlay();Info("Paused");});
-    public void Seek(double seconds)=>Guard(()=>{if(!double.IsFinite(seconds)||seconds<0||seconds>_preview.Duration)throw new ArgumentOutOfRangeException(nameof(seconds));_preview.Seek(seconds);Info($"Time {_preview.Playhead:F3}s");});
+    public void Play()=>Guard(()=>{if(!_preview.TransportPlaying)_preview.ToggleTransport();Info(_preview.TransportPlaying?"Playing":"No animation loaded");});
+    public void Pause()=>Guard(()=>{if(_preview.TransportPlaying)_preview.ToggleTransport();Info("Paused");});
+    public void Seek(double seconds)=>Guard(()=>{if(!double.IsFinite(seconds)||seconds<0||seconds>_preview.TransportDuration)throw new ArgumentOutOfRangeException(nameof(seconds));_preview.SeekTransport(seconds);Info($"Time {_preview.TransportPlayhead:F3}s");});
     public void Clip(string clip)=>Guard(()=>{if(!_preview.Clips.Contains(clip))throw new ArgumentException("Unknown clip");_preview.SelectClip(clip);PendingTask=_preview.Bones.PendingSampling;Info(clip);});
     public void Speed(double value)=>Guard(()=>{if(!double.IsFinite(value)||value<.1||value>4)throw new ArgumentOutOfRangeException(nameof(value));_preview.SetSpeed(value);Info($"Speed {value}");});
     public void Material(string mode)=>Guard(()=>{if(mode is not ("clay" or "original"))throw new ArgumentException("Use clay or original");_preview.SetClay(mode=="clay");Info("Preview material: "+mode);});
@@ -199,7 +194,7 @@ public partial class ConsoleCommands : Node
         try{using var activity=_api.BeginActivity();var result=await _api.Jobs.WaitAsync(id);Info(Summary(result));if(!_closing)_refresh();}
         catch(Exception ex){Fail(ex);}
     }
-    private static string Summary(JobRecord r)=>$"{r.Id} | {r.Kind} | {r.State} | {r.Finished}/{r.Total}\nSucceeded {r.Succeeded}; skipped {r.Skipped}; failed {r.Failed}; cancelled {r.Cancelled}\n"+(r.Kind is JobKind.Import or JobKind.ImportUasset?$"Animations: {r.Items.Sum(i=>i.ImportedAssets)} added, {r.Items.Sum(i=>i.DuplicateAssets)} duplicate, {r.Items.Sum(i=>i.UnsupportedAssets)} unsupported\n":"")+$"Report: {r.ReportPath}";
+    private static string Summary(JobRecord r)=>$"{r.Id} | {r.Kind} | {r.State} | {r.Finished}/{r.Total}\nSucceeded {r.Succeeded}; skipped {r.Skipped}; failed {r.Failed}; cancelled {r.Cancelled}\n"+(r.Kind is JobKind.Import or JobKind.ImportUasset?$"Animations: {r.Items.Sum(i=>i.ImportedAssets)} added, {r.Items.Sum(i=>i.DuplicateAssets)} duplicate, {r.Items.Sum(i=>i.ExcludedInPlaceAssets)} InPlace skipped, {r.Items.Sum(i=>i.ExcludedWithoutAnimationAssets)} without animation skipped, {r.Items.Sum(i=>i.UnsupportedAssets)} unsupported\n":"")+$"Report: {r.ReportPath}";
     private void OnJobChanged(JobUpdate update)=>_updates.Enqueue(update);
     public override void _Process(double delta)
     {

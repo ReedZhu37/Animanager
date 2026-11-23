@@ -169,17 +169,17 @@ public sealed class BatchJobQueue
                         else if(job.Kind==JobKind.ImportUasset||item.Source.IsUasset)
                         {
                             var result=await _api.ImportUassetAsync(item.Source.Input,log,token.Token);
-                            lock(_gate){item.Output=result.ReportPath;item.ImportedAssets=result.Added;item.DuplicateAssets=result.Skipped;item.UnsupportedAssets=result.Unsupported;item.Warnings=result.Warnings;}
+                            lock(_gate){item.Output=result.ReportPath;item.ImportedAssets=result.Added;item.AddedAssetIds=result.AddedAssetIds;item.DuplicateAssets=result.Skipped;item.ExcludedInPlaceAssets=result.ExcludedInPlace;item.ExcludedWithoutAnimationAssets=result.ExcludedWithoutAnimation;item.UnsupportedAssets=result.Unsupported;item.Warnings=result.Warnings;}
                             if(result.Errors.Count>0)throw new IOException(string.Join("\n",result.Errors));
-                            if(result.Added+result.Skipped==0)throw new IOException("没有导入可用的 AnimSequence 动画。\n"+string.Join("\n",result.Warnings)+"\n详细报告："+result.ReportPath);
+                            if(result.Added+result.Skipped+result.ExcludedInPlace+result.ExcludedWithoutAnimation==0)throw new IOException("没有导入可用的 AnimSequence 动画。\n"+string.Join("\n",result.Warnings)+"\n详细报告："+result.ReportPath);
                             lock(_gate)item.State=result.Added>0?ItemState.Succeeded:ItemState.Skipped;
                         }
                         else
                         {
                             var result=await _api.ImportAsync([item.Source.Input],log,token.Token);
-                            lock(_gate){item.ImportedAssets=result.Added;item.DuplicateAssets=result.Skipped;}
+                            lock(_gate){item.ImportedAssets=result.Added;item.AddedAssetIds=result.AddedAssetIds;item.DuplicateAssets=result.Skipped;item.ExcludedInPlaceAssets=result.ExcludedInPlace;item.ExcludedWithoutAnimationAssets=result.ExcludedWithoutAnimation;item.Warnings=result.Warnings;}
                             if(result.Errors.Count>0)throw new IOException(string.Join("\n",result.Errors));
-                            if(result.Added==0&&result.Skipped==0)throw new IOException("No asset was imported; input is missing or unsupported.");
+                            if(result.Added+result.Skipped+result.ExcludedInPlace+result.ExcludedWithoutAnimation==0)throw new IOException("No asset was imported; input is missing or unsupported.");
                             lock(_gate)item.State=result.Added>0?ItemState.Succeeded:ItemState.Skipped;
                         }
                         log.Report("Result: "+item.State+(item.Output.Length>0?" -> "+item.Output:""));

@@ -28,9 +28,12 @@ job retry last
 
 | 输入 / 能力 | 当前行为 |
 | --- | --- |
+| UE 4.18 编辑器 AnimSequence 原始轨道 | Insane Air Combo 的 133 段标准骨骼序列，包含 16 段保留源根位移的侧移动画 |
+| UE 4.21 编辑器 AnimSequence 原始轨道 | ARPG Ninja 的 285 段序列通过 68 骨骼 UE4 Mannequin 校验，保留根骨骼位移 |
 | UE 4.23 编辑器 AnimSequence 原始轨道 | 识别 UE4 Mannequin；386 段 Movement 动画已与 UE FBX 对比 |
 | UE 4.27 编辑器 AnimSequence 原始轨道 | Dodge_Animations 的 58 段序列全部入库；19,720 个骨骼局部变换采样与独立读取的源数据对照通过 |
 | UE 5.0 编辑器 AnimDataModel | Nodachi 全部 740 段通过源关键帧与 App 核对；详见 [NODACHI_IMPORT.md](NODACHI_IMPORT.md) |
+| UE 5.1 编辑器原生 AnimDataModel 轨道 | Stylish Flip 的 UE4 Mannequin 和 UE5 Manny 各 25 段序列 |
 | UE 5.6 编辑器 AnimationSequencerDataModel | 读取单轨、单区段、Direct FKControlRig 的线性源变换通道；Manny Idle 已与 UE FBX 对比 |
 | 附带 Skeleton | 按骨骼名称、父子层级与绑定姿态识别 UE4 / UE5 标准家族；无固定资源路径或轨道顺序要求 |
 | 附加辅助骨骼、部分动画轨道 | 有完整且兼容的 Skeleton 时保留额外骨骼；未动画骨骼保持绑定姿态 |
@@ -39,7 +42,8 @@ job retry last
 | InPlace / RootMotion / 本包 AimOffset 源姿势 | 保留源骨骼变换、时长、比例和根位移；记录 additive 类型，不执行混合 |
 | 其他 UE 版本 / DataModel / 自定义 ControlRig | 未验证，明确返回 unsupported；安装于 UE5.8 目录的样本实际保存版本为 UE5.6，不能据此宣称支持 UE5.8 资产 |
 | 自定义比例或层级、Montage、cooked / 加密包 | 不支持；自定义比例需要单独的重定向流程 |
-| ForceRootLock、非线性插值、区段裁切 / 混合 | 不执行这些语义，不作为普通序列静默导入 |
+| ForceRootLock | 启用了 Root Motion 的 UE4 原始轨道保留源根位移，在报告和 GLB 中记录锁定模式。其余带 ForceRootLock 的序列不支持 |
+| 非线性插值、区段裁切 / 混合 | 当前不支持 |
 | 曲线、通知、事件、Montage 时间线 | 当前只导入骨骼源变换，不导入这些运行语义 |
 
 识别分开检查引擎版本、动画编码和骨架兼容性。“采用 UE5 骨架”不能保证 `.uasset` 可解析；“文件可以解析”也不能保证能直接驱动标准预览网格。Quinn 等兼容网格可共享骨架，但当前 UE5 预览统一使用 Manny；不重建原材质、角色网格或面部系统。

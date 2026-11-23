@@ -63,7 +63,10 @@ public static class UassetPackTests
             using var report=JsonDocument.Parse(File.ReadAllText(job.Items[0].Output));
             var converted=report.RootElement.GetProperty("items").EnumerateArray().Where(i=>i.GetProperty("status").GetString()=="converted").ToArray();
             Check(converted.Length==references.Count,"every source animation has a converted result");
-            foreach(var item in converted)
+            var retained=converted.Where(i=>!Core.Pipeline.AnimationDisplacement.IsInPlaceSource(i.GetProperty("source").GetString()!)).ToArray();
+            int excluded=converted.Length-retained.Length;
+            Check(job.Items.Sum(i=>i.ExcludedInPlaceAssets)==excluded,"import reports the source pack's InPlace variants");
+            foreach(var item in retained)
             {
                 var row=new ClipResult{Source=item.GetProperty("source").GetString()!};rows.Add(row);
                 try
@@ -97,11 +100,12 @@ public static class UassetPackTests
                 }
                 catch(Exception ex){row.Error=ex.Message;GD.PushWarning(row.Source+": "+ex.Message);}
                 await owner.ToSignal(owner.GetTree(),SceneTree.SignalName.ProcessFrame);
-                if(rows.Count%25==0){Save();GD.Print($"UASSET_PACK_PROGRESS {rows.Count}/{converted.Length}");}
+                if(rows.Count%25==0){Save();GD.Print($"UASSET_PACK_PROGRESS {rows.Count}/{retained.Length}");}
             }
             Check(rows.All(r=>r.Valid),"all imported animations preserve sampled original local keys, full skeletons and duration");
             await Execute($"uasset import \"{folder.Replace('\\','/')}\"");job=api.Jobs.Get(api.Jobs.LatestId!);
-            Check(job.State==JobState.Completed&&job.Items.Sum(i=>i.ImportedAssets)==0&&job.Items.Sum(i=>i.DuplicateAssets)==converted.Length,"whole-pack reimport deduplicates all converted animations");
+            Check(job.State==JobState.Completed&&job.Items.Sum(i=>i.ImportedAssets)==0&&job.Items.Sum(i=>i.DuplicateAssets)==retained.Length
+                &&job.Items.Sum(i=>i.ExcludedInPlaceAssets)==excluded,"whole-pack reimport deduplicates retained animations and skips InPlace variants");
             }
             foreach(var row in new[]{rows.First(),rows.First(r=>r.Source.Contains("Combo_Attack_01_All")),rows.MaxBy(r=>r.RootTravel)!}.Distinct())
             {

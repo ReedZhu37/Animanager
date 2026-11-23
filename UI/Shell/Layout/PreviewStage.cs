@@ -16,7 +16,13 @@ public partial class PreviewStage : Control
     public HSlider Timeline => _timeline;
     public HSlider SpeedControl => _speed;
     public VBoxContainer CharacterSlot { get; } = new();
+    internal VBoxContainer WeaponSlot { get; } = new();
     public AcceptDialog SettingsDialog { get; } = new() { Name = "ViewportSettingsPage", Title = "视口设置", OkButtonText = "关闭" };
+    public CheckButton ResetCameraToggle { get; } = new()
+    {
+        Name = "ResetCameraOnAnimationChange", Text = "切换动画时重置镜头",
+        TooltipText = "切换动画资产或片段时重新聚焦角色。"
+    };
     private readonly Label _loadStatus = new() { Name = "PreviewLoadStatus", AutowrapMode = TextServer.AutowrapMode.WordSmart, MaxLinesVisible = 2, Visible = false };
     public event Action? SettingsPressed;
     public void SetLoadStatus(string text) { _loadStatus.Text = text; _loadStatus.TooltipText = text; _loadStatus.Visible = text.Length > 0; }
@@ -43,6 +49,7 @@ public partial class PreviewStage : Control
     private PanelContainer _transport = null!;
 
     private bool _syncing;
+    private bool _comparing;
     private int _clipCount;
     private readonly OptionButton _compactClip = new() { Name = "CompactClip", FitToLongestItem = false, CustomMinimumSize = new(90, 24), Visible = false };
 
@@ -69,11 +76,13 @@ public partial class PreviewStage : Control
         _badges = Type.Build("", Typography.Regular, Type.Caption, Tokens.Text3);
         _badges.AutowrapMode = TextServer.AutowrapMode.WordSmart;
         settingsColumn.AddChild(_title); settingsColumn.AddChild(_badges); settingsColumn.AddChild(CharacterSlot);
+        settingsColumn.AddChild(WeaponSlot);
         settingsColumn.AddChild(new HSeparator());
         var clay = new CheckButton { Text = "粘土材质", ButtonPressed = true };
         clay.Toggled += _ => ClayToggled?.Invoke(); settingsColumn.AddChild(clay);
         var grid = new CheckButton { Text = "地面网格", ButtonPressed = true };
         grid.Toggled += Viewport.SetGridVisible; settingsColumn.AddChild(grid);
+        settingsColumn.AddChild(ResetCameraToggle);
         var projection = new Button { Text = "切换透视 / 正交" };
         projection.Pressed += Viewport.ToggleProjection; settingsColumn.AddChild(projection);
         var frame = new Button { Text = "聚焦角色 · F" }; frame.Pressed += () => FramePressed?.Invoke(); settingsColumn.AddChild(frame);
@@ -148,11 +157,19 @@ public partial class PreviewStage : Control
     }
     private void AdaptClips()
     {
-        bool column = _clipCount > 1 && Size.X >= 550;
+        bool column = !_comparing && _clipCount > 1 && Size.X >= 550;
         _clipPanel.Visible = column; Viewport.OffsetRight = column ? -152 : 0;
-        _compactClip.Visible = _clipCount > 1 && !column;
+        _compactClip.Visible = !_comparing && _clipCount > 1 && !column;
         _compactClip.OffsetTop = Size.Y < 420 ? -100 : -114;
         _compactClip.OffsetBottom = Size.Y < 420 ? -74 : -88;
+    }
+
+    public void SetComparing(bool comparing)
+    {
+        if (_comparing == comparing) return;
+        _comparing = comparing;
+        CharacterSlot.Visible = !comparing;
+        AdaptClips();
     }
 
     private void BuildTransport(out IconButton play, out HSlider timeline, out Label time, out HSlider speed,
@@ -186,7 +203,7 @@ public partial class PreviewStage : Control
         start.Pressed += () => StepRequested?.Invoke(-1);
         row.AddChild(start);
 
-        play = new IconButton(Icons.Play, 16, "播放 / 暂停");
+        play = new IconButton(Icons.Play, 16, "播放 / 暂停（空格）");
         play.CustomMinimumSize = new Vector2(30, 26);
         play.Pressed += () => PlayPressed?.Invoke();
         row.AddChild(play);
@@ -286,6 +303,16 @@ public partial class PreviewStage : Control
         int current = total == 0 ? 0 : Math.Clamp((int)Math.Round(playhead * fps) + 1, 1, total);
         _time.Text = $"{current} / {total} 帧";
         _time.TooltipText = $"{playhead:0.000} / {duration:0.000} s · {fps:0.###} FPS\n帧从 1 开始，包含结束采样点；播放倍速不改变帧数。";
+        _syncing = false;
+    }
+
+    public void SetComparisonTime(double playhead, double duration)
+    {
+        _syncing = true;
+        _timeline.MaxValue = Math.Max(duration, .001);
+        _timeline.SetValueNoSignal(playhead);
+        _time.Text = $"{playhead:0.00} / {duration:0.00} s";
+        _time.TooltipText = "对比时间轴 · 较短的动画在结束后保持最后一帧；循环时所有动画一起从头播放。";
         _syncing = false;
     }
 

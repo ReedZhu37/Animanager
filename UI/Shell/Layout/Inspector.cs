@@ -15,12 +15,14 @@ public partial class Inspector : PanelContainer
     private readonly BadgePill _kindPill;
     private readonly HFlowContainer _tagChips;
     private readonly ClipList _clipList;
+    private readonly Button _addTag, _saveTags;
 
-    private FieldRow? _duration, _fps, _skeleton, _bones, _format, _size, _imported, _path;
+    private FieldRow? _duration, _fps, _skeleton, _bones, _format, _size, _imported, _path, _library;
 
     public Label TitleLabel => _title;
     public Label Summary { get; } = new() { AutowrapMode = TextServer.AutowrapMode.WordSmart };
     public Label Readiness { get; } = new() { Name = "AssetReadiness", AutowrapMode = TextServer.AutowrapMode.WordSmart, Text = "未检查" };
+    internal VBoxContainer WeaponOverview { get; } = new();
     public LineEdit TagsInput { get; } = new() { Name = "AssetTags", PlaceholderText = "标签以空格分隔" };
     public Button FavoriteButton { get; private set; } = null!;
     public event Action? TagsSaved;
@@ -104,12 +106,14 @@ public partial class Inspector : PanelContainer
         _fps = NewField(overview, "源帧率", true);
         _skeleton = NewField(overview, "骨架", false);
         _bones = NewField(overview, "骨骼 / 网格", true);
+        overview.Body.AddChild(WeaponOverview);
 
         var file = new InspectorSection("文件");
         _content.AddChild(file);
         _format = NewField(file, "格式", false);
         _size = NewField(file, "大小", true);
         _imported = NewField(file, "导入", true);
+        _library = NewField(file, "来源库", false);
         _path = NewField(file, "库路径", true);
 
         var tags = new InspectorSection("标签");
@@ -118,17 +122,17 @@ public partial class Inspector : PanelContainer
         _tagChips.AddThemeConstantOverride("h_separation", 5);
         _tagChips.AddThemeConstantOverride("v_separation", 5);
         tags.Body.AddChild(_tagChips);
-        var addTag = new Button
+        _addTag = new Button
         {
-            Text = "添加标签", ThemeTypeVariation = "GhostButton", CustomMinimumSize = new Vector2(0, 24),
+            Name = "AssetAddTag", Text = "添加标签", ThemeTypeVariation = "GhostButton", CustomMinimumSize = new Vector2(0, 24),
             Alignment = HorizontalAlignment.Left
         };
-        addTag.AddThemeFontSizeOverride("font_size", Type.Caption);
-        addTag.Pressed += () => TagAddRequested?.Invoke();
-        tags.Body.AddChild(addTag);
+        _addTag.AddThemeFontSizeOverride("font_size", Type.Caption);
+        _addTag.Pressed += () => TagAddRequested?.Invoke();
+        tags.Body.AddChild(_addTag);
         tags.Body.AddChild(TagsInput);
-        var saveTags = new Button { Text = "保存标签" }; tags.Body.AddChild(saveTags);
-        saveTags.Pressed += () => TagsSaved?.Invoke(); TagsInput.TextSubmitted += _ => TagsSaved?.Invoke();
+        _saveTags = new Button { Text = "保存标签" }; tags.Body.AddChild(_saveTags);
+        _saveTags.Pressed += () => TagsSaved?.Invoke(); TagsInput.TextSubmitted += _ => TagsSaved?.Invoke();
 
         var animations = new InspectorSection("动画片段");
         _content.AddChild(animations);
@@ -179,6 +183,12 @@ public partial class Inspector : PanelContainer
         _content.Visible = false;
     }
 
+    public void SetEditable(bool editable)
+    {
+        TagsInput.Editable = editable;
+        _addTag.Disabled = _saveTags.Disabled = FavoriteButton.Disabled = !editable;
+    }
+
     public void ShowAsset(AssetCardModel card, AssetAttributes? attributes, int boneCount, int meshCount,
         string sourceFormat, IEnumerable<(string Name, double? Seconds)> clips, string? currentClip = null)
     {
@@ -206,6 +216,7 @@ public partial class Inspector : PanelContainer
         _imported?.SetValue(DateTime.TryParse(card.ImportedAt, out var imported)
             ? imported.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
             : "未知");
+        _library?.SetValue(card.LibraryName);
         _path?.SetValue(card.VirtualPath);
 
         foreach (var child in _tagChips.GetChildren())

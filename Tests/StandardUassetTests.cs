@@ -30,6 +30,8 @@ public static class StandardUassetTests
             Check(!ue5.GetProperty("dependencySubstituted").GetBoolean()&&ue5.GetProperty("skeletonBones").GetInt32()==161&&ue5.GetProperty("previewBones").GetInt32()==89,"UE5 source Skeleton is validated and distinguished from preview joints");
             Check(items.Single(i=>i.GetProperty("profile").GetString()=="ue4-mannequin").GetProperty("dependencySubstituted").GetBoolean(),"missing UE4 dependency substitution is explicit in the report");
             Check(api.Find(name).Tags.Contains("UE5_Mannequin")&&api.Find("UE4_WalkFwdLoop").Tags.Contains("UE4_Mannequin"),"library tags retain each source skeleton family");
+            Check(job.Items.SelectMany(item => item.AddedAssetIds).ToHashSet().SetEquals([api.Find(name).Id, api.Find("UE4_WalkFwdLoop").Id]),
+                "the import job identifies both newly converted animations for review");
             await Execute("preview load "+name);preview.SetLoop(false);
             Check(preview.BoneCount==161&&preview.MeshCount==1&&preview.Clips.Length==1&&Math.Abs(preview.Duration-7.5666666)<.001,"UE5 preview retains all 161 bones and the complete source clip");
             var sk=Preview3DViewport.Descendants(preview.Model!).OfType<Skeleton3D>().Single();

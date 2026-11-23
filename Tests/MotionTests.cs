@@ -3,6 +3,8 @@ using Animanager.Core;
 using Animanager.Core.Motion;
 using Animanager.Core.Console;
 using Animanager.Core.Jobs;
+using Animanager.Core.Preview;
+using Animanager.Core.Retarget;
 using Animanager.UI.Components;
 using System.Text.Json;
 
@@ -21,6 +23,11 @@ public static class MotionTests
             preview.SetLoop(false);preview.Seek(2.1);var initial=preview.Motion.Prop.GlobalTransform;preview.TogglePlay();
             for(int i=0;i<40;i++)await owner.ToSignal(owner.GetTree(),SceneTree.SignalName.ProcessFrame);
             if(preview.Playhead<=2.1||preview.Motion.Prop.GlobalTransform.IsEqualApprox(initial))throw new Exception("Real-time prop playback did not advance");
+            preview.GetNode<Button>("Navigation/WeaponPreview").ButtonPressed = true;
+            var ribbon = (MeshInstance3D)preview.View.FindChild("WeaponTrail", owned: false);
+            for (int f = 0; f < 120 && ribbon.Mesh.GetSurfaceCount() == 0; f++)
+                await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
+            if (ribbon.Mesh.GetSurfaceCount() == 0) throw new Exception("White weapon ribbon was not generated.");
             for(int i=0;i<3;i++)
             {
                 preview.Seek(2.5+i*.2);preview.Bones.Select("hand_r");
@@ -29,9 +36,70 @@ public static class MotionTests
                 preview.Redraw();await owner.ToSignal(RenderingServer.Singleton,RenderingServer.SignalName.FramePostDraw);
                 using var screenshot=owner.GetViewport().GetTexture().GetImage();screenshot.SavePng(Path.Combine(folder,$"spin-{i+1}.png"));
             }
-            File.WriteAllText(Path.Combine(folder,"render-results.txt"),"PASS: Combo03 real-time body and independent prop playback; fixed 161-bone character; three spin screenshots. Diagnostic blade uses source-bone origin, grip/contact unverified.\n");owner.GetTree().Quit();
+            preview.SetWeaponHeatmap(true);
+            await owner.ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
+            using (var screenshot = owner.GetViewport().GetTexture().GetImage())
+                screenshot.SavePng(Path.Combine(folder, "spin-3-heatmap.png"));
+            await CheckHeatmapRendering(preview, folder);
+            File.WriteAllText(Path.Combine(folder,"render-results.txt"),
+                "PASS: Combo03 independent prop playback and visible slow/fast heatmap colors in the renderer.\n");
+            owner.GetTree().Quit();
         }
         catch(Exception ex){GD.PushError(ex.ToString());owner.GetTree().Quit(1);}
+    }
+
+    private static async Task CheckHeatmapRendering(Preview3DViewport preview, string folder)
+    {
+        var fixture = new Node3D();
+        var socket = new Node3D { Name = "BladeSocket" };
+        fixture.AddChild(socket);
+        var player = new AnimationPlayer { Name = "SpeedPlayer", RootNode = new NodePath("..") };
+        fixture.AddChild(player);
+        var clip = new Animation { Length = 2 };
+        int track = clip.AddTrack(Animation.TrackType.Position3D);
+        clip.TrackSetPath(track, "BladeSocket");
+        foreach (var (time, x) in new[] { (0, 0f), (.6, .12f), (1.1, 1.32f), (2, 1.5f) })
+            clip.PositionTrackInsertKey(track, time, new Vector3(x, 1, 0));
+        var library = new AnimationLibrary();
+        library.AddAnimation("SpeedFixture", clip);
+        player.AddAnimationLibrary("", library);
+        preview.AttachModel(fixture);
+        preview.ApplyWeaponProfile(WeaponProfile.Reference with
+        {
+            Weapons = [new("SpeedFixture") { Socket = new WeaponSocket("BladeSocket"), TrailSeconds = 2 }]
+        }, null, enable: true);
+        preview.SetGridVisible(false);
+        preview.SnapAxis(1);
+        preview.FocusPoint(new(.76f, 1, .4f));
+        preview.Seek(1.85);
+        var ribbon = (MeshInstance3D)preview.View.FindChild("WeaponTrail", owned: false);
+        for (int frame = 0; frame < 120 && ribbon.Mesh.GetSurfaceCount() == 0; frame++)
+            await preview.ToSignal(preview.GetTree(), SceneTree.SignalName.ProcessFrame);
+        if (ribbon.Mesh.GetSurfaceCount() == 0) throw new Exception("The speed test ribbon could not be sampled.");
+
+        async Task<Image> Capture(bool heatmap, string file)
+        {
+            preview.SetWeaponHeatmap(heatmap);
+            await preview.ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
+            var rendered = preview.View.GetTexture().GetImage();
+            rendered.SavePng(Path.Combine(folder, file));
+            return rendered;
+        }
+        using var neutral = await Capture(false, "speed-fixture-white.png");
+        using var thermal = await Capture(true, "speed-fixture-heatmap.png");
+        int blue = 0, red = 0;
+        for (int y = 0; y < thermal.GetHeight(); y++)
+            for (int x = 0; x < thermal.GetWidth(); x++)
+            {
+                var heat = thermal.GetPixel(x, y);
+                var white = neutral.GetPixel(x, y);
+                if (Math.Abs(white.R - white.B) > .15f || white.R < .30f) continue;
+                if (heat.B > heat.R + .20f && heat.B > heat.G + .10f) blue++;
+                if (heat.R > heat.G + .25f && heat.R > heat.B + .20f) red++;
+            }
+        if (blue < 20 || red < 20)
+            throw new Exception($"The heatmap must render visibly different slow and fast trail pixels. Blue: {blue}; red: {red}.");
+        GD.Print($"PASS weapon heatmap renders blue and red trail pixels where the ordinary ribbon is white ({blue}, {red})");
     }
     public static string MeshHash(Node3D root)
     {
@@ -95,6 +163,23 @@ public static class MotionTests
             Check(true,"All previews retain canonical rig, original mesh/skin and original sampled source poses");
             var chosen=assets.FirstOrDefault(a=>a.Name.Contains("AS_Combo_Attack_01_All_Seq"))??assets[0];await Execute("preview load "+chosen.Id);preview.SetLoop(false);
             var selected=preview.Motion!;preview.Seek(preview.Duration*.4);var propBefore=selected.Prop.GlobalTransform;string path=selected.ManifestPath;var objects=selected.Manifest.Objects.ToDictionary(k=>k.Key,k=>k.Value.Sha256);
+            Check(preview.WeaponSockets().Any(choice => choice.Label.StartsWith("Nodachi_Weapon_R ·") && choice.Socket.Bone == null),
+                "the independent Nodachi source track is available as a weapon socket");
+            var weaponToggle = preview.GetNode<Button>("Navigation/WeaponPreview");
+            var weaponPath = (ImmediateMesh)((MeshInstance3D)preview.View.FindChild("WeaponTrail", owned: false)).Mesh;
+            weaponToggle.ButtonPressed = true;
+            for (int i = 0; i < 120 && weaponPath.GetSurfaceCount() == 0; i++)
+                await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
+            Check(Math.Abs(preview.Playhead - preview.Duration * .4) < .001 && weaponPath.GetSurfaceCount() == 1,
+                "weapon trail sampling leaves the live independent motion playhead in place");
+            var vertices = weaponPath.SurfaceGetArrays(0)[(int)Mesh.ArrayType.Vertex].AsVector3Array();
+            var tip = Vector3.Back * MotionPlayback.ReferenceBladeLength;
+            preview.Seek(0); var startTip = selected.Grip.GlobalTransform * tip;
+            preview.Seek(preview.Duration); var endTip = selected.Grip.GlobalTransform * tip;
+            Check(vertices[0].IsEqualApprox(startTip) && vertices[^1].IsEqualApprox(endTip),
+                "weapon trail samples the independent blade tip through the exact end of the clip");
+            weaponToggle.ButtonPressed = false;
+            preview.Seek(preview.Duration * .4);
             var legacyArg=OS.GetCmdlineUserArgs().FirstOrDefault(a=>a.StartsWith("--legacy-library="));
             if(legacyArg!=null)
             {
@@ -155,6 +240,29 @@ public static class MotionTests
                 Check(difference<.003&&angleError<.5,$"FBX independent weapon round trip: {difference:F7} m / {angleError:F4} deg");
                 Check(geometryError<.003,$"FBX coordinate normalization also preserves visible blade geometry: {geometryError:F7} m");
             }
+            preview.LoadFile(path);
+            var sourceSocket = new WeaponSocket(preview.Model!.GetPathTo(preview.Motion!.Prop).ToString());
+            var retarget = new RetargetOptions { TargetRig = "ue4-mannequin" };
+            var baked = await RetargetBaker.BakePreviewAsync(path, retarget, CancellationToken.None);
+            preview.AttachRetarget(baked, retarget, path);
+            preview.ApplyWeaponProfile(WeaponProfile.Reference with { Weapons = [new("Nodachi") { Socket = sourceSocket }] }, null, enable: true);
+            weaponPath = (ImmediateMesh)((MeshInstance3D)preview.View.FindChild("WeaponTrail", owned: false)).Mesh;
+            preview.Seek(preview.Duration / 2);
+            var marker = (Node3D)preview.View.FindChild("ReferenceWeapon", owned: false);
+            var targetProp = baked.Root.GetNode<Node3D>(RetargetBaker.PropNodeName);
+            for (int i = 0; i < 120 && weaponPath.GetSurfaceCount() == 0; i++)
+                await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
+            Check(preview.WeaponSockets().Any(choice => choice.Socket == WeaponSocket.PrimaryTrack) && !weaponToggle.Disabled &&
+                  marker.Visible && marker.GlobalPosition.IsEqualApprox(targetProp.GlobalPosition) && weaponPath.GetSurfaceCount() == 1,
+                "a saved source-node profile binds the same Nodachi track and generates a ribbon on the retargeted character");
+            preview.SetRetargetView(0);
+            var sourceProp = preview.View.FindChildren(RetargetBaker.PropNodeName, "Node3D", owned: false)
+                .OfType<Node3D>().Single(node => node != targetProp);
+            for (int i = 0; i < 120 && weaponPath.GetSurfaceCount() == 0; i++)
+                await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
+            Check(preview.WeaponSockets().Any(choice => choice.Socket == WeaponSocket.PrimaryTrack) && !weaponToggle.Disabled &&
+                  marker.GlobalPosition.IsEqualApprox(sourceProp.GlobalPosition) && weaponPath.GetSurfaceCount() == 1,
+                "switching to the source view keeps the same profile and restores its ribbon");
             Save();GD.Print($"MOTION_APP_COMPLETE {rows.Count} clips, {checks.Count} checks");owner.GetTree().Quit();
         }
         catch(Exception ex){error=ex.ToString();Save();GD.PushError(error);owner.GetTree().Quit(1);}

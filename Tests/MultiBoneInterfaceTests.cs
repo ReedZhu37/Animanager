@@ -122,7 +122,7 @@ public static class MultiBoneInterfaceTests
             Check(!rootMotion.ButtonPressed&&Item("0:12").IsSelected(0)&&Item("0:15").IsSelected(0),"hidden panel catches up with Console multi-selection and Root Motion");
             await ClickControl(rootMotion);await Ready();await ClickControl(Find<Button>("BoneClearPins"));await Ready();
             Check(bones.Pins.Count==0&&Find<Label>("BonePinEmpty").Visible&&Find<Button>("BoneClearPins").Disabled&&bones.RootMotionEnabled,"clear pins restores empty state without hiding Root Motion");
-            await Execute("preview load StudioBot_Rig");await ClickBone("LeftFoot");
+            preview.LoadFile(RuntimePaths.Bundled("BuiltinAssets/Samples/StudioBot_Rig.glb"));await Frames();await ClickBone("LeftFoot");
             Check(pinButton.Disabled&&rootMotion.Disabled&&rootSource.Selected==0&&bones.Pins.Count==0,"static asset resets pins and source while disabling animation-only actions");
             preview.AttachModel(new Node3D{Name="Empty"});await Frames();
             Check(rootSource.Disabled&&rootMotion.Disabled&&pinButton.Disabled&&rootSource.ItemCount==1,"skeleton-free asset has a complete disabled empty state");

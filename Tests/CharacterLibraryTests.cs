@@ -85,9 +85,20 @@ public static class CharacterLibraryTests
             await Task.WhenAll(slow, newer);
             Check(owner.PreviewCharacterId == "ue4-mannequin" && preview.BoneCount == 68, "latest character wins during overlapping requests");
             await owner.SelectPreviewCharacterAsync(character.Id);
+            preview.SnapAxis(0);
+            preview.FocusPoint(new(1.2f, .9f, 1.5f));
+            preview.Zoom(.65f);
+            var camera = (preview.CameraTarget, preview.CameraDistance, preview.CameraBasis, preview.Orthographic);
             commands.Load("ue5-mannequin"); await commands.PendingTask; await owner.PendingRetargetPreview;
             Check(owner.PreviewCharacterId == character.Id && preview.AppliedRetarget?.SourceRig == "ue5-mannequin" && preview.BoneCount == 115,
                 "changing source animation automatically retains character and recognizes new source family");
+            Check(camera == (preview.CameraTarget, preview.CameraDistance, preview.CameraBasis, preview.Orthographic),
+                "a newly retargeted animation preserves the preview camera");
+            await owner.PreviewAssetAsync(api.Find("ue4-mannequin"));
+            hits = owner.CharacterCacheHits;
+            await owner.PreviewAssetAsync(api.Find("ue5-mannequin"));
+            Check(owner.CharacterCacheHits > hits && camera == (preview.CameraTarget, preview.CameraDistance, preview.CameraBasis, preview.Orthographic),
+                "a cached retargeted animation also preserves the preview camera");
             Check(new CharacterLibrary(store.Root).SelectedId == character.Id, "preview character selection survives app settings reload");
             await owner.SelectPreviewCharacterAsync("");
             Check(preview.AppliedRetarget == null && preview.BoneCount == 161, "original character restores source and clears retarget");

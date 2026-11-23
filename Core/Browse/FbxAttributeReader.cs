@@ -11,11 +11,97 @@ internal sealed class FbxAttributeReader(BinaryReader reader, bool wide, Cancell
     {
         using var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
         using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
+        var fbx = Open(reader, cancellationToken, out uint version);
+        return fbx?.ReadAttributes(version) ?? AssetAttributes.Unknown;
+    }
+
+    internal static bool? HasAnimationKeys(string path, CancellationToken cancellationToken, out double? sourceFps)
+    {
+        sourceFps = null;
+        using var reader = new BinaryReader(File.OpenRead(path), Encoding.UTF8);
+        var fbx = Open(reader, cancellationToken, out _);
+        if (fbx == null) return null;
+        var nodes = fbx.Nodes(reader.BaseStream.Position, reader.BaseStream.Length).ToArray();
+        var objects = nodes.FirstOrDefault(node => node.Name == "Objects");
+        if (objects.Name == null) return null;
+        sourceFps = SourceRate(fbx.Properties(nodes.FirstOrDefault(node => node.Name == "GlobalSettings")));
+        return fbx.Children(objects).Any(node => node.Name == "AnimationCurve" && fbx.HasKeys(node));
+    }
+
+    internal static long[] MissingTextureFilenameOffsets(Stream source, string path, CancellationToken ct)
+    {
+        using var reader = new BinaryReader(source, Encoding.UTF8, leaveOpen: true);
+        var fbx = Open(reader, ct, out _);
+        if (fbx == null) return [];
+
+        var top = fbx.Nodes(source.Position, source.Length).ToArray();
+        var objects = fbx.Children(top.FirstOrDefault(node => node.Name == "Objects"))
+            .Where(node => node.Name is "Video" or "Texture").ToArray();
+        var textures = objects.Where(node => node.Name == "Texture").ToArray();
+        if (textures.Length == 0) return [];
+
+        var embeddedVideos = new HashSet<long>();
+        var embeddedFiles = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var video in objects.Where(node => node.Name == "Video"))
+        {
+            if (!fbx.HasEmbeddedContent(fbx.Child(video, "Content"))) continue;
+            if (fbx.Values(video).FirstOrDefault() is long id) embeddedVideos.Add(id);
+            foreach (var file in fbx.Children(video).Where(node => node.Name is "FileName" or "Filename")
+                .SelectMany(fbx.Values).OfType<string>())
+                embeddedFiles.Add(file);
+        }
+
+        var embeddedTextures = new HashSet<long>();
+        if (embeddedVideos.Count > 0)
+        {
+            foreach (var connection in fbx.Children(top.FirstOrDefault(node => node.Name == "Connections")))
+                if (connection.Name == "C" && fbx.Values(connection) is ["OO", long from, long to] &&
+                    embeddedVideos.Contains(from))
+                    embeddedTextures.Add(to);
+        }
+
+        var missing = new List<long>();
+        var directory = Path.GetDirectoryName(path)!;
+        foreach (var texture in textures)
+        {
+            if (fbx.Values(texture).FirstOrDefault() is long id && embeddedTextures.Contains(id)) continue;
+            var fields = fbx.Children(texture)
+                .Where(node => node.Name is "FileName" or "Filename" or "RelativeFileName" or "RelativeFilename").ToArray();
+            var filenames = fields.SelectMany(fbx.Values).OfType<string>().Where(name => !string.IsNullOrWhiteSpace(name)).ToArray();
+            if (filenames.Length > 0 && !filenames.Any(name => embeddedFiles.Contains(name) || TextureExists(directory, name)))
+                missing.AddRange(fields.Select(node => node.Properties - node.Name.Length));
+        }
+        return missing.ToArray();
+    }
+
+    private bool HasEmbeddedContent(Node node)
+    {
+        if (node.PropertyCount == 0 || node.Children - node.Properties <= 5) return false;
+        reader.BaseStream.Position = node.Properties;
+        if (reader.ReadByte() is not ((byte)'R' or (byte)'S')) return false;
+        uint length = reader.ReadUInt32();
+        return length > 0 && length <= node.Children - reader.BaseStream.Position;
+    }
+
+    // Godot also searches common texture directories above the model.
+    private static bool TextureExists(string directory, string filename)
+    {
+        filename = filename.Trim().Replace('\\', '/');
+        if (File.Exists(Path.Combine(directory, filename))) return true;
+        var basename = Path.GetFileName(filename);
+        string[] folders = ["", "textures", "Textures", "images", "Images", "materials", "Materials", "maps", "Maps", "tex", "Tex"];
+        for (var current = new DirectoryInfo(directory); current != null; current = current.Parent)
+            if (folders.Any(folder => File.Exists(Path.Combine(current.FullName, folder, basename)))) return true;
+        return false;
+    }
+
+    private static FbxAttributeReader? Open(BinaryReader reader, CancellationToken cancellationToken, out uint version)
+    {
+        version = 0;
         var signature = "Kaydara FBX Binary  \0\x1a\0"u8;
-        if (!reader.ReadBytes(signature.Length).AsSpan().SequenceEqual(signature)) return AssetAttributes.Unknown;
-        var version = reader.ReadUInt32();
-        if (version < 7000) return AssetAttributes.Unknown;
-        return new FbxAttributeReader(reader, version >= 7500, cancellationToken).ReadAttributes(version);
+        if (!reader.ReadBytes(signature.Length).AsSpan().SequenceEqual(signature)) return null;
+        version = reader.ReadUInt32();
+        return version < 7000 ? null : new FbxAttributeReader(reader, version >= 7500, cancellationToken);
     }
 
     private AssetAttributes ReadAttributes(uint version)

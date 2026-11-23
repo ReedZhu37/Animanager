@@ -1,3 +1,4 @@
+using Animanager.Core.Storage;
 using Godot;
 
 namespace Animanager.UI.Shell;
@@ -11,9 +12,16 @@ public partial class SideBar : PanelContainer
     public event Action<string>? CategorySelected;
     public event Action<string>? CollectionSelected;
     public event Action? OpenLibraryFolder;
+    public event Action<string>? OpenLibrarySelected;
+    public event Action<string>? CloseLibraryRequested;
     public event Action? CreateCollection;
+    public event Action? CreateTag;
+    public event Action? CreateTagGroup;
+    public event Action<string>? EditTagGroup;
     public event Action<string>? TagSelected;
+    public event Action<string>? TagGroupSelected;
     private readonly VBoxContainer _collections = new();
+    private readonly VBoxContainer _openLibraries = new() { Name = "OpenLibrariesList", Visible = false };
     private readonly MenuButton _collectionRail = new() { Text = "集合", TooltipText = "选择集合" };
 
     public bool Collapsed { get; private set; }
@@ -31,7 +39,9 @@ public partial class SideBar : PanelContainer
     private readonly VBoxContainer _stack;
     private readonly VBoxContainer _rail;
     private readonly ScrollContainer _scroll;
-    private readonly HFlowContainer _tags;
+    private readonly VBoxContainer _tags;
+    private readonly List<(string Name, Button Chip)> _tagButtons = [];
+    private readonly HashSet<string> _foldedTagGroups = [];
     private readonly Dictionary<string, NavRow> _rows = new(StringComparer.Ordinal);
     private readonly Dictionary<string, IconButton> _railButtons = new(StringComparer.Ordinal);
 
@@ -64,24 +74,47 @@ public partial class SideBar : PanelContainer
         _scroll.AddChild(_stack);
 
         _stack.AddChild(Hairline.Spacer(10));
-        _stack.AddChild(new NavSection("库"));
+        _stack.AddChild(new NavSection("资产"));
         foreach (var (key, icon, title) in Categories)
         {
             AddCategory(key, icon, title);
             AddRailButton(key, icon, title);
         }
 
-        _stack.AddChild(Hairline.Spacer(12));
-        _stack.AddChild(new NavSection("集合", () => CreateCollection?.Invoke()));
-        _stack.AddChild(_collections);
-        _rail.AddChild(_collectionRail);
-        _collectionRail.GetPopup().IdPressed += id => CollectionSelected?.Invoke(_collectionRail.GetPopup().GetItemMetadata((int)id).AsString());
+        _stack.AddChild(_openLibraries);
 
         _stack.AddChild(Hairline.Spacer(12));
-        _stack.AddChild(new NavSection("标签"));
-        _tags = new HFlowContainer();
-        _tags.AddThemeConstantOverride("h_separation", 6);
-        _tags.AddThemeConstantOverride("v_separation", 6);
+        var collectionHeading = new NavSection("集合", () => CreateCollection?.Invoke(), "新建集合")
+        {
+            Name = "CollectionRootDrop",
+            TooltipText = "将子集合拖到这里可移到顶层"
+        };
+        EnableCollectionRootDrop(collectionHeading);
+        _stack.AddChild(collectionHeading);
+        _collections.AddThemeConstantOverride("separation", 0);
+        _stack.AddChild(_collections);
+        _rail.AddChild(_collectionRail);
+        _collectionRail.GetPopup().IdPressed += id =>
+        {
+            var key = _collectionRail.GetPopup().GetItemMetadata((int)id).AsString();
+            RevealCollection(key);
+            CollectionSelected?.Invoke(key);
+        };
+        var expand = new IconButton(Icons.Panel, 16, "展开侧栏");
+        expand.Pressed += () => SetCollapsed(false);
+        _rail.AddChild(expand);
+
+        _stack.AddChild(Hairline.Spacer(12));
+        var tagHeading = new NavSection("标签");
+        var createTag = TagGroupButton("新建标签", "创建可用于任何资产的标签");
+        createTag.Name = "CreateAppTag";
+        createTag.Pressed += () => CreateTag?.Invoke();
+        tagHeading.AddAction(createTag);
+        var createGroup = TagGroupButton("新建组", "新建标签组");
+        createGroup.Pressed += () => CreateTagGroup?.Invoke();
+        tagHeading.AddAction(createGroup);
+        _stack.AddChild(tagHeading);
+        _tags = new VBoxContainer();
         var tagPad = new MarginContainer();
         tagPad.AddThemeConstantOverride("margin_left", 14);
         tagPad.AddThemeConstantOverride("margin_right", 12);
@@ -101,6 +134,7 @@ public partial class SideBar : PanelContainer
     {
         var button = new IconButton(icon, 17, title);
         button.CustomMinimumSize = new Vector2(34, 32);
+        if (key == "Favorites") EnableFavoritesDrop(button);
         button.Pressed += () =>
         {
             SetActive(key);
@@ -134,6 +168,11 @@ public partial class SideBar : PanelContainer
     private void AddCategory(string key, string icon, string title)
     {
         var row = new NavRow(icon, title);
+        if (key == "Favorites")
+        {
+            row.TooltipText = "拖入资产即可收藏";
+            EnableFavoritesDrop(row);
+        }
         row.Pressed += () =>
         {
             SetActive(key);
@@ -143,46 +182,126 @@ public partial class SideBar : PanelContainer
         _stack.AddChild(row);
     }
 
-    private void AddCollection(string key, string title)
+    internal void SetOpenLibraries((string Id, string Name, string Tooltip)[] entries)
     {
-        var row = new NavRow(Icons.Folder, title);
-        row.Pressed += () => CollectionSelected?.Invoke(key);
-        _rows[key] = row;
-        _collections.AddChild(row);
+        foreach (var child in _openLibraries.GetChildren()) { _openLibraries.RemoveChild(child); child.QueueFree(); }
+        _openLibraries.Visible = entries.Length > 0;
+        if (entries.Length == 0) return;
+
+        _openLibraries.AddChild(new NavSection("已打开的库"));
+        foreach (var (id, name, tooltip) in entries)
+        {
+            var line = new HBoxContainer();
+            var row = new NavRow(Icons.Folder, name)
+            {
+                TooltipText = tooltip, FocusMode = FocusModeEnum.All, SizeFlagsHorizontal = SizeFlags.ExpandFill
+            };
+            row.Pressed += () => OpenLibrarySelected?.Invoke(id);
+            line.AddChild(row);
+            var close = new IconButton(Icons.Close, 13, $"移出浏览 · {name}")
+            {
+                Name = "CloseLibrary" + id, FocusMode = FocusModeEnum.All
+            };
+            close.Pressed += () => CloseLibraryRequested?.Invoke(id);
+            line.AddChild(close);
+            _openLibraries.AddChild(line);
+        }
     }
 
-    public void SetCollections(IEnumerable<(string Id, string Name)> entries)
+    internal void SetTagSections((string GroupId, string Group, (string Name, int Count)[] Tags)[] sections)
     {
-        foreach (var child in _collections.GetChildren()) { _collections.RemoveChild(child); child.QueueFree(); }
-        foreach (var key in _rows.Keys.Where(k => !Categories.Any(c => c.Key == k)).ToArray()) _rows.Remove(key);
-        var menu = _collectionRail.GetPopup(); menu.Clear();
-        foreach (var entry in entries) { AddCollection(entry.Id, entry.Name); menu.AddItem(entry.Name); menu.SetItemMetadata(menu.ItemCount - 1, entry.Id); }
-        _collectionRail.Disabled = menu.ItemCount == 0; SetActive(ActiveCategory);
-    }
-
-    public void SetTags(IEnumerable<(string Name, int Count)> tags)
-    {
+        _foldedTagGroups.IntersectWith(sections.Select(section => section.GroupId));
+        _tagButtons.Clear();
         foreach (var child in _tags.GetChildren())
         {
             _tags.RemoveChild(child);
             child.QueueFree();
         }
-        foreach (var (name, count) in tags)
+        foreach (var (groupId, group, tags) in sections)
         {
-            var chip = new Button
+            var heading = new HBoxContainer();
+            heading.AddThemeConstantOverride("separation", 2);
+            var flow = new HFlowContainer { Visible = !_foldedTagGroups.Contains(groupId) };
+            var disclosure = new IconButton(Icons.ChevronDown, 11)
             {
-                Text = $"{name} {count}", CustomMinimumSize = new Vector2(0, 22), ThemeTypeVariation = "Chip"
+                Name = "TagGroupDisclosure" + groupId, Disabled = tags.Length == 0
             };
-            chip.AddThemeFontSizeOverride("font_size", Type.Caption);
-            chip.Pressed += () => TagSelected?.Invoke(name);
-            _tags.AddChild(chip);
+            void SyncDisclosure()
+            {
+                disclosure.SetIcon(flow.Visible ? Icons.ChevronDown : Icons.ChevronRight);
+                disclosure.TooltipText = (flow.Visible ? "折叠 " : "展开 ") + group;
+            }
+            SyncDisclosure();
+            disclosure.Pressed += () =>
+            {
+                if (!_foldedTagGroups.Add(groupId)) _foldedTagGroups.Remove(groupId);
+                flow.Visible = !_foldedTagGroups.Contains(groupId);
+                SyncDisclosure();
+            };
+            heading.AddChild(disclosure);
+            var title = Type.Build(group, Typography.Semi, Type.Caption, Tokens.Text2);
+            title.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+            title.VerticalAlignment = VerticalAlignment.Center;
+            title.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
+            title.TooltipText = group;
+            title.MouseFilter = MouseFilterEnum.Pass;
+            heading.AddChild(title);
+            var union = TagGroupButton("并集", $"显示包含「{group}」中任一标签的资产");
+            union.Name = "TagGroupUnion" + groupId;
+            union.Disabled = tags.Length == 0;
+            union.Pressed += () => TagGroupSelected?.Invoke(groupId);
+            heading.AddChild(union);
+            if (groupId != AppTagCatalog.AllGroupId)
+            {
+                var edit = TagGroupButton("编辑", $"编辑标签组「{group}」");
+                edit.Pressed += () => EditTagGroup?.Invoke(groupId);
+                heading.AddChild(edit);
+            }
+            _tags.AddChild(heading);
+            flow.AddThemeConstantOverride("h_separation", 6);
+            flow.AddThemeConstantOverride("v_separation", 6);
+            _tags.AddChild(flow);
+            foreach (var (name, count) in tags)
+            {
+                string label = $"{name} {count}";
+                var chip = new Button
+                {
+                    Text = Typography.Fit(Typography.Regular, label, Type.Caption, 140),
+                    TooltipText = label + "\n点击加入或移除标签筛选", ToggleMode = true,
+                    CustomMinimumSize = new Vector2(0, 22), ThemeTypeVariation = "Chip"
+                };
+                chip.AddThemeFontSizeOverride("font_size", Type.Caption);
+                chip.Pressed += () => TagSelected?.Invoke(name);
+                flow.AddChild(chip);
+                _tagButtons.Add((name, chip));
+            }
         }
+    }
+
+    private static Button TagGroupButton(string text, string tooltip)
+    {
+        var button = new Button
+        {
+            Text = text, TooltipText = tooltip, Flat = true,
+            MouseDefaultCursorShape = CursorShape.PointingHand, CustomMinimumSize = new Vector2(0, 24)
+        };
+        button.AddThemeFontSizeOverride("font_size", Type.Caption);
+        return button;
+    }
+
+    internal void SetSelectedTags(IReadOnlySet<string> tags)
+    {
+        foreach (var (name, chip) in _tagButtons) chip.SetPressedNoSignal(tags.Contains(name));
     }
 
     public void SetCount(string key, int count)
     {
         if (_rows.TryGetValue(key, out var row)) row.SetCount(count);
-        if (_railButtons.TryGetValue(key, out var button)) button.TooltipText = Categories.First(c => c.Key == key).Title + " · " + count.ToString("N0");
+        if (_railButtons.TryGetValue(key, out var button))
+        {
+            var tip = Categories.First(c => c.Key == key).Title + " · " + count.ToString("N0");
+            button.TooltipText = key == "Favorites" ? tip + "\n拖入资产即可收藏" : tip;
+        }
     }
 
     public void SetActive(string key)
@@ -190,6 +309,8 @@ public partial class SideBar : PanelContainer
         foreach (var pair in _rows) pair.Value.SetActive(pair.Key == key);
         foreach (var pair in _railButtons) pair.Value.SetActive(pair.Key == key);
         ActiveCategory = key;
+        var menu = _collectionRail.GetPopup();
+        for (int i = 0; i < menu.ItemCount; i++) menu.SetItemChecked(i, menu.GetItemMetadata(i).AsString() == key);
     }
 
     public void SetCollapsed(bool collapsed)

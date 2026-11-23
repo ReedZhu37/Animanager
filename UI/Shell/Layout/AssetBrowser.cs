@@ -10,6 +10,8 @@ namespace Animanager.UI.Shell;
 /// </summary>
 public partial class AssetBrowser : VBoxContainer
 {
+    private const string DragPrefix = "animanager-asset:";
+
     public enum ViewMode { Grid, List }
 
     public event Action<AssetGridEvent>? Activated;
@@ -19,6 +21,7 @@ public partial class AssetBrowser : VBoxContainer
     public event Action<string>? ContextMenuRequested;
     public event Action<ViewMode>? ViewModeChanged;
     public event Action? DeleteRequested;
+    internal event Action<AssetCardModel>? OpenSourceRequested;
 
     public AssetSelection Selection { get; } = new();
     public ViewMode Mode { get; private set; } = ViewMode.Grid;
@@ -30,6 +33,7 @@ public partial class AssetBrowser : VBoxContainer
     private int _scrollMemoryGrid, _scrollMemoryList;
     private int _viewGeneration;
     private bool _restoringScroll;
+    private string? _keyboardId;
 
     public AssetBrowser()
     {
@@ -50,6 +54,7 @@ public partial class AssetBrowser : VBoxContainer
         _list.Bind(_scroll);
         _grid.BindSelection(Selection);
         _list.BindSelection(Selection);
+        Selection.Changed += () => _keyboardId = null;
         _scroll.AddChild(_grid);
         _scroll.AddChild(_list);
 
@@ -57,18 +62,20 @@ public partial class AssetBrowser : VBoxContainer
         {
             if (view is AssetGrid grid)
             {
-                grid.Activated += e => { _keyboardIndex = e.Index; Activated?.Invoke(e); };
+                grid.Activated += OnViewActivated;
                 grid.SelectionChanged += () => SelectionChanged?.Invoke();
                 grid.VisibleRangeChanged += (first, last) => VisibleRangeChanged?.Invoke(first, last);
                 grid.ContextMenuRequested += id => ContextMenuRequested?.Invoke(id);
+                grid.OpenSourceRequested += card => OpenSourceRequested?.Invoke(card);
             }
             else if (view is AssetList list)
             {
-                list.Activated += e => { _keyboardIndex = e.Index; Activated?.Invoke(e); };
+                list.Activated += OnViewActivated;
                 list.SelectionChanged += () => SelectionChanged?.Invoke();
                 list.VisibleRangeChanged += (first, last) => VisibleRangeChanged?.Invoke(first, last);
                 list.SortRequested += key => SortRequested?.Invoke(Animanager.Core.Browse.AssetSort.FromKey(key, list.SortDescending));
                 list.ContextMenuRequested += id => ContextMenuRequested?.Invoke(id);
+                list.OpenSourceRequested += card => OpenSourceRequested?.Invoke(card);
             }
         }
 
@@ -88,30 +95,90 @@ public partial class AssetBrowser : VBoxContainer
     public IEnumerable<int> VisibleIndices() => Enumerable.Range(0, Count).Where(i =>
         RowRect(i).End.Y > _scroll.ScrollVertical + (Mode == ViewMode.List ? AssetList.HeaderHeight : 0) && RowRect(i).Position.Y < _scroll.ScrollVertical + _scroll.Size.Y);
     public void SetSort(Animanager.Core.Browse.AssetSort sort) => _list.SetSort(sort.Key, sort.Descending);
-    private int _keyboardIndex;
+
+    private void OnViewActivated(AssetGridEvent activation)
+    {
+        _keyboardId = Row(activation.Index)?.Id;
+        Activated?.Invoke(activation);
+    }
+
     private void HandleKeys(InputEvent ev)
     {
         if (ev is not InputEventKey { Pressed: true } key) return;
         if (key.Keycode == Key.Delete) { DeleteRequested?.Invoke(); ActiveView.AcceptEvent(); return; }
         if ((key.CtrlPressed || key.MetaPressed) && key.Keycode == Key.A)
-        { Selection.AddRange(_rows.Select(r => r.Id)); ActiveView.AcceptEvent(); return; }
-        if (Count == 0) return;
-        int current = Math.Max(0, IndexOf(Selection.Anchor ?? ""));
-        int columns = Mode == ViewMode.Grid ? _grid.Columns : 1;
-        int next = key.Keycode switch
+        { Selection.AddRange(_rows.Where(row => row.ClosedLibraryId == null).Select(row => row.Id)); ActiveView.AcceptEvent(); return; }
+        int firstClosed = _rows.FindIndex(row => row.ClosedLibraryId != null);
+        int available = firstClosed < 0 ? Count : firstClosed;
+        if (available == 0) return;
+
+        int current = IndexOf(_keyboardId ?? "");
+        if (current < 0) current = IndexOf(Selection.Anchor ?? "");
+        if (key.Keycode == Key.Space)
         {
-            Key.Left => current - 1, Key.Right => current + 1, Key.Up => current - columns,
-            Key.Down => current + columns, Key.Home => 0, Key.End => Count - 1,
-            Key.Enter or Key.KpEnter or Key.Space => current, _ => -999
+            if (key.CtrlPressed && !key.ShiftPressed && !key.AltPressed && !key.MetaPressed)
+            {
+                ActiveView.AcceptEvent();
+                if (!key.Echo) Selection.Toggle(_rows[Math.Max(0, current)].Id);
+            }
+            return;
+        }
+
+        if (key.IsActionPressed("ui_accept", allowEcho: true, exactMatch: true))
+        {
+            ActiveView.AcceptEvent();
+            if (!key.Echo && current >= 0 && Selection.Contains(_rows[current].Id))
+                Activated?.Invoke(new AssetGridEvent(current, OpenRequested: true));
+            return;
+        }
+
+        int columns = Mode == ViewMode.Grid ? _grid.Columns : 1;
+        int next = key switch
+        {
+            { Keycode: Key.Home } => 0,
+            { Keycode: Key.End } => available - 1,
+            _ when key.IsActionPressed("ui_left", allowEcho: true) => Math.Max(0, current - 1),
+            _ when key.IsActionPressed("ui_right", allowEcho: true) => Math.Max(0, current + 1),
+            _ when key.IsActionPressed("ui_up", allowEcho: true) => Math.Max(0, current - columns),
+            _ when key.IsActionPressed("ui_down", allowEcho: true) => current < 0 ? 0 : current + columns,
+            _ => -1
         };
-        if (next == -999) return;
-        if (key.ShiftPressed && key.Keycode is Key.Up or Key.Down or Key.Left or Key.Right)
-            next = _keyboardIndex + (key.Keycode == Key.Up ? -columns : key.Keycode == Key.Down ? columns : key.Keycode == Key.Left ? -1 : 1);
-        next = Math.Clamp(next, 0, Count - 1); _keyboardIndex = next;
+        if (next < 0) return;
+        next = Math.Min(next, available - 1);
+        ActiveView.AcceptEvent();
         if (key.ShiftPressed) Selection.SelectRange(_rows[next].Id);
-        else if (key.Keycode == Key.Space && key.CtrlPressed) Selection.Toggle(_rows[next].Id);
         else Selection.Select(_rows[next].Id);
-        ScrollToIndex(next); Activated?.Invoke(new(next, _rows[next], key.ShiftPressed || key.CtrlPressed)); ActiveView.AcceptEvent();
+        _keyboardId = _rows[next].Id;
+        ScrollToIndex(next);
+    }
+
+    internal static Variant BeginAssetDrag(Control view, AssetCardModel? card, AssetSelection selection)
+    {
+        if (card == null || card.Trashed || card.ClosedLibraryId != null) return default;
+        selection.CancelPendingClick();
+        string[] keys = selection.Contains(card.Id) ? [card.Id, .. selection.Where(id => id != card.Id)] : [card.Id];
+        var label = new Label { Text = keys.Length == 1 ? card.Name : $"{keys.Length} 个资产", MouseFilter = MouseFilterEnum.Ignore };
+        label.AddThemeStyleboxOverride("normal", Surfaces.Fill(Tokens.Raised, Tokens.Radius.Control, 12, 8, Tokens.Accent));
+        view.SetDragPreview(label);
+        return Variant.From<string[]>([DragPrefix, .. keys]);
+    }
+
+    internal static void DrawSourceButton(Control view, Rect2 rect, AssetCardModel card, bool hovered)
+    {
+        string label = SourceActionLabel(card);
+        view.DrawStyleBox(Surfaces.Fill(hovered ? Tokens.Hover : Tokens.Raised, Tokens.Radius.Control, border: Tokens.LineStrong), rect);
+        float width = Typography.Width(Typography.Semi, label, Type.Caption);
+        view.DrawString(Typography.Semi, rect.GetCenter() + new Vector2(-width / 2, 4), label,
+            HorizontalAlignment.Left, -1, Type.Caption, Tokens.Accent);
+    }
+
+    internal static string SourceActionLabel(AssetCardModel card) => card.LocateClosedLibrary ? "定位来源库" : "打开来源库";
+
+    internal static string[] DraggedAssets(Variant data)
+    {
+        if (data.VariantType != Variant.Type.PackedStringArray) return [];
+        var payload = data.AsStringArray();
+        return payload.Length > 1 && payload[0] == DragPrefix ? payload[1..] : [];
     }
 
     public AssetGrid Grid => _grid;
@@ -145,6 +212,7 @@ public partial class AssetBrowser : VBoxContainer
     public void SetMode(ViewMode mode)
     {
         if (Mode == mode) return;
+        bool transferFocus = ActiveView.IsInsideTree() && ActiveView.HasFocus();
 
         // Remember where each view was, so toggling back returns to the same place.
         if (!_restoringScroll)
@@ -156,6 +224,7 @@ public partial class AssetBrowser : VBoxContainer
         Mode = mode;
         _grid.Visible = mode == ViewMode.Grid;
         _list.Visible = mode == ViewMode.List;
+        if (transferFocus) ActiveView.GrabFocus();
 
         if (mode == ViewMode.Grid) _grid.Reflow();
         else _list.Reflow();
@@ -182,7 +251,7 @@ public partial class AssetBrowser : VBoxContainer
     public void SelectIndex(int index)
     {
         var row = Row(index);
-        if (row != null) Selection.Select(row.Id);
+        if (row is { ClosedLibraryId: null }) Selection.Select(row.Id);
     }
 
     /// <summary>Grid column count at the current width; used by the responsive rule.</summary>

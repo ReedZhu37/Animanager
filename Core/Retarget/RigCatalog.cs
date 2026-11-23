@@ -72,6 +72,18 @@ public static class RigCatalog
     public static string ModelPath(string id) => FilePath(id, true);
     private sealed class Profile { public string id { get; set; } = ""; public Bone[] bones { get; set; } = []; }
     private sealed class Bone { public string name { get; set; } = ""; public int parent { get; set; } public float[] p { get; set; } = []; public float[] r { get; set; } = []; public float[] s { get; set; } = []; }
+    private static readonly Dictionary<string, (FileStamp[] Stamps, string Hash)> Hashes = new();
+    private static readonly Dictionary<(string Id, bool Variant), (string Hash, RigDescriptor Rig)> References = new();
+    private const string MannyIdle = "BuiltinAssets/Baselines/UE5_Manny_Idle.fbx";
+    private static readonly (string Id, bool Variant)[] StandardReferences = [(Ids[0], false), (Ids[1], false), (Ids[1], true)];
+    internal readonly record struct FileStamp(long Length, DateTime Modified, DateTime Created)
+    {
+        internal static FileStamp Read(string path)
+        {
+            var file = new FileInfo(path);
+            return new(file.Length, file.LastWriteTimeUtc, file.CreationTimeUtc);
+        }
+    }
     private static string FilePath(string id, bool mesh = false)
     {
         if (!BodyIds.Contains(id)) throw new ArgumentException("Unknown standard rig: " + id);
@@ -82,15 +94,34 @@ public static class RigCatalog
     }
     public static string Hash(string id)
     {
-        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        hash.AppendData(Encoding.UTF8.GetBytes("animanager-retarget-fk-v2-ready1"));
-        hash.AppendData(File.ReadAllBytes(FilePath(id))); hash.AppendData(File.ReadAllBytes(FilePath(id, true)));
-        if (id == "ue5-mannequin") hash.AppendData(File.ReadAllBytes(RuntimePaths.Bundled("BuiltinAssets/Baselines/UE5_Manny_Idle.fbx")));
-        return Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
+        string[] paths = id == "ue5-mannequin"
+            ? [FilePath(id), FilePath(id, true), RuntimePaths.Bundled(MannyIdle)] : [FilePath(id), FilePath(id, true)];
+        lock (Hashes)
+        {
+            var stamps = paths.Select(FileStamp.Read).ToArray();
+            if (Hashes.TryGetValue(id, out var known) && stamps.SequenceEqual(known.Stamps)) return known.Hash;
+            using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+            hash.AppendData(Encoding.UTF8.GetBytes("animanager-retarget-fk-v2-ready1"));
+            var buffer = new byte[65536];
+            foreach (var path in paths)
+            {
+                using var stream = File.OpenRead(path);
+                int read;
+                while ((read = stream.Read(buffer)) > 0) hash.AppendData(buffer.AsSpan(0, read));
+            }
+            string value = Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
+            Hashes[id] = (stamps, value);
+            return value;
+        }
     }
     public static Node3D Load(string id, out Skeleton3D skeleton)
     {
         var root = SceneAsset.Load(FilePath(id, true), out _, forExport: true);
+        return Complete(id, root, out skeleton);
+    }
+
+    internal static Node3D Complete(string id, Node3D root, out Skeleton3D skeleton)
+    {
         try
         {
             skeleton = Preview3DViewport.Descendants(root).OfType<Skeleton3D>().Single();
@@ -108,34 +139,71 @@ public static class RigCatalog
         }
         catch { root.Free(); throw; }
     }
+    private static RigDescriptor Reference(string id, bool variant)
+    {
+        string hash = Hash(id);
+        lock (References)
+        {
+            if (References.TryGetValue((id, variant), out var cached) && cached.Hash == hash) return cached.Rig;
+            var root = variant ? SceneAsset.Load(RuntimePaths.Bundled(MannyIdle), out _, forExport: true) : Load(id, out _);
+            return RememberReference(id, variant, hash, root);
+        }
+    }
+
+    internal static async Task WarmReferencesAsync(Func<bool> isIdle, CancellationToken ct)
+    {
+        foreach (var (id, variant) in StandardReferences)
+        {
+            if (!isIdle()) return;
+            string hash = Hash(id);
+            lock (References)
+                if (References.TryGetValue((id, variant), out var cached) && cached.Hash == hash) continue;
+            using var parsed = await SceneAsset.ParsePreviewAsync(variant ? RuntimePaths.Bundled(MannyIdle) : ModelPath(id), ct);
+            if (!isIdle() || Hash(id) != hash) return;
+            lock (References)
+            {
+                if (References.TryGetValue((id, variant), out var cached) && cached.Hash == hash) continue;
+                var root = parsed.Generate(fullTracks: true);
+                if (!variant) root = Complete(id, root, out _);
+                RememberReference(id, variant, hash, root);
+            }
+        }
+    }
+
+    private static RigDescriptor RememberReference(string id, bool variant, string hash, Node3D root)
+    {
+        try
+        {
+            var skeleton = Preview3DViewport.Descendants(root).OfType<Skeleton3D>().Single();
+            var rig = new RigDescriptor(skeleton, root);
+            References[(id, variant)] = (hash, rig);
+            return rig;
+        }
+        finally { root.Free(); }
+    }
+
     public static RigDescriptor Identify(Skeleton3D skeleton, Node3D root)
     {
         var rig = new RigDescriptor(skeleton, root);
         var reasons = new List<string>();
-        foreach (var (id, variant) in new[] { (Ids[0], false), (Ids[1], false), (Ids[1], true) })
+        foreach (var (id, variant) in StandardReferences)
         {
-            var reference = variant ? SceneAsset.Load(RuntimePaths.Bundled("BuiltinAssets/Baselines/UE5_Manny_Idle.fbx"), out _, forExport: true) : Load(id, out _);
-            try
+            var expected = Reference(id, variant);
+            if (!rig.Indices.ContainsKey("pelvis") || !rig.Indices.ContainsKey("root") || rig.Names.Length < (id == Ids[0] ? 68 : 89)) { reasons.Add(id + ": 缺少标准骨骼，实际 " + rig.Names.Length); continue; }
+            if (rig.Names.Any(n => !expected.Indices.ContainsKey(n))) { reasons.Add(id + ": 未知骨骼 " + string.Join(",", rig.Names.Where(n => !expected.Indices.ContainsKey(n)).Take(4))); continue; }
+            if (new[] { "head", "hand_l", "hand_r", "foot_l", "foot_r" }.Any(n => !rig.Indices.ContainsKey(n))) continue;
+            bool matches = rig.Order.All(i =>
             {
-                var sk = Preview3DViewport.Descendants(reference).OfType<Skeleton3D>().Single();
-                var expected = new RigDescriptor(sk, reference);
-                if (!rig.Indices.ContainsKey("pelvis") || !rig.Indices.ContainsKey("root") || rig.Names.Length < (id == Ids[0] ? 68 : 89)) { reasons.Add(id + ": 缺少标准骨骼，实际 " + rig.Names.Length); continue; }
-                if (rig.Names.Any(n => !expected.Indices.ContainsKey(n))) { reasons.Add(id + ": 未知骨骼 " + string.Join(",", rig.Names.Where(n => !expected.Indices.ContainsKey(n)).Take(4))); continue; }
-                if (new[] { "head", "hand_l", "hand_r", "foot_l", "foot_r" }.Any(n => !rig.Indices.ContainsKey(n))) continue;
-                bool matches = rig.Order.All(i =>
-                {
-                    int e = expected.Indices[rig.Names[i]];
-                    string Parent(RigDescriptor r, int b) => r.Parents[b] < 0 ? "" : r.Names[r.Parents[b]];
-                    // Joint positions validate the silhouette and proportions while allowing bone-roll differences from FBX.
-                    float distance = (rig.GlobalRest[i].Origin - rig.GlobalRest[rig.Indices["root"]].Origin).DistanceTo(
-                            expected.GlobalRest[e].Origin - expected.GlobalRest[expected.Indices["root"]].Origin);
-                    bool valid = Parent(rig, i) == Parent(expected, e) && distance < .001f;
-                    if (!valid) reasons.Add($"{id}: {rig.Names[i]} 父节点 {Parent(rig, i)} / {Parent(expected, e)}，参考位置差 {distance:G5} 米");
-                    return valid;
-                });
-                if (matches) { rig.Id = id; return rig; }
-            }
-            finally { reference.Free(); }
+                int e = expected.Indices[rig.Names[i]];
+                string Parent(RigDescriptor r, int b) => r.Parents[b] < 0 ? "" : r.Names[r.Parents[b]];
+                // Joint positions validate the silhouette and proportions while allowing bone-roll differences from FBX.
+                float distance = (rig.GlobalRest[i].Origin - rig.GlobalRest[rig.Indices["root"]].Origin).DistanceTo(
+                        expected.GlobalRest[e].Origin - expected.GlobalRest[expected.Indices["root"]].Origin);
+                bool valid = Parent(rig, i) == Parent(expected, e) && distance < .001f;
+                if (!valid) reasons.Add($"{id}: {rig.Names[i]} 父节点 {Parent(rig, i)} / {Parent(expected, e)}，参考位置差 {distance:G5} 米");
+                return valid;
+            });
+            if (matches) { rig.Id = id; return rig; }
         }
         throw new NotSupportedException("无法识别标准 UE4 / UE5 骨架：名称、层级、参考姿势或比例不匹配。" + string.Join("; ", reasons));
     }

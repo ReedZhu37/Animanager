@@ -28,13 +28,27 @@ internal partial class AssetThumbnailRenderer : SubViewport
         AddChild(_camera);
     }
 
-    internal async Task<Image?> RenderAsync(string path, Func<bool> current)
+    internal async Task<Image?> RenderAsync(string path, Func<bool> current, Func<Task<bool>>? waitToGenerate = null)
     {
         Node3D? model = null;
         MeshInstance3D? pose = null;
+        async Task<bool> ReadyToGenerate() => current() && (waitToGenerate == null || await waitToGenerate());
         try
         {
-            model = MotionJson.IsMotion(path) ? new MotionPlayback(path, verifySourceObjects: false).Root : SceneAsset.Load(path, out _);
+            if (MotionJson.IsMotion(path))
+            {
+                var source = await Task.Run(() => MotionPlayback.ReadSource(path, verifySourceObjects: false));
+                if (!current()) return null;
+                using var parsed = await SceneAsset.ParsePreviewAsync(source.PresetPath, CancellationToken.None, thumbnail: true);
+                if (!await ReadyToGenerate()) return null;
+                model = new MotionPlayback(path, source, parsed.Generate(fullTracks: false)).Root;
+            }
+            else
+            {
+                using var parsed = await SceneAsset.ParsePreviewAsync(path, CancellationToken.None, thumbnail: true);
+                if (!await ReadyToGenerate()) return null;
+                model = parsed.Generate(fullTracks: false);
+            }
             Preview3DViewport.ApplyClay(model, enabled: true);
             AddChild(model);
             // Imported cameras belong to their original scenes and must not replace the thumbnail camera.
@@ -89,7 +103,7 @@ internal partial class AssetThumbnailRenderer : SubViewport
         player.Seek(player.GetAnimation(clip).Length * .35, update: true);
     }
 
-    private static IEnumerable<(Vector3 From, Vector3 To)> PoseLines(Node[] nodes)
+    internal static IEnumerable<(Vector3 From, Vector3 To)> PoseLines(Node[] nodes)
     {
         foreach (var skeleton in nodes.OfType<Skeleton3D>())
         {

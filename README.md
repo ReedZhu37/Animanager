@@ -8,7 +8,7 @@ P1 本轮补齐可配置导出、预览缩略图与属性筛选。已加入标�
 
 Nodachi 已实现固定人体预设、独立武器轨道及握持 / 接触记录，操作与范围见 [独立轨道说明](Docs/MOTION_STORAGE.md)。完整后续设计见 [动画存储规划](Docs/ANIMATION_STORAGE_PLAN.md)；标准人体 retarget 已接入；接触 IK 和完整旧库迁移尚未实施。
 
-已加入独立 `.uasset / ZIP` 导入：无需安装 Unreal，使用 CUE4Parse 自动识别 UE4 / UE5 标准骨架。已验证 UE4.23 / 4.27 原始动画、UE5.0 AnimDataModel 与 UE5.6 Sequencer Direct FK 动画；Movement 的 386 段序列及官方 Manny Idle 已与已有 UE FBX 对照通过。UE5 保留完整 161 根骨骼；其他版本与编码尚未承诺兼容。见 [导入方法与兼容范围](Docs/CUE4PARSE_IMPORT.md)。
+已加入独立 `.uasset / ZIP` 导入：无需安装 Unreal，使用 CUE4Parse 自动识别 UE4 / UE5 标准骨架。已验证 UE4.18 / 4.21 / 4.23 / 4.27 原始动画、UE5.0 / 5.1 AnimDataModel 与 UE5.6 Sequencer Direct FK 动画；Movement 的 386 段序列及官方 Manny Idle 已与已有 UE FBX 对照通过。UE5 保留完整 161 根骨骼；其他版本与编码尚未承诺兼容。见 [导入方法与兼容范围](Docs/CUE4PARSE_IMPORT.md)。
 
 本轮新增四个默认男/女角色、自动重定向准入检查、播放滑条和 Blender 风格导航。详见 [Ready-v1 规则与验收](Docs/ASSET_READINESS.md)。
 
@@ -22,12 +22,14 @@ Nodachi 的 740 段 UE5.0 动画已导入并验证，可双击 `OpenNodachiCUE.c
 
 UE4 / UE5 独立导入样例可双击 `OpenUEStandardCUE.cmd`，打开已验证便携版及独立样例库。
 
-本机双击 `Launch.cmd`。脚本构建 C# 工程后启动独立应用窗口。程序首次自动创建默认库时导入 UE4 Mannequin、UE5 Manny / Quinn（Simple）及 Manny Idle 基准资产。也可用 Godot Mono 打开 `project.godot` 后运行。
+本机双击 `Launch.cmd`。脚本构建 C# 工程后启动独立应用窗口。程序首次自动创建默认库时导入 Manny Idle 基准动作，UE4 Mannequin 和 UE5 Manny / Quinn 可直接在预览角色中选择。也可用 Godot Mono 打开 `project.godot` 后运行。
 
 ## 管理素材库
 
-- 工具栏的 **Library** 显示活动库、登记路径和最近打开时间，可以新建空库、登记已有库、切换和重新定位。布局与显示偏好在应用内共享。导入或导出期间先等待任务结束，也可以在任务面板取消后重新切换。
+- 可以同时打开多个资产库。点击侧栏的库名查看该库，点击库名旁的 **×** 或在 **库管理** 里选择 **移出浏览** 即可关闭。库目录和登记记录会保留，可以随时重新打开。应用会记住上次打开的库。
 - 资产列表用 Ctrl 增减选择，用 Shift 选择当前页连续范围。翻页和筛选保留选中 ID，数量旁会显示其他页或筛选外的选择。通过 **整理** 重命名、批量改标签和收藏、操作集合。右键点选中项可将选中资产移入回收站，也可在回收站右键恢复。恢复会带回原 ID 和展示配置。
+- 把任意已打开库里的动画卡片拖到侧栏集合即可加入。跨库成员保留在来源库，集合只保存引用。关闭来源库时暂时隐藏这些成员，重新打开即可查看。点集合旁的 **⋯** 或右键集合，可以编辑名称、关闭当前集合、创建子集合或删除集合。点箭头展开或折叠子集合。删除父集合时，它的直接子集合会移到上一级。
+- 导入时跳过纯 Mesh、静态骨架和只有空动画片段的文件，并在导入结果中显示跳过数量。带动画的文件按整段根轨迹添加「无位移」「水平位移」「垂直位移」或「混合」标签。导入也会跳过标记为 InPlace 的变体，包括 `02_IP` 文件夹和 `_IP` 后缀。在 Limbo Console 运行 `library organize_motion` 可给当前库补标签，并将已入库的 InPlace 变体移入回收站。
 - **Library** 提供完整性检查、备份恢复、索引重建和缓存清理预览。缩略图与解析属性属于可再生成缓存，和可清理转换文件一起列出，备份不依赖这些缓存。备份及恢复各使用一个尚不存在的目录。已有旧库首次打开时，会将健康 SQLite 内的元数据补录到持久清单。
 
 运行 `Test.ps1 -Suite LibraryP0` 验证 P0，测试在隔离目录运行。本地有 Nodachi 和 Movement 两个样例库时也会执行完整切库、备份和恢复流程。命令行入口见 [Limbo Console](Docs/CONSOLE.md#素材库与资产整理)。
@@ -63,6 +65,16 @@ job status last
 3. 动画支持播放 / 暂停、片段切换、循环、0.1–3 倍速滑条、当前帧 / 总帧显示、时间轴定位。独立 `.motion` 动画按源帧率步进，其他资产按已知源帧率步进，未知时使用 30 FPS。空格播放 / 暂停，Ctrl+F 搜索。
 4. 按名称或标签搜索，切换动画 / 模型 / 收藏分类，并按骨架、时长和源帧率筛选；先筛选再分页，每页 60 项。列表自动生成缩略图，不能确认的属性显示未知。源帧率与预览播放速度独立。
 5. 在导出面板选择范围、格式、Mesh、动画片段及可选的时间范围 / 采样帧率，再选择目录并导出：支持 Godot `.res` AnimationLibrary、`.glb` 和 Blender 后台 `.fbx`，均使用任务队列。同名文件自动编号，不覆盖已有文件；导出设置不修改原资产。
+
+### Cascadeur 插件（Windows）
+
+1. 在 Animanager 打开 **更多 → 插件 → 安装接收脚本**，选择包含 `cascadeur.exe` 的目录。
+2. 重新加载 Cascadeur 命令或重启 Cascadeur，再执行 **Commands → Animanager → Toggle connection**。
+3. 在 Animanager 右键动画，选择 **发送到 → Cascadeur**。面板会显示换算后的绑定骨架。保持 **自动 · 使用 GLB 场景坐标**，或者在高级选项指定向上轴和朝前轴，确认角色沿 +Y 站立后点击发送。手动轴设置同时应用于动画和绑定姿态。发送会沿用该资产已启用的重定向配置，并按 30 FPS 导入新的 Cascadeur 场景标签页。
+
+接收插件按关节名称和层级匹配 Cascadeur 自带的 UE4 Mannequin、UE5 Manny / Quinn Quick Rigging 模板。匹配 UE4 Mannequin 且有蒙皮网格时，它会在发送过来的骨架上生成 AutoPosing 控制器。看到 **AutoPosing 已就绪** 后，可以在 Cascadeur 选中控制点和时间轴上的帧，再用 **Edit → Retargeting Copy**。UE5 暂时导入动画并提示手动检查绑定姿态。已安装旧版接收脚本的用户需重新安装并连接。
+
+接收端离线时，仍可以从插件窗口打开上次导出的文件夹。新增外部工具时，实现 `IAnimationPlugin` 并在 `BuildPluginSettings` 中注册，即可接入插件窗口和资产发送菜单。
 
 ## 数据与兼容范围
 

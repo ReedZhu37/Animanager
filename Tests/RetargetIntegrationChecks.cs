@@ -90,12 +90,7 @@ internal static class RetargetIntegrationChecks
                 if (path != null) localSamples.Add((path, "ue5-mannequin"));
             }
         }
-        string nodachi = RuntimePaths.Bundled("Libraries/Nodachi-Motion/motion");
-        if (Directory.Exists(nodachi))
-        {
-            var spin = Directory.GetFiles(nodachi, "*.motion.json").FirstOrDefault(p => MotionJson.ReadManifest(p).Clip == "AS_Combo_Attack_03_All_Seq");
-            if (spin != null) localSamples.Add((spin, "ue4-mannequin"));
-        }
+        if (FindLocalSpinMotion() is { } spin) localSamples.Add((spin, "ue4-mannequin"));
         foreach (var (path, target) in localSamples)
         {
             var originalHash = MotionJson.Hash(File.ReadAllBytes(path));
@@ -143,6 +138,32 @@ internal static class RetargetIntegrationChecks
             finally { result.Root.GetParent()?.RemoveChild(result.Root); result.Root.Free(); }
         }
         check(localSamples.Count >= 0, "local real-material checks: " + localSamples.Count + " samples (when installed)");
+    }
+
+    internal static async Task CheckMotionCache(MainShell owner, Preview3DViewport preview, WorkspaceApi api, Action<bool, string> check)
+    {
+        if (FindLocalSpinMotion() is not { } spin) return;
+        await api.ImportAsync([spin]);
+        var motion = api.Database.SearchAll().Single(item => item.SourceFormat == ".motion");
+        await owner.SelectPreviewCharacterAsync("ue4-mannequin");
+        await owner.PreviewAssetAsync(motion);
+        int hits = owner.CharacterCacheHits;
+        await owner.PreviewAssetAsync(motion);
+        check(owner.CharacterCacheHits == hits + 1, "verified motion preview reuses its baked animation");
+
+        hits = owner.CharacterCacheHits;
+        api.SetMotionGrip(motion.Id, [.05f, 0, 0], [0, 0, 0, 1]);
+        await owner.PreviewAssetAsync(motion);
+        var grip = Preview3DViewport.Descendants(preview.Model!).OfType<Node3D>().Single(node => node.Name == "GripCalibration");
+        check(owner.CharacterCacheHits == hits && Mathf.IsEqualApprox(grip.Position.X, .05f),
+            "editing the motion grip invalidates the cached preview and displays the new calibration");
+    }
+
+    private static string? FindLocalSpinMotion()
+    {
+        string nodachi = RuntimePaths.Bundled("Libraries/Nodachi-Motion/motion");
+        return Directory.Exists(nodachi) ? Directory.EnumerateFiles(nodachi, "*.motion.json")
+            .FirstOrDefault(p => MotionJson.ReadManifest(p).Clip == "AS_Combo_Attack_03_All_Seq") : null;
     }
     private static float Angle(Transform3D a, Transform3D b) => Mathf.RadToDeg(2 * Mathf.Acos(Mathf.Clamp(Math.Abs(
         a.Basis.Orthonormalized().GetRotationQuaternion().Dot(b.Basis.Orthonormalized().GetRotationQuaternion())), 0, 1)));

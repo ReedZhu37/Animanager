@@ -7,9 +7,13 @@ public sealed class AssetCardModel
 {
     public string Id = "";
     public string Name = "";
+    public string LibraryName = "";
     public string MetaLine = "";      // "FBX · 2.5 MB"
     public string DetailLine = "";    // "2.0s · 60fps · UE5_Manny"
     public bool IsAnimation;
+    public bool Trashed;
+    internal string? ClosedLibraryId;
+    internal bool LocateClosedLibrary;
     public bool Favorite;
     public Texture2D? Thumbnail;
     public bool ThumbnailPending;
@@ -58,6 +62,7 @@ public partial class AssetGrid : Control
     public event Action? SelectionChanged;
     public event Action<int, int>? VisibleRangeChanged;
     public event Action<string>? ContextMenuRequested;
+    internal event Action<AssetCardModel>? OpenSourceRequested;
 
     public IReadOnlyCollection<string> SelectedIds => _selection.Ids;
 
@@ -79,7 +84,7 @@ public partial class AssetGrid : Control
     public override void _Ready()
     {
         MouseFilter = MouseFilterEnum.Stop;
-        FocusMode = FocusModeEnum.Click;
+        FocusMode = FocusModeEnum.All;
         ClipContents = true;
         SizeFlagsHorizontal = SizeFlags.ExpandFill;
         CustomMinimumSize = new Vector2(0, CardHeight);
@@ -97,7 +102,7 @@ public partial class AssetGrid : Control
     {
         _cards.Clear();
         _cards.AddRange(cards);
-        _selection.SetView(_cards.Select(card => card.Id));
+        _selection.SetView(_cards.Where(card => card.ClosedLibraryId == null).Select(card => card.Id));
         Reflow();
     }
 
@@ -166,11 +171,18 @@ public partial class AssetGrid : Control
         var background = selected || hovered ? Tokens.CardHover : Tokens.Card;
         DrawStyleBox(Surfaces.Fill(background, Tokens.Radius.Card, 0, 0, selected ? Tokens.Accent : Tokens.Line), rect);
 
-        var thumbRect = new Rect2(rect.Position + new Vector2(Tokens.CardMetrics.ThumbInset, Tokens.CardMetrics.ThumbInset),
-            new Vector2(CardWidth - Tokens.CardMetrics.ThumbInset * 2, Tokens.CardMetrics.ThumbHeight));
+        bool closed = card.ClosedLibraryId != null;
+        var thumbRect = ThumbnailRect(rect);
         DrawStyleBox(Surfaces.Fill(Tokens.Sunken, Tokens.Radius.Control, 0, 0), thumbRect);
 
-        if (card.Thumbnail != null)
+        if (closed)
+        {
+            const string status = "来源库未打开";
+            DrawString(Typography.Regular, thumbRect.GetCenter() + new Vector2(-Typography.Width(Typography.Regular, status, Type.Caption) / 2, -7),
+                status, HorizontalAlignment.Left, -1, Type.Caption, Tokens.Text3);
+            AssetBrowser.DrawSourceButton(this, SourceButtonRect(index), card, hovered);
+        }
+        else if (card.Thumbnail != null)
         {
             var natural = card.Thumbnail.GetSize();
             float scale = Mathf.Max(thumbRect.Size.X / natural.X, thumbRect.Size.Y / natural.Y);
@@ -191,11 +203,11 @@ public partial class AssetGrid : Control
             }
         }
 
-        if (card.Favorite)
+        if (!closed && card.Favorite)
             Icons.Draw(this, Icons.Star, new Rect2(thumbRect.Position + new Vector2(thumbRect.Size.X - 18, 5),
                 new Vector2(13, 13)), Tokens.Warn, 1.2f);
 
-        if (card.IsAnimation)
+        if (!closed && card.IsAnimation)
         {
             var badge = new Rect2(thumbRect.Position + new Vector2(7, thumbRect.Size.Y - 23), new Vector2(19, 17));
             DrawStyleBox(Surfaces.Fill(new Color(0, 0, 0, .45f), Tokens.Radius.Chip), badge);
@@ -210,11 +222,12 @@ public partial class AssetGrid : Control
 
         DrawString(Typography.Semi, new Vector2(left, baseline + 20),
             Typography.Fit(Typography.Semi, card.Name, Type.Row, textWidth),
-            HorizontalAlignment.Left, -1, Type.Row, Tokens.Text);
+            HorizontalAlignment.Left, -1, Type.Row, closed ? Tokens.Text3 : Tokens.Text);
 
-        if (card.MetaLine.Length > 0)
-            DrawString(Typography.Mono, new Vector2(left, baseline + 38),
-                Typography.Fit(Typography.Mono, card.MetaLine, Type.Micro, textWidth),
+        var metadata = card.LibraryName.Length > 0 ? card.LibraryName + " · " + card.MetaLine : card.MetaLine;
+        if (metadata.Length > 0)
+            DrawString(Typography.Regular, new Vector2(left, baseline + 38),
+                Typography.Fit(Typography.Regular, metadata, Type.Micro, textWidth),
                 HorizontalAlignment.Left, -1, Type.Micro, Tokens.Text3);
 
         if (card.DetailLine.Length > 0)
@@ -230,6 +243,12 @@ public partial class AssetGrid : Control
                 Tokens.OnAccent, 1.8f);
         }
     }
+
+    private static Rect2 ThumbnailRect(Rect2 card) => new(
+        card.Position + new Vector2(Tokens.CardMetrics.ThumbInset, Tokens.CardMetrics.ThumbInset),
+        new Vector2(CardWidth - Tokens.CardMetrics.ThumbInset * 2, Tokens.CardMetrics.ThumbHeight));
+
+    internal Rect2 SourceButtonRect(int index) => new(ThumbnailRect(CardRect(index)).GetCenter() + new Vector2(-45, 4), new Vector2(90, 25));
 
     private int IndexAt(Vector2 point)
     {
@@ -257,13 +276,21 @@ public partial class AssetGrid : Control
                 QueueRedraw();
             }
             TooltipText = index >= 0 ? _cards[index].Tooltip : "";
+            MouseDefaultCursorShape = Card(index)?.ClosedLibraryId != null && SourceButtonRect(index).HasPoint(motion.Position)
+                ? CursorShape.PointingHand : CursorShape.Arrow;
         }
 
-        if (ev is InputEventMouseButton { Pressed: true } button)
+        if (ev is InputEventMouseButton button)
         {
             if (button.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown) return;
 
             int hit = IndexAt(button.Position);
+            if (!button.Pressed)
+            {
+                if (button.ButtonIndex == MouseButton.Left) _selection.ReleaseRow(Card(hit)?.Id);
+                return;
+            }
+            _selection.CancelPendingClick();
             if (hit < 0)
             {
                 if (button.ButtonIndex == MouseButton.Left && !button.CtrlPressed && !button.ShiftPressed)
@@ -271,7 +298,16 @@ public partial class AssetGrid : Control
                 return;
             }
 
-            string id = _cards[hit].Id;
+            var card = _cards[hit];
+            string id = card.Id;
+            if (card.ClosedLibraryId != null)
+            {
+                if (button.ButtonIndex == MouseButton.Right) ContextMenuRequested?.Invoke(id);
+                else if (button.ButtonIndex == MouseButton.Left && SourceButtonRect(hit).HasPoint(button.Position))
+                    OpenSourceRequested?.Invoke(card);
+                AcceptEvent();
+                return;
+            }
             if (button.ButtonIndex == MouseButton.Right)
             {
                 if (!_selection.Contains(id)) _selection.Select(id);
@@ -281,14 +317,14 @@ public partial class AssetGrid : Control
             if (button.ButtonIndex != MouseButton.Left) return;
 
             GrabFocus();
-            if (button.ShiftPressed) _selection.SelectRange(id);
-            else if (button.CtrlPressed) _selection.Toggle(id);
-            else _selection.Select(id);
+            _selection.PressRow(id, button);
 
             SelectionChanged?.Invoke();
-            Activated?.Invoke(new AssetGridEvent(hit, _cards[hit], button.CtrlPressed || button.ShiftPressed));
+            Activated?.Invoke(new AssetGridEvent(hit, button.DoubleClick && !button.CtrlPressed && !button.ShiftPressed));
         }
     }
+
+    public override Variant _GetDragData(Vector2 atPosition) => AssetBrowser.BeginAssetDrag(this, Card(IndexAt(atPosition)), _selection);
 
     public void SelectSingle(string id)
     {
@@ -304,7 +340,7 @@ public partial class AssetGrid : Control
 
     public void SelectAll()
     {
-        _selection.SetAll(_cards.Select(card => card.Id));
+        _selection.SetAll(_cards.Where(card => card.ClosedLibraryId == null).Select(card => card.Id));
         SelectionChanged?.Invoke();
     }
 
@@ -318,4 +354,4 @@ public partial class AssetGrid : Control
 }
 
 /// <summary>Raised when a card is clicked or activated by the keyboard.</summary>
-public readonly record struct AssetGridEvent(int Index, AssetCardModel Card, bool Additive);
+public readonly record struct AssetGridEvent(int Index, bool OpenRequested);

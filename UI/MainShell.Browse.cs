@@ -1,6 +1,7 @@
 using Animanager.Core;
 using Animanager.Core.Browse;
 using Animanager.Core.Models;
+using Animanager.Core.Storage;
 using Animanager.UI.Components;
 using Godot;
 using Animanager.UI.Shell;
@@ -11,28 +12,52 @@ namespace Animanager.UI;
 public partial class MainShell
 {
     private const int AssetPageSize = 60;
+    private OptionButton _assetLibraryScope = null!;
+    private Button _locateAsset = null!;
+    private string? _assetLibraryFilter;
+    private (string Id, string Name, int Count)[] _assetLibraryChoices = [];
+    private bool CategoryIncludesMountedLibraries => _category is "All" or "Animation" or "Model" or "Favorites" or "Trash";
     private AssetAttributeFilter _attributeFilter = new();
     private Button _attributeToggle = null!;
     private VBoxContainer _attributePanel = null!;
+    private readonly HashSet<string> _selectedTags = new(StringComparer.OrdinalIgnoreCase);
+    private OptionButton _tagMatchMode = null!;
+    private MenuButton _tagPicker = null!;
     private OptionButton _skeletonFilter = null!;
     private LineEdit _durationFilter = null!, _fpsFilter = null!;
     private Label _attributeHint = null!;
     private AssetAttributes? _inspectorAttributes;
     private string _inspectorStamp="";
     private AssetSkeleton[] _skeletonChoices = [];
-    private (string Catalog, int Cache)? _skeletonRevision;
+    private (string Catalog, int Cache, int Libraries)? _skeletonRevision;
     private CancellationTokenSource? _skeletonRequest, _browseRequest, _attributeDetailsRequest;
     private string? _attributeDetailsId;
     private int _attributeDetailsCacheRevision;
-    private AssetBrowseRow[] _browseRows = [];
-    private (string Query, string Category, AssetAttributeFilter Filter) _publishedBrowseScope = ("", "All", new());
+    private LibraryAssetRow[] _browseRows = [];
+    private (LibraryBrowseScope[] Scopes, string Query, AssetAttributeFilter Filter, AssetTagFilter? Tags)
+        _publishedBrowseScope = ([], "", new(), null);
+    private (string Category, string? Library, int LibraryRevision, AssetSort Sort, int Page) _publishedBrowseView;
+    private ClosedCollectionAsset[] _publishedClosedRows = [];
     private int FilteredAssetCount { get; set; }
+    private int _onlineFilteredAssetCount;
     private int _browseGeneration;
     private bool _thumbnailsEnabled, _thumbnailPending;
-    private ulong _nextThumbnailTick;
+    private ulong _nextThumbnailTick, _thumbnailRenderAfter;
     private readonly HashSet<int> _thumbnailAttempts = [];
+    private const int ThumbnailMemoryLimit = 240;
+    private readonly record struct ThumbnailKey(LibrarySession Library, string Path, int Revision);
+    private readonly LinkedList<(ThumbnailKey Key, Texture2D Texture)> _recentThumbnails = new();
+    private readonly Dictionary<ThumbnailKey, LinkedListNode<(ThumbnailKey Key, Texture2D Texture)>> _thumbnailTextures = [];
+    private readonly Dictionary<LibrarySession, LibraryThumbnailWarmup> _thumbnailWarmups = [];
+    private sealed class LibraryThumbnailWarmup(Task<AssetItem[]> assets)
+    {
+        internal Task<AssetItem[]> Assets { get; } = assets;
+        internal int Next;
+    }
     private AssetThumbnailRenderer? _thumbnailRenderer;
     private Task _pendingBrowse = Task.CompletedTask;
+    private LibrarySession[] _durationProgressLibraries = [];
+    private ulong _nextDurationProgress;
     internal Task PendingBrowse => _pendingBrowse;
     private void ApplyAssetSearch()
     {
@@ -40,14 +65,110 @@ public partial class MainShell
     }
     private void GoToAssetPage(int page)
     {
-        _page=Math.Clamp(page,0,Math.Max(0,(FilteredAssetCount-1)/AssetPageSize));
-        _browser.Scroll.ScrollVertical=0; Refresh();
+        if (_browseRequest != null) return;
+        int destination = Math.Clamp(page, 0, Math.Max(0, (FilteredAssetCount - 1) / AssetPageSize));
+        if (destination == _page) return;
+        var (scopes, query, filter, tags) = _publishedBrowseScope;
+        if (query != _search.Text) { ApplyAssetSearch(); return; }
+        ResetThumbnailRows();
+        _thumbnailRenderAfter = Time.GetTicksMsec() + 120;
+        RequestAssetBrowse(scopes, query, filter, tags, destination, closedRows: _publishedClosedRows);
+    }
+
+    private OptionButton BuildAssetLibraryScope()
+    {
+        _assetLibraryScope = new OptionButton
+        {
+            Name = "AssetLibraryScope", Visible = false, FitToLongestItem = false, AllowReselect = true,
+            TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis, CustomMinimumSize = new(114, Tokens.Size.Control)
+        };
+        _assetLibraryScope.ItemSelected += index =>
+        {
+            if (index == 0) { ShowAllBrowseLibraries(); return; }
+            BrowseLibrary(_assetLibraryChoices[(int)index - 1].Id);
+        };
+        return _assetLibraryScope;
+    }
+
+    private void BrowseLibrary(string id)
+    {
+        if (_libraries.FindOpenLibrary(id) == null) return;
+        if (!CategoryIncludesMountedLibraries)
+        {
+            _collectionBrowseReturn = null;
+            SetAssetCategory("All", 0);
+        }
+        _assetLibraryFilter = id;
+        _page = 0;
+        _browser.Scroll.ScrollVertical = 0;
+        Refresh();
+        _workspace.ShowPanel("assets");
+    }
+
+    private void ShowAllBrowseLibraries()
+    {
+        _assetLibraryFilter = null;
+        _browser.Scroll.ScrollVertical = 0;
+        SetAssetSort(new(AssetSortField.LibraryMix));
+    }
+
+    private void LocateAssetInLibrary(string key)
+    {
+        if (_libraryLoading || SelectionLibrary(key) is not { } library ||
+            library.Api.Database.Find(SelectionAssetId(key)) is not { } asset) return;
+        _searchTimer.Stop();
+        _search.Text = _assetSearch.Text = "";
+        ResetAssetFilters(refresh: false);
+        _collectionBrowseReturn = null;
+        _category = asset.Trashed ? "Trash" : "All";
+        _assetLibraryFilter = library.Identity.Id;
+        _page = 0;
+        _browser.Scroll.ScrollVertical = 0;
+        _assetSelection.Select(key);
+        _workspace.ShowPanel("assets");
+        RefreshAssetBrowse(key);
+    }
+
+    private void LocatePreviewAsset(string key)
+    {
+        if (_closing || _libraryLoading) return;
+        if (!_searchTimer.IsStopped())
+        {
+            _searchTimer.Stop();
+            _page = 0;
+        }
+        RefreshAssetBrowse(key);
+    }
+
+    private void SyncAssetLibraryScope((string Id, string Name, int Count)[] choices)
+    {
+        int selected = choices.Length > 1 ? Array.FindIndex(choices, choice => choice.Id == _assetLibraryFilter) : -1;
+        if (selected < 0) _assetLibraryFilter = null;
+        _assetLibraryScope.Visible = CategoryIncludesMountedLibraries && choices.Length > 1;
+        if (!_assetLibraryScope.Visible) return;
+        if (!_assetLibraryChoices.SequenceEqual(choices))
+        {
+            _assetLibraryChoices = choices;
+            _assetLibraryScope.Clear();
+            _assetLibraryScope.AddItem($"全部库 · {choices.Length}");
+            for (int i = 0; i < choices.Length; i++)
+            {
+                var choice = choices[i];
+                _assetLibraryScope.AddItem(Typography.Fit(Typography.Regular, $"{choice.Name} · {choice.Count:N0}", Shell.Type.Body, 270));
+                _assetLibraryScope.SetItemTooltip(i + 1, $"{choice.Name} · {choice.Count:N0} 个资产");
+            }
+        }
+        _assetLibraryScope.Select(selected + 1);
+        _assetLibraryScope.TooltipText = selected < 0 ? "按来源库筛选。选择全部库可交错查看各库资产。" : choices[selected].Name;
     }
 
     private void BuildAssetBrowseControls(VBoxContainer column)
     {
         _thumbnailsEnabled = DisplayServer.GetName() != "headless";
         _attributePanel = column;
+        BuildTagFilterControls(column);
+        column.AddChild(new HSeparator());
+        column.AddChild(Label("资产属性", false, 13));
         _skeletonFilter = new OptionButton { Name = "AssetSkeletonFilter", FitToLongestItem = false, CustomMinimumSize = new(0, 32) };
         _attributePanel.AddChild(_skeletonFilter);
         SetSkeletonOptions([]);
@@ -58,15 +179,84 @@ public partial class MainShell
         _fpsFilter = AddNumberFilter(numbers, "源帧率", "AssetFpsFilter", "例如 60", "按文件记录的源帧率筛选。" + NumberFilterHelp);
         var actions = new HFlowContainer();
         _attributePanel.AddChild(actions);
-        var apply = Button("应用筛选", ApplyAssetAttributeFilter);
+        var apply = Button("应用属性筛选", ApplyAssetAttributeFilter);
         apply.Name = "AssetApplyFilters";
         actions.AddChild(apply);
-        var clear = Button("清除条件", () => ResetAssetAttributeFilter(refresh: true));
+        var clear = Button("清除筛选", () => ResetAssetFilters(refresh: true));
         clear.Name = "AssetClearFilters";
         actions.AddChild(clear);
         _attributeHint = Wrapped("");
         _attributeHint.Visible = false;
         _attributePanel.AddChild(_attributeHint);
+    }
+
+    private void BuildTagFilterControls(VBoxContainer column)
+    {
+        column.AddChild(Label("标签", false, 13));
+        _tagMatchMode = new OptionButton { Name = "AssetTagMatchMode", CustomMinimumSize = new(0, 32) };
+        _tagMatchMode.AddItem("交集 · 包含全部所选标签");
+        _tagMatchMode.AddItem("并集 · 包含任一所选标签");
+        _tagMatchMode.Select(0);
+        _tagMatchMode.ItemSelected += _ => { if (_selectedTags.Count > 0) RefreshAfterFilterChange(); };
+        column.AddChild(_tagMatchMode);
+
+        var actions = Row(column);
+        _tagPicker = new MenuButton
+        {
+            Name = "AssetTagPicker", Text = "选择标签 ▾", CustomMinimumSize = new(0, 32),
+            Flat = false, Disabled = true, FocusMode = FocusModeEnum.All, SizeFlagsHorizontal = SizeFlags.ExpandFill
+        };
+        var popup = _tagPicker.GetPopup();
+        popup.HideOnCheckableItemSelection = false;
+        popup.AllowSearch = true;
+        _tagPicker.AboutToPopup += () =>
+        {
+            popup.Clear();
+            var all = _tagSections.FirstOrDefault(section => section.GroupId == AppTagCatalog.AllGroupId).Tags ?? [];
+            if (all.Length > 0) popup.AddSeparator(AppTagCatalog.AllGroupName);
+            foreach (var (name, count) in all) AddTag(name, $"{name} · {count:N0}");
+            var visible = all.Select(tag => tag.Name);
+            var missing = _selectedTags.Except(visible, StringComparer.OrdinalIgnoreCase).ToArray();
+            if (missing.Length > 0 && _tagGroups.Length > 0) popup.AddSeparator("其他已选标签");
+            foreach (var name in missing)
+                AddTag(name, name);
+
+            void AddTag(string name, string label)
+            {
+                int index = popup.ItemCount;
+                popup.AddCheckItem(Typography.Fit(Typography.Regular, label, Shell.Type.Body, 270));
+                popup.SetItemMetadata(index, name);
+                popup.SetItemTooltip(index, label);
+                popup.SetItemChecked(index, _selectedTags.Contains(name));
+            }
+        };
+        popup.IndexPressed += index =>
+        {
+            var name = popup.GetItemMetadata((int)index).AsString();
+            ToggleAssetTag(name);
+            popup.SetItemChecked((int)index, _selectedTags.Contains(name));
+        };
+        actions.AddChild(_tagPicker);
+        actions.AddChild(BuildTagGroupMenu());
+    }
+
+    private void ToggleAssetTag(string tag)
+    {
+        if (!_selectedTags.Add(tag)) _selectedTags.Remove(tag);
+        RefreshAfterFilterChange();
+    }
+
+    private void BrowseByTag(string tag)
+    {
+        if (!_workspace.IsPanelVisible("assets")) _workspace.ShowPanel("assets");
+        ToggleAssetTag(tag);
+    }
+
+    private void RefreshAfterFilterChange()
+    {
+        _page = 0;
+        _browser.Scroll.ScrollVertical = 0;
+        Refresh();
     }
 
     private const string NumberFilterHelp = "留空为不限。输入数字、1..3、1..、..3 或“未知”。";
@@ -94,25 +284,45 @@ public partial class MainShell
             SetAttributeHint("");
             if (_attributeFilter == next) return;
             _attributeFilter = next;
-            _attributeToggle.Text = next.IsActive ? "属性筛选 · 已启用" : "属性筛选";
-            _page = 0;
-            SyncFilterChips();
-            Refresh();
+            RefreshAfterFilterChange();
         }
         catch (ArgumentException error) { SetAttributeHint(error.Message); }
     }
 
-    private void ResetAssetAttributeFilter(bool refresh)
+    private void ResetAssetFilters(bool refresh)
     {
-        var changed = _attributeFilter.IsActive;
+        var changed = _attributeFilter.IsActive || _selectedTags.Count > 0;
         _attributeFilter = new();
-        if (_attributeToggle == null) return;
-        _attributeToggle.Text = "属性筛选";
+        _selectedTags.Clear();
+        _tagMatchMode.Select(0);
         _durationFilter.Text = _fpsFilter.Text = "";
         _skeletonFilter.Select(0);
         SetAttributeHint("");
-        SyncFilterChips();
-        if (changed && refresh) { _page = 0; Refresh(); }
+        if (changed && refresh) RefreshAfterFilterChange();
+        else SyncFilterChips();
+    }
+
+    private void RemoveAssetFilter(string key)
+    {
+        switch (key)
+        {
+            case "tags":
+                _selectedTags.Clear();
+                break;
+            case "skeleton":
+                _skeletonFilter.Select(0);
+                _attributeFilter = _attributeFilter with { SkeletonId = null, UnknownSkeleton = false };
+                break;
+            case "duration":
+                _durationFilter.Text = "";
+                _attributeFilter = _attributeFilter with { Duration = null };
+                break;
+            case "fps":
+                _fpsFilter.Text = "";
+                _attributeFilter = _attributeFilter with { SourceFps = null };
+                break;
+        }
+        RefreshAfterFilterChange();
     }
 
     private void SetAttributeHint(string text)
@@ -138,21 +348,25 @@ public partial class MainShell
     private void LoadSkeletonOptions()
     {
         if (_api == null || _closing) return;
-        var revision = (_database.CatalogRevision, _api.BrowseCacheRevision);
+        var libraries = LoadedLibraries();
+        var revision = (string.Join("/", libraries.Select(library => library.Api.Database.CatalogRevision)),
+            libraries.Sum(library => library.Api.BrowseCacheRevision), _browseLibraryRevision);
         if (_skeletonRevision == revision) return;
         StopRequest(ref _skeletonRequest);
         _skeletonRevision = revision;
         var request = new CancellationTokenSource();
         _skeletonRequest = request;
         SetAttributeHint("正在读取骨架选项…");
-        _ = LoadSkeletonOptionsAsync(_api, request);
+        _ = LoadSkeletonOptionsAsync(libraries, request);
     }
 
-    private async Task LoadSkeletonOptionsAsync(WorkspaceApi api, CancellationTokenSource request)
+    private async Task LoadSkeletonOptionsAsync(LibrarySession[] libraries, CancellationTokenSource request)
     {
         try
         {
-            var skeletons = await api.GetAssetSkeletonsAsync(request.Token);
+            var sources = await Task.WhenAll(libraries.Select(library => library.Api.GetAssetSkeletonsAsync(request.Token)));
+            var skeletons = sources.SelectMany(source => source).DistinctBy(skeleton => skeleton.Id, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(skeleton => skeleton.Name, StringComparer.OrdinalIgnoreCase).ThenBy(skeleton => skeleton.Id, StringComparer.Ordinal).ToArray();
             if (!_closing && ReferenceEquals(_skeletonRequest, request))
             {
                 SetSkeletonOptions(skeletons);
@@ -177,39 +391,162 @@ public partial class MainShell
 
     private void SyncFilterChips()
     {
-        if(_filterBar==null)return;
-        var chips=new List<(string Key,string Label)>();
-        if(_skeletonFilter.Selected>0)chips.Add(("skeleton",_skeletonFilter.GetItemText(_skeletonFilter.Selected)));
-        if(_attributeFilter.Duration?.IsActive==true)chips.Add(("duration","时长 "+_durationFilter.Text));
-        if(_attributeFilter.SourceFps?.IsActive==true)chips.Add(("fps","帧率 "+_fpsFilter.Text));
-        _filterBar.SetFilters(chips);if(_assetSelection.Count>1)_filterBar.Hide();
-    }
-    private void RefreshAssetBrowse()
-    {
-        if (_database == null || _closing || _browser==null) return;
-        StopRequest(ref _browseRequest); ResetThumbnailRows(); RefreshCollections(); RefreshCurrentAsset();
-        if (_assetSelection.Count > 0) _assetSelection.Prune(_database.ExistingIds(_assetSelection, _category == "Trash"));
-        _sideBar.SetActive(_category);
-        foreach(var category in new[]{"All","Animation","Model","Favorites","Trash"})_sideBar.SetCount(category,_database.Search(category:category).Total);
-        _header.SetLibrary(_libraries.Active!.Identity.Name,_database.Search().Total);
-        if (_workspace.ActiveDrawer=="filters") LoadSkeletonOptions();
-        FilteredAssetCount=0;_items=[];_browseRows=[];_browser.SetRows([]);
-        _count.Text="正在读取…";_firstPage.Disabled=_lastPage.Disabled=_previous.Disabled=_next.Disabled=true;_empty.Visible=false;
-        SyncAssetSelection();
-        var request=new CancellationTokenSource();_browseRequest=request;
-        _pendingBrowse = RefreshAssetBrowseAsync(_api,_search.Text,_category,_attributeFilter,_sort,_page,request);
+        if (_filterBar == null) return;
+        int tagCount = _selectedTags.Count;
+        _sideBar.SetSelectedTags(_selectedTags);
+        _tagPicker.Disabled = tagCount == 0 && !_tagSections.Any(section => section.Tags.Length > 0);
+        _tagPicker.Text = tagCount == 0 ? "选择标签 ▾" : $"已选 {tagCount} 个标签 ▾";
+        var chips = new List<(string Key, string Label)>();
+        if (tagCount > 0)
+        {
+            string mode = tagCount == 1 ? "标签" : _tagMatchMode.Selected == 0 ? "标签交集" : "标签并集";
+            string names = string.Join("、", _selectedTags.Order(StringComparer.OrdinalIgnoreCase));
+            chips.Add(("tags", $"{mode} · {names}"));
+        }
+        if (_attributeFilter.UnknownSkeleton) chips.Add(("skeleton", "骨架未知"));
+        else if (_attributeFilter.SkeletonId is { } id)
+            chips.Add(("skeleton", _skeletonChoices.FirstOrDefault(s => s.Id == id)?.Name ?? id));
+        if (_attributeFilter.Duration?.IsActive == true) chips.Add(("duration", "时长 " + DescribeNumberFilter(_attributeFilter.Duration)));
+        if (_attributeFilter.SourceFps?.IsActive == true) chips.Add(("fps", "帧率 " + DescribeNumberFilter(_attributeFilter.SourceFps)));
+        _attributeToggle.Text = chips.Count > 0 ? $"筛选 {chips.Count}" : "筛选";
+        _attributeToggle.AddThemeColorOverride("font_color", chips.Count > 0 ? Tokens.Accent : Tokens.Text);
+        _filterBar.SetFilters(chips);
     }
 
-    private async Task RefreshAssetBrowseAsync(WorkspaceApi api, string query, string category, AssetAttributeFilter filter,
-        AssetSort sort, int page, CancellationTokenSource request)
+    private static string DescribeNumberFilter(AssetNumberFilter filter) => filter.UnknownOnly ? "未知" :
+        filter.Minimum == filter.Maximum ? $"{filter.Minimum}" : $"{filter.Minimum}..{filter.Maximum}";
+
+    private AssetTagFilter? CurrentAssetTagFilter() =>
+        _selectedTags.Count == 0 ? null : new AssetTagFilter(_selectedTags, _tagMatchMode.Selected == 0);
+
+    private void RefreshAssetBrowse(string? locateKey = null)
+    {
+        if (_closing || _browser==null) return;
+        StopRequest(ref _browseRequest); ResetThumbnailRows(); RefreshCollections(); RefreshCurrentAsset();
+        RefreshComparisonAssets();
+        if (_assetSelection.Count > 0)
+        {
+            var live = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var group in _assetSelection.GroupBy(SelectionLibrary))
+            {
+                if (group.Key is not { } library) continue;
+                var ids = library.Api.Database.ExistingIds(group.Select(SelectionAssetId), _category == "Trash");
+                live.UnionWith(ids.Select(id => AssetKey(library, id)));
+            }
+            _assetSelection.Prune(live);
+        }
+        _sideBar.SetActive(_category);
+        var libraries = LoadedLibraries();
+        SyncOpenLibraries(libraries);
+        SyncLibraryThumbnailWarmups(libraries);
+        var counts = new[] { "All", "Animation", "Model", "Favorites", "Trash" }.ToDictionary(category => category, _ => 0);
+        var libraryChoices = new (string Id, string Name, int Count)[libraries.Length];
+        for (int i = 0; i < libraries.Length; i++)
+        {
+            var library = libraries[i];
+            var libraryCounts = library.Api.Database.BrowseCategoryCounts();
+            libraryChoices[i] = (library.Identity.Id, library.Identity.Name, libraryCounts["All"]);
+            foreach (var (category, count) in libraryCounts)
+                counts[category] += count;
+        }
+        SyncAssetLibraryScope(libraryChoices);
+        foreach (var (category, count) in counts) _sideBar.SetCount(category, count);
+        var header = libraries.Length switch
+        {
+            0 => "打开资产库",
+            1 => libraries[0].Identity.Name,
+            _ => $"全部库 · {libraries.Length}"
+        };
+        _header.SetLibrary(header, counts["All"]);
+        if (_workspace.ActiveDrawer=="filters") LoadSkeletonOptions();
+        var collection = CurrentCollection;
+        var scoped = ScopedLibrary;
+        LibrarySession[] categoryLibraries = scoped != null ? [scoped] : libraries;
+        var scopes = collection != null ? CollectionBrowseScopes(collection, libraries) :
+            categoryLibraries.Select(library => new LibraryBrowseScope(library, _category)).ToArray();
+        _durationProgressLibraries = _sort.Field == AssetSortField.Duration || _attributeFilter.Duration?.IsActive == true
+            ? scopes.Select(scope => scope.Library).ToArray() : [];
+        _nextDurationProgress = 0;
+        _sortControl.SetItemText((int)AssetSortField.LibraryMix, scopes.Length > 1 ? "按库混合" : "默认顺序");
+        _sortControl.TooltipText = scopes.Length > 1 && _sort.Field == AssetSortField.LibraryMix ? "各来源库交错显示" :
+            _sort.Descending ? "降序；点击列表表头可切换方向" : "升序；点击列表表头可切换方向";
+        var tags = CurrentAssetTagFilter();
+        bool sameView = _publishedBrowseView == (_category, _assetLibraryFilter, _browseLibraryRevision, _sort, _page) &&
+            _publishedBrowseScope.Query == _search.Text && _publishedBrowseScope.Filter == _attributeFilter &&
+            AssetTagFilter.Equivalent(_publishedBrowseScope.Tags, tags);
+        if (!sameView)
+        {
+            FilteredAssetCount = _onlineFilteredAssetCount = 0;
+            _browseRows = [];
+            _browser.SetRows([]);
+        }
+        _empty.Visible = false;
+        SyncAssetSelection();
+        RequestAssetBrowse(scopes, _search.Text, _attributeFilter, tags, _page, collection, locateKey);
+    }
+
+    private void RequestAssetBrowse(LibraryBrowseScope[] scopes, string query, AssetAttributeFilter filter,
+        AssetTagFilter? tags, int page, AppCollection? collection = null, string? locateKey = null,
+        ClosedCollectionAsset[]? closedRows = null)
+    {
+        _count.Text = "正在读取…";
+        _firstPage.Disabled = _lastPage.Disabled = _previous.Disabled = _next.Disabled = true;
+        var request = new CancellationTokenSource();
+        _browseRequest = request;
+        _pendingBrowse = RefreshAssetBrowseAsync(scopes, query, filter, tags, _sort, page, collection, locateKey, closedRows, request);
+    }
+
+    private LibrarySession[] LoadedLibraries() => _libraries.OpenLibraries();
+
+    private async Task RefreshAssetBrowseAsync(LibraryBrowseScope[] scopes, string query, AssetAttributeFilter filter,
+        AssetTagFilter? tags, AssetSort sort, int page, AppCollection? collection, string? locateKey,
+        ClosedCollectionAsset[]? closedRows, CancellationTokenSource request)
     {
         try
         {
-            var result = await api.BrowseAssetsAsync(query, category, filter, sort, page, AssetPageSize, request.Token);
-            if (result.Items.Length == 0 && page > 0)
-                result = await api.BrowseAssetsAsync(query, category, filter, sort, pageSize: AssetPageSize, cancellationToken: request.Token);
-            if (!_closing && ReferenceEquals(_browseRequest, request) && _api==api && query == _search.Text)
-                ShowAssetBrowsePage(result, query, category, filter);
+            if (locateKey != null && SelectionLibrary(locateKey) is { } library)
+            {
+                int index = await WorkspaceApi.FindAssetBrowseIndexAsync(scopes, library, SelectionAssetId(locateKey),
+                    query, filter, sort, tags, request.Token);
+                if (index >= 0) page = index / AssetPageSize;
+            }
+            var token = request.Token;
+            var closed = closedRows != null || collection == null ? Task.FromResult(closedRows ?? []) :
+                Task.Run(() => ReadClosedCollectionAssets(collection, scopes, query, filter, sort, tags, token), token);
+            var online = WorkspaceApi.BrowseLibrariesAsync(scopes, query, filter, sort, page, AssetPageSize, token, tags);
+            await Task.WhenAll(closed, online);
+            var result = await online;
+            var unavailable = await closed;
+            int last = Math.Max(0, (result.Total + unavailable.Length - 1) / AssetPageSize);
+            if (page > last)
+            {
+                page = last;
+                result = await WorkspaceApi.BrowseLibrariesAsync(scopes, query, filter, sort, page, AssetPageSize, token, tags);
+            }
+            if (!_closing && ReferenceEquals(_browseRequest, request) && query == _search.Text)
+            {
+                if (_publishedBrowseView.Page != page) _browser.Scroll.ScrollVertical = 0;
+                ShowAssetBrowsePage(result, unavailable, page, scopes, query, filter, tags);
+                if (locateKey != null)
+                {
+                    int generation = _browseGeneration;
+                    int index = _browser.IndexOf(locateKey);
+                    if (_browser.Row(index) is { } row)
+                    {
+                        if (!_workspace.IsPanelVisible("assets")) _workspace.ShowPanel("assets");
+                        // The replacement rows must finish layout before the scrollbar can reach them.
+                        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+                        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+                        if (!_closing && generation == _browseGeneration && ReferenceEquals(_browseRequest, request) && query == _search.Text)
+                        {
+                            _assetSelection.Select(locateKey);
+                            _browser.ScrollToIndex(index);
+                            SetStatus("已定位 · " + row.Name);
+                        }
+                    }
+                    else SetStatus("当前筛选结果中没有这个资产");
+                }
+            }
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
@@ -219,6 +556,8 @@ public partial class MainShell
                 _count.Text = "筛选失败";
                 _empty.Text = ex.Message;
                 _empty.Visible = true;
+                _firstPage.Disabled = _previous.Disabled = _page == 0;
+                _lastPage.Disabled = _next.Disabled = ((long)_page + 1) * AssetPageSize >= FilteredAssetCount;
             }
         }
         finally
@@ -228,31 +567,53 @@ public partial class MainShell
         }
     }
 
-    private void ShowAssetBrowsePage(AssetBrowsePage result, string query, string category, AssetAttributeFilter filter)
+    private void ShowAssetBrowsePage(LibraryAssetPage result, ClosedCollectionAsset[] closedRows, int page,
+        LibraryBrowseScope[] scopes, string query, AssetAttributeFilter filter, AssetTagFilter? tags)
     {
-        _page = result.Page;
-        _publishedBrowseScope = (query, category, filter);
-        FilteredAssetCount = result.Total;
+        _page = page;
+        _publishedBrowseView = (_category, _assetLibraryFilter, _browseLibraryRevision, _sort, _page);
+        _publishedBrowseScope = (scopes, query, filter, tags);
+        _publishedClosedRows = closedRows;
+        _onlineFilteredAssetCount = result.Total;
+        FilteredAssetCount = result.Total + closedRows.Length;
         _browseRows = result.Items;
-        _items = result.Items.Select(row => row.Asset).ToList();
-        _browser.SetRows(_browseRows.Select(row=>CardModel(row.Asset,row.Attributes)));
-        _count.Text = $"{result.Total} 个结果";
-        _pageLabel.Text = $"{_page + 1} / {Math.Max(1, ((long)result.Total + AssetPageSize - 1) / AssetPageSize)}";
+        bool showLibrary = LoadedLibraries().Length > 1 || closedRows.Length > 0;
+        // Open members retain their existing sort order, followed by the unavailable members.
+        var closedPage = closedRows.Skip(Math.Max(0, page * AssetPageSize - result.Total)).Take(AssetPageSize - _browseRows.Length);
+        _browser.SetRows(_browseRows.Select(row => CardModel(row.Asset, row.Attributes,
+            showLibrary ? row.Library.Identity.Name : "", AssetKey(row.Library, row.Asset.Id))).Concat(closedPage.Select(ClosedCardModel)));
+        _count.Text = $"{FilteredAssetCount:N0} 个结果" + (closedRows.Length > 0 ? $" · {closedRows.Length:N0} 项来源库未打开" : "");
+        _pageLabel.Text = $"{_page + 1} / {Math.Max(1, ((long)FilteredAssetCount + AssetPageSize - 1) / AssetPageSize)}";
         _firstPage.Disabled = _previous.Disabled = _page == 0;
-        _lastPage.Disabled = _next.Disabled = ((long)_page + 1) * AssetPageSize >= result.Total;
-        _empty.Visible = result.Total == 0;
-        _empty.Text = _attributeFilter.IsActive ? "没有符合条件的资产\n调整属性筛选或搜索词。" :
+        _lastPage.Disabled = _next.Disabled = ((long)_page + 1) * AssetPageSize >= FilteredAssetCount;
+        _empty.Visible = FilteredAssetCount == 0;
+        _empty.Text = CurrentCollection is { Members.Length: 0 } ? "集合为空\n可将资产拖入侧栏中的集合。" :
+            CategoryIncludesMountedLibraries && scopes.Length == 0 ? "尚未打开资产库\n从「库管理」打开或新建资产库。" :
+            filter.IsActive || tags != null ? "没有符合条件的资产\n调整筛选条件或搜索词。" :
             query.Length > 0 ? "没有匹配的资产\n试试其他名称或标签。" : "这里还没有资产\n导入文件，或载入内置示例。";
         SyncAssetSelection();
         RefreshCurrentAsset();
     }
 
-    private static AssetCardModel CardModel(AssetItem item,AssetAttributes? attributes) => new()
+    private static AssetCardModel ClosedCardModel(ClosedCollectionAsset item)
     {
-        Id=item.Id,Name=item.Name,MetaLine=item.SourceFormat.TrimStart('.').ToUpperInvariant()+" · "+FormatSize(item.Size),
+        var asset = item.Row.Asset;
+        var card = CardModel(asset, item.Row.Attributes, item.LibraryName, LibraryKeyPrefix + item.LibraryId + ":" + asset.Id);
+        card.ClosedLibraryId = item.LibraryId;
+        card.LocateClosedLibrary = item.LocateLibrary;
+        card.ThumbnailPending = false;
+        card.DetailLine = "预览不可用";
+        if (asset.VirtualPath.Length == 0) card.MetaLine = card.SizeText = "";
+        card.Tooltip = asset.Name + "\n" + item.LibraryName + "\n来源库未打开，无法预览";
+        return card;
+    }
+
+    private static AssetCardModel CardModel(AssetItem item, AssetAttributes? attributes, string libraryName = "", string? key = null) => new()
+    {
+        Id=key??item.Id,Name=item.Name,LibraryName=libraryName,Trashed=item.Trashed,MetaLine=item.SourceFormat.TrimStart('.').ToUpperInvariant()+" · "+FormatSize(item.Size),
         DetailLine=attributes==null?"读取属性…":$"{attributes.Duration?.ToString("0.##")??"—"}s · {attributes.SourceFps?.ToString("0.#")??"—"}fps · {attributes.Skeletons.FirstOrDefault()?.Name??"未知"}",
         IsAnimation=item.Type=="Animation",Favorite=item.Favorite,ThumbnailPending=true,
-        Tooltip=item.Name+"\n"+item.VirtualPath+(attributes==null?"":"\n"+DescribeAttributes(attributes)),Tags=item.Tags,VirtualPath=item.VirtualPath,
+        Tooltip=item.Name+"\n"+(libraryName.Length==0?"":libraryName+"\n")+item.VirtualPath+(attributes==null?"":"\n"+DescribeAttributes(attributes)),Tags=item.Tags,VirtualPath=item.VirtualPath,
         ImportedAt=item.ImportedAt,Size=item.Size,DurationSeconds=attributes?.Duration,SourceFps=attributes?.SourceFps,
         SkeletonCount=attributes?.Skeletons.Length??0,SkeletonName=attributes?.Skeletons.FirstOrDefault()?.Name??"",
         DurationText=attributes?.Duration is {} d?$"{d:0.##}s":"—",FpsText=attributes?.SourceFps is {} f?$"{f:0.#}":"—",
@@ -268,104 +629,221 @@ public partial class MainShell
         return $"骨架  {skeletons}\n最长片段  {duration} · 源帧率  {fps}";
     }
 
-    private Task<List<AssetItem>> GetAssetsForCurrentFilterAsync(CancellationToken cancellationToken = default)
-    {
-        var (query, category, filter) = _publishedBrowseScope;
-        return _api.GetMatchingAssetsAsync(query, category, filter, cancellationToken);
-    }
-
     private void ProcessAssetBrowse()
     {
         if(_closing||_api==null||_browser==null)return;
-        ProcessAttributeDetails();
-        if(!_thumbnailsEnabled||_thumbnailPending||_browseRequest!=null||!_browser.IsVisibleInTree()||_api.LibraryBusy||Time.GetTicksMsec()<_nextThumbnailTick)return;
-        foreach(int index in _browser.VisibleIndices())
+        if (_browseRequest != null && _durationProgressLibraries.Length > 0 && Time.GetTicksMsec() >= _nextDurationProgress)
         {
-            if(!_thumbnailAttempts.Add(index))continue;
-            _thumbnailPending=true;_ = LoadAssetThumbnailAsync(_api,_items[index],index,_browseGeneration);return;
+            _nextDurationProgress = Time.GetTicksMsec() + 200;
+            int completed = 0, total = 0;
+            foreach (var library in _durationProgressLibraries)
+            {
+                var progress = library.Api.DurationProgress;
+                completed += progress.Completed;
+                total += progress.Total;
+            }
+            if (completed < total) _count.Text = $"正在准备时长索引 · {completed:N0} / {total:N0}";
+        }
+        ProcessAttributeDetails();
+        if (!_thumbnailsEnabled || _thumbnailPending || Time.GetTicksMsec() < _nextThumbnailTick || !CanRenderAssetThumbnail()) return;
+        foreach (int index in _browser.IsVisibleInTree() ? _browser.VisibleIndices() : [])
+        {
+            if (index >= _browseRows.Length || _browser.Row(index)?.Thumbnail != null || !_thumbnailAttempts.Add(index)) continue;
+            _thumbnailPending = true;
+            _ = LoadAssetThumbnailAsync(_browseRows[index].Library, _browseRows[index].Asset, preload: false);
+            return;
+        }
+        if (_preview.TransportPlaying) return;
+        foreach (var (library, warmup) in _thumbnailWarmups.Reverse())
+        {
+            if (library.Api.LibraryBusy || !warmup.Assets.IsCompletedSuccessfully || warmup.Next >= warmup.Assets.Result.Length) continue;
+            _thumbnailPending = true;
+            _ = LoadAssetThumbnailAsync(library, warmup.Assets.Result[warmup.Next++], preload: true);
+            return;
         }
     }
+
+    private bool CanRenderAssetThumbnail() => !_closing && !_libraryLoading && _browseRequest == null &&
+        PendingAssetPreview.IsCompleted && PendingRetargetPreview.IsCompleted && _comparisonRequest == null &&
+        !_api.LibraryBusy;
+
     private void ProcessAttributeDetails()
     {
-        var revision=_api.BrowseCacheRevision;
-        if(_attributeDetailsId==_selected?.Id&&_attributeDetailsCacheRevision==revision)return;
-        StopRequest(ref _attributeDetailsRequest);_attributeDetailsId=_selected?.Id;_attributeDetailsCacheRevision=revision;
+        var api = _selectedLibrary?.Api ?? _api;
+        var revision=api.BrowseCacheRevision;
+        if(_attributeDetailsId==_selectedKey&&_attributeDetailsCacheRevision==revision)return;
+        StopRequest(ref _attributeDetailsRequest);_attributeDetailsId=_selectedKey;_attributeDetailsCacheRevision=revision;
         _inspectorAttributes=null;_inspectorStamp="";
         if(_selected==null){_inspector.ShowEmpty();return;}
-        if(_browseRows.FirstOrDefault(r=>r.Asset.Id==_selected.Id)?.Attributes is {} ready){_inspectorAttributes=ready;SyncInspector();return;}
-        var request=new CancellationTokenSource();_attributeDetailsRequest=request;_ = LoadAttributeDetailsAsync(_api,_selected,request);
+        if(_browseRows.FirstOrDefault(r=>r.Library==_selectedLibrary&&r.Asset.Id==_selected.Id)?.Attributes is {} ready){_inspectorAttributes=ready;SyncInspector();return;}
+        var request=new CancellationTokenSource();_attributeDetailsRequest=request;_ = LoadAttributeDetailsAsync(api,_selected,_selectedKey!,request);
     }
-    private async Task LoadAttributeDetailsAsync(WorkspaceApi api,AssetItem asset,CancellationTokenSource request)
+    private async Task LoadAttributeDetailsAsync(WorkspaceApi api,AssetItem asset,string key,CancellationTokenSource request)
     {
         try
         {
             var attributes=await api.GetAssetAttributesAsync(asset,request.Token);
-            if(!_closing&&_api==api&&ReferenceEquals(_attributeDetailsRequest,request)&&asset.Id==_selected?.Id)
+            if(!_closing&&ReferenceEquals(_attributeDetailsRequest,request)&&key==_selectedKey)
             {_inspectorAttributes=attributes;_inspectorStamp="";SyncInspector();}
         }
         catch(OperationCanceledException){}
-        catch(Exception ex){if(!_closing&&_api==api)SetStatus("属性读取失败 · "+ex.Message);}
+        catch(Exception ex){if(!_closing&&ReferenceEquals(_attributeDetailsRequest,request)&&key==_selectedKey)SetStatus("属性读取失败 · "+ex.Message);}
         finally{if(ReferenceEquals(_attributeDetailsRequest,request))_attributeDetailsRequest=null;request.Dispose();}
     }
     private void SyncInspector()
     {
         if(_inspector==null)return;
         if(_selected==null){_inspector.ShowEmpty();_inspectorStamp="";return;}
-        var stamp=$"{_selected.Id}|{_selected.Name}|{_selected.Tags}|{_selected.Favorite}|{_preview.BoneCount}|{_preview.MeshCount}|{_preview.CurrentClip}|{_preview.Clips.Length}";
+        var preview = _previewAssetId == _selectedKey ? _preview : null;
+        var stamp=$"{_selectedKey}|{_selected.Name}|{_selected.Tags}|{_selected.Favorite}|{_selected.Type}|{preview?.BoneCount}|{preview?.MeshCount}|{preview?.CurrentClip}|{preview?.Clips.Length}";
         if(stamp==_inspectorStamp)return;_inspectorStamp=stamp;
-        var attributes=_browseRows.FirstOrDefault(r=>r.Asset.Id==_selected.Id)?.Attributes??_inspectorAttributes;
-        _inspector.ShowAsset(CardModel(_selected,attributes),attributes,_preview.BoneCount,_preview.MeshCount,_selected.SourceFormat,
-            _preview.Clips.Select(clip=>(clip,_preview.Player is {} p&&p.HasAnimation(clip)?(double?)p.GetAnimation(clip).Length:null)),_preview.CurrentClip);
+        var attributes = _browseRows.FirstOrDefault(r => r.Library == _selectedLibrary && r.Asset.Id == _selected.Id)?.Attributes ??
+            (_attributeDetailsId == _selectedKey ? _inspectorAttributes : null);
+        _inspector.SetEditable(_selectedLibrary != null);
+        _inspector.ShowAsset(CardModel(_selected,attributes,_selectedLibrary!.Identity.Name),attributes,preview?.BoneCount??0,preview?.MeshCount??0,_selected.SourceFormat,
+            (preview?.Clips ?? []).Select(clip => (clip, preview?.Player is { } player && player.HasAnimation(clip) ? (double?)player.GetAnimation(clip).Length : null)),
+            preview?.CurrentClip);
     }
 
-    private async Task LoadAssetThumbnailAsync(WorkspaceApi api, AssetItem asset, int index, int generation)
+    private void SyncLibraryThumbnailWarmups(LibrarySession[] libraries)
     {
-        bool Current() => !_closing && _api == api && _browseGeneration == generation && index < _items.Count && _items[index].Id == asset.Id;
+        if (!_thumbnailsEnabled) return;
+        foreach (var closed in _thumbnailWarmups.Keys.Except(libraries).ToArray())
+        {
+            _thumbnailWarmups.Remove(closed);
+            foreach (var key in _thumbnailTextures.Keys.Where(key => key.Library == closed).ToArray())
+            {
+                _recentThumbnails.Remove(_thumbnailTextures[key]);
+                _thumbnailTextures.Remove(key);
+            }
+        }
+        foreach (var library in libraries)
+        {
+            if (_thumbnailWarmups.ContainsKey(library)) continue;
+            var assets = Task.Run(() =>
+            {
+                try { return library.Api.Database.SearchAll().ToArray(); }
+                catch (Exception error) when (error is not OutOfMemoryException)
+                {
+                    GD.PushWarning($"无法预载「{library.Identity.Name}」的缩略图 · {error.Message}");
+                    return [];
+                }
+            });
+            _thumbnailWarmups.Add(library, new LibraryThumbnailWarmup(assets));
+        }
+    }
+
+    private async Task LoadAssetThumbnailAsync(LibrarySession library, AssetItem asset, bool preload)
+    {
+        var api = library.Api;
+        int revision = api.BrowseCacheRevision;
+        bool reused = false;
+        bool Current() => !_closing && _thumbnailWarmups.ContainsKey(library) && _libraries.FindOpenLibrary(library.Identity.Id) == library;
+        int CurrentRow()
+        {
+            if (!Current()) return -1;
+            int index = _browser.IndexOf(AssetKey(library, asset.Id));
+            return index >= 0 && index < _browseRows.Length && _browseRows[index] is { } row &&
+                row.Library == library && row.Asset.FileHash == asset.FileHash && row.Asset.VirtualPath == asset.VirtualPath ? index : -1;
+        }
+
+        bool CanGenerate() => CanRenderAssetThumbnail() && !api.LibraryBusy && Time.GetTicksMsec() >= _thumbnailRenderAfter;
+
+        async Task<bool> WaitToGenerate()
+        {
+            while (Current() && !CanGenerate())
+                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            return Current();
+        }
+
+        void ShowThumbnail(int index, Texture2D texture)
+        {
+            _browser.UpdateRow(index, card =>
+            {
+                card.Thumbnail = texture;
+                card.ThumbnailPending = false;
+            });
+        }
+
+        void CacheThumbnail(ThumbnailKey key, Image image)
+        {
+            int index = CurrentRow();
+            if (index < 0 || revision != api.BrowseCacheRevision) return;
+            var texture = ImageTexture.CreateFromImage(image);
+            _thumbnailTextures.Add(key, _recentThumbnails.AddFirst((key, texture)));
+            if (_recentThumbnails.Count > ThumbnailMemoryLimit)
+            {
+                _thumbnailTextures.Remove(_recentThumbnails.Last!.Value.Key);
+                _recentThumbnails.RemoveLast();
+            }
+            ShowThumbnail(index, texture);
+        }
+
         try
         {
-            var prepared = await Task.Run(() =>
+            var request = await Task.Run(() =>
             {
-                var request = api.PrepareAssetThumbnail(asset);
-                return (Request: request, Bytes: api.ReadAssetThumbnail(request));
+                if (preload) api.ReadBrowseAttributes(asset, CancellationToken.None);
+                return api.PrepareAssetThumbnail(asset);
             });
-            if (!Current()) return;
-            using var cached = new Image();
-            if (prepared.Bytes != null && cached.LoadPngFromBuffer(prepared.Bytes) == Error.Ok)
-                _browser.UpdateRow(index,card=>{card.Thumbnail=ImageTexture.CreateFromImage(cached);card.ThumbnailPending=false;});
-            else
+            if (!Current() || revision != api.BrowseCacheRevision) return;
+            var key = new ThumbnailKey(library, request.CachePath, revision);
+            int index = CurrentRow();
+            if (_thumbnailTextures.TryGetValue(key, out var entry))
             {
-                if (_api.LibraryBusy || !_browser.IsVisibleInTree())
+                if (index >= 0)
                 {
-                    _thumbnailAttempts.Remove(index);
-                    return;
+                    _recentThumbnails.Remove(entry);
+                    _recentThumbnails.AddFirst(entry);
+                    ShowThumbnail(index, entry.Value.Texture);
                 }
-                if (_thumbnailRenderer == null)
-                {
-                    _thumbnailRenderer = new AssetThumbnailRenderer();
-                    AddChild(_thumbnailRenderer);
-                }
-                using var image = await _thumbnailRenderer.RenderAsync(prepared.Request.SourcePath, Current);
-                if (!Current()) return;
-                if (image == null || image.IsEmpty()) throw new IOException("没有可绘制的模型或姿势。");
-                _browser.UpdateRow(index,card=>{card.Thumbnail=ImageTexture.CreateFromImage(image);card.ThumbnailPending=false;});
-                var bytes = image.SavePngToBuffer();
-                await Task.Run(() => api.SaveAssetThumbnail(prepared.Request, bytes));
+                reused = true;
+                return;
             }
-            if (Current() && _browseRows[index].Attributes == null)
+
+            var (exists, cachedImage) = await Task.Run(() =>
             {
-                var attributes = await api.GetAssetAttributesAsync(asset);
-                if (Current()) _browser.UpdateRow(index,card=>card.Tooltip=asset.Name+"\n"+DescribeAttributes(attributes));
+                var bytes = api.ReadAssetThumbnail(request);
+                if (bytes == null || index < 0) return (bytes != null, (Image?)null);
+                var image = new Image();
+                if (image.LoadPngFromBuffer(bytes) == Error.Ok) return (true, image);
+                image.Dispose();
+                return (false, null);
+            });
+            using var cached = cachedImage;
+            if (!Current() || revision != api.BrowseCacheRevision) return;
+            if (exists)
+            {
+                if (cached != null) CacheThumbnail(key, cached);
+                return;
             }
+
+            if (!await WaitToGenerate()) return;
+            if (_thumbnailRenderer == null)
+            {
+                _thumbnailRenderer = new AssetThumbnailRenderer();
+                AddChild(_thumbnailRenderer);
+            }
+            using var rendered = await _thumbnailRenderer.RenderAsync(request.SourcePath, Current, WaitToGenerate);
+            if (!Current() || revision != api.BrowseCacheRevision) return;
+            if (rendered == null || rendered.IsEmpty()) throw new IOException("没有可绘制的模型或姿势。");
+            CacheThumbnail(key, rendered);
+            await Task.Run(() =>
+            {
+                var png = rendered.SavePngToBuffer();
+                if (revision == api.BrowseCacheRevision) api.SaveAssetThumbnail(request, png);
+            });
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            if(Current())_browser.UpdateRow(index,card=>card.ThumbnailPending=false);
-            if (Current()) GD.PushWarning($"资产缩略图不可用 · {asset.Name} · {ex.Message}");
+            int index = CurrentRow();
+            if (index >= 0) _browser.UpdateRow(index, card => card.ThumbnailPending = false);
+            if (!preload && Current()) GD.PushWarning($"资产缩略图不可用 · {asset.Name} · {ex.Message}");
         }
         finally
         {
             _thumbnailPending = false;
-            if (!_closing) _nextThumbnailTick = Time.GetTicksMsec() + 32;
+            if (!_closing && !reused) _nextThumbnailTick = Time.GetTicksMsec() + (preload ? 64ul : 32ul);
         }
     }
 
@@ -391,7 +869,7 @@ public partial class MainShell
         _skeletonRevision = null;
         ResetThumbnailRows();
         if (!resetFilters || _attributePanel == null) return;
-        ResetAssetAttributeFilter(refresh: false);
+        ResetAssetFilters(refresh: false);
         SetSkeletonOptions([]);
         if(_workspace.ActiveDrawer=="filters")_workspace.CloseDrawer();
         _inspectorAttributes=null;_inspectorStamp="";

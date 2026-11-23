@@ -6,9 +6,12 @@ using Animanager.Core.Console;
 using Animanager.Core.Jobs;
 using Animanager.Core.Motion;
 using Animanager.Core.Pipeline;
+using Animanager.Core.Plugins;
 using Animanager.UI;
 using Animanager.UI.Components;
 using Godot;
+using Axis = System.Numerics.Vector3;
+using Quaternion = System.Numerics.Quaternion;
 
 namespace Animanager.Tests;
 
@@ -59,6 +62,107 @@ public static class ExportOptionsTests
             await Execute("preview load " + assetA.Id);
             Check(preview.Clips.Contains("Walk fast") && preview.Clips.Contains("Hold") && preview.BoneCount == 16,
                 "original scene exposes existing clips and 16 skeletal joints");
+            if (OperatingSystem.IsWindows())
+            {
+                await owner.PendingBrowse;
+                var menu = (PopupMenu)owner.FindChild("AssetContextMenu", true, false)!;
+                for (int open = 0; open < 2; open++)
+                {
+                    owner.ShowAssetContextMenu(assetA.Id);
+                    var send = Enumerable.Range(0, menu.ItemCount).Single(i => menu.GetItemText(i) == "发送到");
+                    var targets = menu.GetItemSubmenuNode(send)!;
+                    Check(targets?.GetItemText(0) == "Cascadeur",
+                        "the asset context menu exposes the registered Cascadeur target on open " + (open + 1));
+                    menu.Hide();
+                    if (open != 1) continue;
+                    targets!.EmitSignal(PopupMenu.SignalName.IdPressed, targets.GetItemId(0));
+                    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                    while (owner.FindChild("CascadeurSendDialog", true, false) is not CascadeurSendDialog { Visible: true })
+                        await Task.Delay(20, timeout.Token);
+                    var dialog = (CascadeurSendDialog)owner.FindChild("CascadeurSendDialog", true, false)!;
+                    var mode = (OptionButton)dialog.FindChild("CascadeurOrientationMode", true, false)!;
+                    var forward = (OptionButton)dialog.FindChild("CascadeurForwardAxis", true, false)!;
+                    Check(mode.Selected == 0 && !forward.GetParent<Control>().IsVisibleInTree() && !dialog.GetOkButton().Disabled,
+                        "the asset menu opens the send dialog in automatic mode with advanced axes hidden");
+                    mode.Select(1);
+                    mode.EmitSignal(OptionButton.SignalName.ItemSelected, 1);
+                    forward.Select(2);
+                    forward.EmitSignal(OptionButton.SignalName.ItemSelected, 2);
+                    Check(forward.GetParent<Control>().IsVisibleInTree() && dialog.GetOkButton().Disabled,
+                        "the send dialog rejects parallel manual axes");
+                    forward.Select(4);
+                    forward.EmitSignal(OptionButton.SignalName.ItemSelected, 4);
+                    Check(!dialog.GetOkButton().Disabled, "the send dialog accepts perpendicular manual axes for the upright fixture");
+                    dialog.EmitSignal(ConfirmationDialog.SignalName.Canceled);
+                    while (owner.FindChild("CascadeurSendDialog", true, false) != null)
+                        await Task.Delay(20, timeout.Token);
+                }
+            }
+
+            var exchange = Folder("cascadeur-exchange");
+            var plugin = new CascadeurPlugin(exchange, RuntimePaths.Bundled("BuiltinAssets/Scripts/animanager_cascadeur.py"));
+            var transfer = new AnimationPluginRequest("Walk fast", (folder, kind, ct) =>
+                api.ExportAsync(assetA.Id, folder, kind, new ExportOptions { Clips = ["Walk fast"] }, ct: ct));
+            var progress = new Progress<string>();
+            using (var stop = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+            {
+                var offline = await plugin.SendAsync(transfer, progress, stop.Token);
+                Check(offline.Message.Contains("未连接") && File.Exists(offline.OutputPath), "offline Cascadeur send retains the selected clip export");
+                var pose = CascadeurBindPose.Read(offline.OutputPath);
+                var head = pose.Joints.Single(joint => joint.Path[^1] == "Head");
+                var turned = Folder("rotated-bind.glb");
+                File.Copy(offline.OutputPath, turned);
+                var toZUp = CascadeurBindPose.MapAxes(Axis.UnitZ, -Axis.UnitY);
+                var sideways = Quaternion.Inverse(toZUp);
+                CascadeurBindPose.RotateExport(turned, sideways);
+                var turnedPose = CascadeurBindPose.Read(turned);
+                var turnedHead = turnedPose.Joints.Single(joint => joint.Path[^1] == "Head");
+                Check(Axis.Distance(turnedHead.Position, Axis.Transform(head.Position, sideways)) < .0001f &&
+                      pose.IsUpright(Quaternion.Identity) == true && turnedPose.IsUpright(Quaternion.Identity) == false &&
+                      turnedPose.IsUpright(toZUp) == true && MotionGlb.Read(turned).Name == "Walk fast",
+                    "bind preview includes the mesh parent transform and manual axes restore Z-up to Y-up without replacing animation tracks");
+
+                var cancelledTransfer = await plugin.SendAsync(transfer, progress, stop.Token, (_, _) => Task.FromResult<Quaternion?>(null));
+                Check(cancelledTransfer.OutputPath.Length == 0 && !Directory.Exists(Path.Combine(exchange, "inbox")),
+                    "cancelling the orientation dialog publishes no Cascadeur request");
+
+                File.WriteAllText(Path.Combine(exchange, "receiver-test.ready"), "");
+                var turnedTransfer = new AnimationPluginRequest("Walk fast", (folder, _, _) =>
+                {
+                    Directory.CreateDirectory(folder);
+                    var outputPath = Path.Combine(folder, "rotated-bind.glb");
+                    File.Copy(turned, outputPath);
+                    return Task.FromResult(outputPath);
+                });
+                var sent = plugin.SendAsync(turnedTransfer, progress, stop.Token, (_, _) => Task.FromResult<Quaternion?>(toZUp));
+                var folder = Path.Combine(exchange, "inbox");
+                string? pending = null;
+                while (pending == null)
+                {
+                    await Task.Delay(20, stop.Token);
+                    if (Directory.Exists(folder)) pending = Directory.EnumerateFiles(folder, "*.json").SingleOrDefault();
+                }
+                var outputFolder = Path.Combine(exchange, "transfers", Path.GetFileNameWithoutExtension(pending));
+                var claimed = Path.Combine(outputFolder, "processing.json");
+                File.Move(pending, claimed);
+                using var manifest = JsonDocument.Parse(File.ReadAllText(claimed));
+                var output = Path.Combine(outputFolder, manifest.RootElement.GetProperty("file").GetString()!);
+                var bindMessage = manifest.RootElement.GetProperty("bindPose");
+                var outputHead = CascadeurBindPose.Read(output).Joints.Single(joint => joint.Path[^1] == "Head");
+                var headMessage = bindMessage.EnumerateArray().Single(joint => joint.GetProperty("path").EnumerateArray().Last().GetString() == "Head")
+                    .GetProperty("position").EnumerateArray().Select(value => value.GetSingle()).ToArray();
+                Check(manifest.RootElement.GetProperty("version").GetInt32() == 3 && MotionGlb.Read(output).Name == "Walk fast" &&
+                      Axis.Distance(new Axis(headMessage[0], headMessage[1], headMessage[2]), head.Position) < .0001f &&
+                      Axis.Distance(outputHead.Position, head.Position) < .0001f &&
+                      MotionGlb.Unpack(File.ReadAllBytes(output)).Json["animations"]!.AsArray().Count == 1,
+                    "published Cascadeur request includes the previewed scene-space bind pose and single-clip GLB");
+                var staged = Path.Combine(outputFolder, "result.tmp");
+                File.WriteAllText(staged, "{\"imported\":true,\"rig\":\"UE4 Mannequin\"}");
+                File.Move(staged, Path.Combine(outputFolder, "result.json"));
+                var importedByCascadeur = await sent;
+                Check(importedByCascadeur.OutputPath == output && importedByCascadeur.Message.Contains("UE4 Mannequin AutoPosing 已就绪"),
+                    "Cascadeur send reports AutoPosing ready only after the receiver confirms the generated rig");
+            }
             preview.SelectClip("Walk fast");
             preview.Seek(.37);
             var previewInstance = preview.Model!.GetInstanceId();

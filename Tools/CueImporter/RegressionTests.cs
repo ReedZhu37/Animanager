@@ -30,6 +30,17 @@ internal static class RegressionTests
                 var bones=Clone();var names=tracks.Select(t=>t.Name).ToHashSet();
                 SkeletonProfiles.ValidateCompatible(profile,bones,meshNames,names);
                 Check(true,"source hierarchy and bind pose match: "+id);
+                var mixedCaseTracks = tracks.Select(t => t with { Name = t.Name.ToUpperInvariant() }).ToArray();
+                SkeletonProfiles.ValidateCompatible(profile, bones, meshNames, mixedCaseTracks.Select(t => t.Name).ToHashSet());
+                var boundClip = rig.BindTrackNames(clip with { Tracks = mixedCaseTracks });
+                Check(boundClip.Tracks.SequenceEqual(tracks), "case variants bind to canonical skeleton names without changing keys: "+id);
+                var mixedCaseBones = Clone();
+                mixedCaseBones[0].name = mixedCaseBones[0].name.ToUpperInvariant();
+                SkeletonProfiles.ValidateCompatible(profile, mixedCaseBones, meshNames, names);
+                var canonicalBones = SkeletonProfiles.CanonicalizeStandardNames(profile, mixedCaseBones);
+                Check(canonicalBones.Select(b => b.name).SequenceEqual(profile.bones.Select(b => b.name))
+                    && canonicalBones[0].p == mixedCaseBones[0].p && canonicalBones[0].parent == mixedCaseBones[0].parent,
+                    "case variants in source skeletons use standard preview names without changing transforms or parents: "+id);
                 bones[1].p[2]+=10;
                 Reject(()=>SkeletonProfiles.ValidateCompatible(profile,bones,meshNames,names),"same bone names with custom proportions are rejected: "+id);
                 bones=Clone();bones[2].parent=0;

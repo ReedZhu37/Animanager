@@ -51,7 +51,9 @@ public static class SecondFeedbackTests
             using (var cancel = new CancellationTokenSource())
             {
                 var pending = owner.PreviewAssetAsync(api.Find("C"), cancel.Token); cancel.Cancel(); await pending;
-                Check(preview.Model!.GetInstanceId() == oldModel, "cancelled asset change preserves the displayed model");
+                var status = (Label)owner.FindChild("PreviewLoadStatus", true, false)!;
+                Check(preview.Model!.GetInstanceId() == oldModel && status.Text.Contains("已取消"),
+                    "cancelling a queued preview preserves the displayed model and clears the loading message");
             }
             var first = owner.PreviewAssetAsync(api.Find("C"));
             var latest = owner.PreviewAssetAsync(api.Find("B"));

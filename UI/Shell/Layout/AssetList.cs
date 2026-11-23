@@ -52,6 +52,7 @@ public partial class AssetList : Control
     public event Action<int, int>? VisibleRangeChanged;
     public event Action<string>? SortRequested;
     public event Action<string>? ContextMenuRequested;
+    internal event Action<AssetCardModel>? OpenSourceRequested;
 
     public int Count => _rows.Count;
     public string SortKey => _sortKey;
@@ -78,7 +79,7 @@ public partial class AssetList : Control
     public override void _Ready()
     {
         MouseFilter = MouseFilterEnum.Stop;
-        FocusMode = FocusModeEnum.Click;
+        FocusMode = FocusModeEnum.All;
         ClipContents = true;
         SizeFlagsHorizontal = SizeFlags.ExpandFill;
         CustomMinimumSize = new Vector2(0, RowHeight);
@@ -104,7 +105,7 @@ public partial class AssetList : Control
     {
         _rows.Clear();
         _rows.AddRange(rows);
-        _selection.SetView(_rows.Select(row => row.Id));
+        _selection.SetView(_rows.Where(row => row.ClosedLibraryId == null).Select(row => row.Id));
         Reflow();
     }
 
@@ -249,6 +250,7 @@ public partial class AssetList : Control
     private void DrawRow(int index)
     {
         var row = _rows[index];
+        bool closed = row.ClosedLibraryId != null;
         bool selected = _selection.Contains(row.Id);
         bool hovered = index == _hover;
 
@@ -279,17 +281,31 @@ public partial class AssetList : Control
         }
         else
         {
-            Icons.Draw(this, Icons.Cube, new Rect2(thumb.GetCenter() - new Vector2(7, 7), new Vector2(14, 14)),
+            Icons.Draw(this, closed ? Icons.Folder : Icons.Cube, new Rect2(thumb.GetCenter() - new Vector2(7, 7), new Vector2(14, 14)),
                 Tokens.Text3.Alpha(.5f), 1.3f);
         }
 
         // Cell text. The name cell starts after the thumbnail and carries the favourite star.
         float nameX = PadX + 6 + ThumbWidth + 10;
         float nameWidth = _widths[0] - (ThumbWidth + 22);
-        var nameColour = selected ? Tokens.Text : Tokens.Text.Alpha(.94f);
+        if (closed) nameWidth = Math.Max(20, SourceButtonRect(index).Position.X - nameX - 8);
+        string libraryLabel = closed ? "库未打开 · " + row.LibraryName : row.LibraryName;
+        float libraryWidth = libraryLabel.Length == 0 ? 0 : Math.Min(nameWidth * .4f,
+            Typography.Width(Typography.Regular, libraryLabel, Type.Micro) + 8);
+        var nameColour = closed ? Tokens.Text3 : selected ? Tokens.Text : Tokens.Text.Alpha(.94f);
         DrawString(Typography.Semi, new Vector2(nameX, mid + 4),
-            Typography.Fit(Typography.Semi, row.Name, Type.Row, Math.Max(20, nameWidth)),
+            Typography.Fit(Typography.Semi, row.Name, Type.Row, Math.Max(20, nameWidth - libraryWidth)),
             HorizontalAlignment.Left, -1, Type.Row, nameColour);
+        if (libraryWidth > 0)
+            DrawString(Typography.Regular, new Vector2(nameX + nameWidth - libraryWidth + 4, mid + 4),
+                Typography.Fit(Typography.Regular, libraryLabel, Type.Micro, libraryWidth - 8),
+                HorizontalAlignment.Left, -1, Type.Micro, Tokens.Text3);
+
+        if (closed)
+        {
+            AssetBrowser.DrawSourceButton(this, SourceButtonRect(index), row, hovered);
+            return;
+        }
 
         if (row.Favorite)
             Icons.Draw(this, Icons.Star, new Rect2(PadX + _widths[0] - 14, mid - 5, 11, 11), Tokens.Warn, 1.1f);
@@ -329,6 +345,9 @@ public partial class AssetList : Control
             }
         }
     }
+
+    internal Rect2 SourceButtonRect(int index) => new(
+        Math.Min(PadX + TotalWidth, Size.X - PadX) - 96, HeaderHeight + index * RowHeight + 3, 90, 24);
 
     /// <summary>
     /// Structured cell values. Kept as named fields on the model rather than parsed out of a
@@ -378,13 +397,20 @@ public partial class AssetList : Control
 
             // Cursor feedback over sortable headers is the cheapest way to advertise sorting.
             int column = HeaderRect.HasPoint(motion.Position) ? ColumnAt(motion.Position) : -1;
-            MouseDefaultCursorShape = column >= 0 && _columns[column].SortKey.Length > 0
+            MouseDefaultCursorShape = (column >= 0 && _columns[column].SortKey.Length > 0) ||
+                (Row(index)?.ClosedLibraryId != null && SourceButtonRect(index).HasPoint(motion.Position))
                 ? CursorShape.PointingHand
                 : CursorShape.Arrow;
         }
 
-        if (ev is not InputEventMouseButton { Pressed: true } button) return;
+        if (ev is not InputEventMouseButton button) return;
         if (button.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown) return;
+        if (!button.Pressed)
+        {
+            if (button.ButtonIndex == MouseButton.Left) _selection.ReleaseRow(Row(RowAt(button.Position))?.Id);
+            return;
+        }
+        _selection.CancelPendingClick();
 
         // Header click sorts; clicking the active column flips direction.
         if (button.ButtonIndex == MouseButton.Left && HeaderRect.HasPoint(button.Position))
@@ -407,7 +433,16 @@ public partial class AssetList : Control
             return;
         }
 
-        string id = _rows[hit].Id;
+        var row = _rows[hit];
+        string id = row.Id;
+        if (row.ClosedLibraryId != null)
+        {
+            if (button.ButtonIndex == MouseButton.Right) ContextMenuRequested?.Invoke(id);
+            else if (button.ButtonIndex == MouseButton.Left && SourceButtonRect(hit).HasPoint(button.Position))
+                OpenSourceRequested?.Invoke(row);
+            AcceptEvent();
+            return;
+        }
         if (button.ButtonIndex == MouseButton.Right)
         {
             if (!_selection.Contains(id)) _selection.Select(id);
@@ -417,12 +452,15 @@ public partial class AssetList : Control
         if (button.ButtonIndex != MouseButton.Left) return;
 
         GrabFocus();
-        if (button.ShiftPressed) _selection.SelectRange(id);
-        else if (button.CtrlPressed) _selection.Toggle(id);
-        else _selection.Select(id);
+        _selection.PressRow(id, button);
 
         SelectionChanged?.Invoke();
-        Activated?.Invoke(new AssetGridEvent(hit, _rows[hit], button.CtrlPressed || button.ShiftPressed));
+        Activated?.Invoke(new AssetGridEvent(hit, button.DoubleClick && !button.CtrlPressed && !button.ShiftPressed));
+    }
+
+    public override Variant _GetDragData(Vector2 atPosition)
+    {
+        return AssetBrowser.BeginAssetDrag(this, Row(RowAt(atPosition)), _selection);
     }
 
     public void ScrollToIndex(int index)

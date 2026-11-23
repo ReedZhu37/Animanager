@@ -43,8 +43,10 @@ public sealed class MotionManifest
 }
 public sealed class MotionProp
 {
-    public string Id {get;set;}="primary-weapon";
-    public string SourceBone {get;set;}="Nodachi_Weapon_R";
+    internal const string PrimaryId = "primary-weapon";
+    internal const string NodachiSourceBone = "Nodachi_Weapon_R";
+    public string Id {get;set;}=PrimaryId;
+    public string SourceBone {get;set;}=NodachiSourceBone;
     public string Anchor {get;set;}="hand_r";
     public string Space {get;set;}="skeleton-anchor";
     public string TrackObject {get;set;}="prop";

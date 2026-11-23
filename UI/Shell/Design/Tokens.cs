@@ -41,7 +41,6 @@ public static class Tokens
         public const int Chip = 3;
         public const int Control = 6;
         public const int Card = 10;
-        public const int Popup = 14;
         public const int Pill = 999;
     }
 

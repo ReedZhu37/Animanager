@@ -31,6 +31,8 @@ public partial class Preview3DViewport : SubViewportContainer
     private Camera3D _camera = null!;
     private Vector3 _target=new(0,0.9f,0);
     private float _distance=4.5f, _yaw=0.5f, _pitch=0.18f;
+    internal bool ResetCameraOnAnimationChange { get; set; }
+    private bool PreserveAnimationCamera => CurrentClip.Length > 0 && !ResetCameraOnAnimationChange;
     private bool _loop=true;
     private bool _clay=true;
     private BoneAttachment3D[] _attachments=[];
@@ -76,6 +78,8 @@ public partial class Preview3DViewport : SubViewportContainer
     }
     public void Clear()
     {
+        EndAnimationComparison(resume: false);
+        ClearWeaponPreview();
         ClearRetarget();
         Bones.Clear();_baseline=null;Motion=null;_attachments=[];_sourceRate=30;SourceReadiness=null;
         if(Model!=null) { _stage.RemoveChild(Model);Model.QueueFree(); }
@@ -87,48 +91,54 @@ public partial class Preview3DViewport : SubViewportContainer
         using var source = new PreviewSource(path);
         AttachSource(source);
     }
-    public void AttachSource(PreviewSource source, bool notify = true)
+    public void AttachSource(PreviewSource source, bool notify = true, bool switchingAsset = false)
     {
-        AttachModel(source.TakeRoot());
+        AttachModel(source.TakeRoot(), preserveCamera: switchingAsset && PreserveAnimationCamera);
         Motion = source.Motion; _sourceRate = source.FrameRate; Motion?.Sync();
         try { Core.Retarget.RetargetBaker.RejectAdditive(source.Path); }
         catch (NotSupportedException e) { SourceReadiness = new(false, (SourceReadiness?.Errors ?? []).Append(e.Message).ToArray()); }
         Redraw(); if (notify) SourceLoaded?.Invoke();
     }
-    internal void AttachModel(Node3D root)
+    internal void AttachModel(Node3D root, Core.Retarget.AssetReadiness? retargetSourceReadiness = null, bool preserveCamera = false)
     {
+        bool hadMesh = MeshCount > 0;
         Clear();Model=root;_stage.AddChild(root);_baseline=new PoseSnapshot(root);
         var nodes=Descendants(root).ToList();
         _attachments=nodes.OfType<BoneAttachment3D>().ToArray();
         Player=nodes.OfType<AnimationPlayer>().FirstOrDefault();
         if (Player != null) Player.SpeedScale = (float)_speed;
         SetClay(_clay);
-        BoneCount=nodes.OfType<Skeleton3D>().Sum(s=>s.GetBoneCount());MeshCount=nodes.OfType<MeshInstance3D>().Count();
+        BoneCount=nodes.OfType<Skeleton3D>().Sum(s=>s.GetBoneCount());MeshCount=nodes.OfType<MeshInstance3D>().Count(mesh=>mesh.Mesh!=null);
         Clips=Player?.GetAnimationList().Where(n=>n!="RESET").ToArray()??[];
-        SourceReadiness = Core.Retarget.AssetReadiness.Inspect(root, Clips.Length > 0);
-        Bones.Bind(root,Player,_baseline);
-        if(Clips.Length>0) SelectClip(Clips[0]);
-        FrameModel();
+        SourceReadiness = retargetSourceReadiness ?? Core.Retarget.AssetReadiness.Inspect(root, Clips.Length > 0);
+        Bones.Bind(root,Player,_baseline,MeshCount==0);
+        if(Clips.Length>0) SelectClip(Clips[0], frameCamera: false);
+        if (retargetSourceReadiness == null && (!preserveCamera || Clips.Length == 0 || hadMesh && MeshCount == 0)) FrameModel();
     }
     public static IEnumerable<Node> Descendants(Node root)
     {
         yield return root;
         foreach(var child in root.GetChildren()) foreach(var nested in Descendants(child)) yield return nested;
     }
-    public void SelectClip(string clip)
+    public void SelectClip(string clip) => SelectClip(clip, ResetCameraOnAnimationChange && CurrentClip != clip);
+
+    private void SelectClip(string clip, bool frameCamera)
     {
         if(Player==null || !Player.HasAnimation(clip)) return;
+        if (AssetComparison != null) ComparisonExitRequested?.Invoke();
         Player.Stop();if(Model!=null)_baseline?.Restore(Model);
         CurrentClip=clip;
         Player.GetAnimation(clip).LoopMode=_loop?Animation.LoopModeEnum.Linear:Animation.LoopModeEnum.None;
         Player.Play(clip);Player.Advance(0);Player.Pause();SetProcess(false);Redraw();
+        if (frameCamera) FrameModel();
         Bones.ClipChanged();
+        RefreshWeaponPreview();
     }
     public void TogglePlay()
     {
         if(Player==null || CurrentClip.Length==0) return;
         if(Playing) Player.Pause(); else { if(Playhead>=Duration) Player.Seek(0,true);Player.Play(CurrentClip); }
-        SetProcess(Playing);Redraw();
+        SetProcess(TransportPlaying);Redraw();
     }
     public void Seek(double time)
     {
@@ -138,7 +148,7 @@ public partial class Preview3DViewport : SubViewportContainer
         animation.LoopMode = Animation.LoopModeEnum.None;
         Player.Seek(Math.Clamp(time, 0, Duration), true);
         animation.LoopMode = loop;
-        SetProcess(false);Redraw();
+        SetProcess(TransportPlaying);Redraw();
     }
     public void SetSpeed(double speed) { _speed = Math.Clamp(speed, .1, 3); if(Player!=null)Player.SpeedScale=(float)_speed; }
     public void SetLoop(bool loop) { _loop=loop;if(Player!=null&&CurrentClip.Length>0)Player.GetAnimation(CurrentClip).LoopMode=loop?Animation.LoopModeEnum.Linear:Animation.LoopModeEnum.None; }
@@ -147,6 +157,9 @@ public partial class Preview3DViewport : SubViewportContainer
         _clay=enabled;
         if (Model != null) ApplyClay(Model, enabled);
         if (_comparison != null) ApplyClay(_comparison, enabled);
+        if (AssetComparison is { } comparison)
+            foreach (var entry in comparison.Entries)
+                if (entry.Root != Model) ApplyClay(entry.Root, enabled);
         Redraw();
     }
     internal static void ApplyClay(Node3D model, bool enabled)
@@ -155,13 +168,41 @@ public partial class Preview3DViewport : SubViewportContainer
             if (!mesh.HasMeta("animanager_prop_visual"))
                 mesh.MaterialOverride = enabled ? new StandardMaterial3D { AlbedoColor = new Color("a9b6c5"), Roughness = .8f } : null;
     }
-    public override void _Process(double delta) {Redraw();if(!Playing)SetProcess(false);}
-    public void Redraw() { SyncRetargetComparison();foreach(var attachment in _attachments)attachment.OnSkeletonUpdate();_screenLabels?.QueueRedraw();if(View!=null)View.RenderTargetUpdateMode=IsVisibleInTree()?SubViewport.UpdateMode.Once:SubViewport.UpdateMode.Disabled; }
+    public override void _Process(double delta)
+    {
+        AssetComparison?.Advance(delta * _speed, _loop);
+        Redraw();
+        if (!TransportPlaying) SetProcess(false);
+    }
+    public void Redraw()
+    {
+        if (AssetComparison == null)
+        {
+            SyncRetargetComparison();
+            foreach (var attachment in _attachments) attachment.OnSkeletonUpdate();
+        }
+        UpdateWeaponPreviewPose();
+        _screenLabels?.QueueRedraw();
+        if (View != null) View.RenderTargetUpdateMode = IsVisibleInTree() ? SubViewport.UpdateMode.Once : SubViewport.UpdateMode.Disabled;
+    }
     public void Zoom(float multiplier){_distance=Mathf.Clamp(_distance*multiplier,.05f,5000);UpdateCamera();}
     public void FocusPoint(Vector3 point){_target=point;UpdateCamera();}
     public void FrameModel()
     {
+        if (AssetComparison is { } comparison) { FrameComparison(comparison.Bounds); return; }
         Aabb? bounds=Model!=null?CalculateWorldBounds(Model):null;
+        if (bounds == null)
+        {
+            foreach (var entry in Bones.Skeletons)
+            {
+                var skeleton = entry.Node;
+                for (int bone = 0; bone < skeleton.GetBoneCount(); bone++)
+                {
+                    var point = skeleton.GlobalTransform * skeleton.GetBoneGlobalPose(bone).Origin;
+                    if (point.IsFinite()) bounds = bounds?.Expand(point) ?? new Aabb(point, Vector3.Zero);
+                }
+            }
+        }
         if(bounds.HasValue)
         {
             _target=bounds.Value.GetCenter();var size=bounds.Value.Size;

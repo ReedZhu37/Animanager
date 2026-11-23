@@ -8,12 +8,13 @@ using System.Collections.Concurrent;
 using Animanager.Core;
 using Animanager.Core.Console;
 using Animanager.Core.Jobs;
+using Animanager.Core.Motion;
+using Animanager.Core.Retarget;
 
 namespace Animanager.UI;
 
 public partial class MainShell : Control
 {
-    private AssetDatabase _database=null!;
     private WorkspaceApi _api=null!;
     private ConsoleCommands _commands=null!;
     private Preview3DViewport _preview=null!;
@@ -27,8 +28,9 @@ public partial class MainShell : Control
     private FileDialog _files=null!,_folder=null!,_output=null!,_uassetFolder=null!;
     private AcceptDialog _message=null!;
     private Godot.Timer _searchTimer=null!;
-    private List<AssetItem> _items=[];
     private AssetItem? _selected;
+    private LibrarySession? _selectedLibrary;
+    private string? _selectedKey;
     private string _category="All";
     private int _page;
     private bool _busy,_closing;
@@ -45,13 +47,26 @@ public partial class MainShell : Control
     {
         try
         {
-            var startup=OpenStartupLibrary();
+            var startupStatus = new Label { Text = "正在打开资产库…", HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center, MouseFilter = MouseFilterEnum.Ignore };
+            AddChild(startupStatus);
+            startupStatus.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+            var startup = await OpenStartupLibraryAsync();
+            if (_closing) return;
+            startupStatus.Hide();
+            startupStatus.QueueFree();
             InitializeDisplay();InitializeCharacterLibrary();BuildUi();
-            _commands=new ConsoleCommands();AddChild(_commands);
-            _commands.Initialize(_api,_preview,Refresh,SyncConsoleSelection,_libraries,BeforeLibrarySwitch,ActivateLibrary);
+            _commands=new ConsoleCommands { AppCollections = AppCollections };AddChild(_commands);
+            _commands.Initialize(_api,_preview,Refresh,SyncConsoleSelection,_libraries,BeforeLibrarySwitch,SwitchLibraryAsync,ActivateLibrary);
             _commands.PreviewLoader = PreviewAssetAsync;
             ConnectWorkspace();
-            if(_api==null){ShowLibraryDialog();SetStatus(startup.Error);return;}
+            GetWindow().FilesDropped+=paths=>{if(_charactersDialog.Visible)_ = ImportCharacters(paths);else ImportIntoLibrary(paths);};
+            if(_api==null)
+            {
+                Refresh();
+                if (startup.Error.Length > 0) { ShowLibraryDialog(); SetStatus(startup.Error); }
+                return;
+            }
             if(OS.GetCmdlineUserArgs().Contains("--third-feedback-test")){await Tests.ThirdFeedbackTests.Run(this,_preview,_api,_commands);return;}
             if(OS.GetCmdlineUserArgs().Contains("--second-feedback-test")){await Tests.SecondFeedbackTests.Run(this,_preview,_api,_commands);return;}
             if(OS.GetCmdlineUserArgs().Contains("--feedback-test")){await Tests.FeedbackTests.Run(this,_preview,_api,_commands);return;}
@@ -85,7 +100,6 @@ public partial class MainShell : Control
             if(OS.GetCmdlineUserArgs().Contains("--cue-prepare")){Tests.CueComparisonTests.Prepare(this,_preview);return;}
             var cueCompare=OS.GetCmdlineUserArgs().FirstOrDefault(a=>a.StartsWith("--cue-compare="));
             if(cueCompare!=null){await Tests.CueComparisonTests.Compare(this,_preview,Path.GetFullPath(cueCompare[14..]));return;}
-            GetWindow().FilesDropped+=paths=>{if(_charactersDialog.Visible)_ = ImportCharacters(paths);else _ = Import(paths);};
             if(OS.GetCmdlineUserArgs().Contains("--self-test"))
             {
                 await Tests.PrototypeTests.Run(this,_preview);return;
@@ -129,12 +143,20 @@ public partial class MainShell : Control
             }
             Refresh();
             await PendingBrowse;
+            if (_closing) return;
+            if (_preferences.OpenLibraryIds == null)
+            {
+                if (_preferences.BrowseLibraryIds.Length > 0) await RestoreBrowseLibrariesAsync();
+                else RememberOpenLibraries();
+            }
+            if (_closing) return;
+            if (_libraries.Active is { } active) QueueLibraryPreviewWarmup(active);
             if(startup.Bootstrap)
             {
                 if(Directory.Exists(RuntimePaths.Bundled("BuiltinAssets/Baselines")))await ImportBaselines();
                 else await ImportSamples();
             }
-            else if(_items.Count>0)SelectOnly(0);
+            else if(_browseRows.Length>0)SelectOnly(0);
             if(startup.Error.Length>0)SetStatus(startup.Error);
             else if(_workspaceError.Length>0)SetStatus(_workspaceError);
             else if(!startup.Bootstrap)SetStatus("本地资产库已就绪 · 拖入文件或文件夹开始导入");
@@ -142,6 +164,8 @@ public partial class MainShell : Control
             if(previewAsset!=null){_commands.Load(previewAsset[16..]);await _commands.PendingTask;await PendingRetargetPreview;}
             if(OS.GetCmdlineUserArgs().Contains("--play")){await PendingRetargetPreview;if(!_preview.Playing)_preview.TogglePlay();}
             if(OS.GetCmdlineUserArgs().Contains("--console"))_commands.Open();
+            else if (_browser.Count > 0 && _browser.ActiveView.IsVisibleInTree() && GetViewport().GuiGetFocusOwner() == null)
+                _browser.ActiveView.GrabFocus();
         }
         catch(Exception ex) { GD.PushError(ex.ToString());if(_message!=null)ShowError("启动失败",ex.Message); }
     }
@@ -153,67 +177,158 @@ public partial class MainShell : Control
     }
     private void Refresh()=>RefreshAssetBrowse();
     internal Task PendingAssetPreview { get; private set; } = Task.CompletedTask;
-    private void SelectAsset(int index)
+    private void OpenAsset(int index)
     {
-        if(index<0||index>=_items.Count||_items[index].Trashed)return;
-        PreviewAssetAsync(_items[index]);
+        if(_libraryLoading||index<0||index>=_browseRows.Length||_browseRows[index].Asset.Trashed)return;
+        var row = _browseRows[index];
+        var key = AssetKey(row.Library, row.Asset.Id);
+        if (!_workspace.IsPanelVisible("preview")) _workspace.ShowPanel("preview");
+        if (_selectedKey == key && (_previewAssetId == key ||
+            (!PendingAssetPreview.IsCompleted && _retargetCancellation is { IsCancellationRequested: false }))) return;
+        _ = PreviewAssetAsync(row.Library, row.Asset);
     }
-    internal Task PreviewAssetAsync(AssetItem asset, CancellationToken ct = default)
+    internal Task PreviewAssetAsync(AssetItem asset, CancellationToken ct = default) =>
+        PreviewAssetAsync(_libraries.Active!, asset, ct);
+
+    private Task PreviewAssetAsync(LibrarySession library, AssetItem asset, CancellationToken ct = default)
     {
-        PendingAssetPreview = LoadSelectedAssetAsync(asset, ct);
+        PendingAssetPreview = LoadSelectedAssetAsync(library, asset, ct);
         PendingRetargetPreview = PendingAssetPreview;
         return PendingAssetPreview;
     }
-    private async Task LoadSelectedAssetAsync(AssetItem asset, CancellationToken externalCancellation)
+    private async Task LoadSelectedAssetAsync(LibrarySession library, AssetItem asset, CancellationToken externalCancellation)
     {
+        EndAnimationComparison();
+        StopRequest(ref _retargetSourceRequest);
+        if (_libraryPreviewWarmup is { } warmup &&
+            (warmup.Library != library || warmup.Asset?.VirtualPath != asset.VirtualPath))
+            _ = StopLibraryPreviewWarmupAsync();
         _retargetCancellation?.Cancel();
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(externalCancellation);
         _retargetCancellation = cancellation;
-        var api = _api; int generation = ++_previewGeneration;
+        var api = library.Api; int generation = ++_previewGeneration;
+        var key = AssetKey(library, asset.Id);
         bool resumePlayback = _preview.Playing;
-        _selected = asset; _title.Text = asset.Name; _tags.Text = asset.Tags;
-        if (!_assetSelection.Contains(asset.Id)) { _assetSelection.Clear(); _assetSelection.Add(asset.Id); _assetAnchor = asset.Id; }
+        _selected = asset; _selectedLibrary = library; _selectedKey = key;
+        _title.Text = asset.Name; _tags.Text = asset.Tags;
+        if (!_assetSelection.Contains(key)) _assetSelection.Select(key);
         _stage.SetLoadStatus("正在准备 " + asset.Name + "…");
         SyncExportControls();
-        bool Current() => !_closing && _api == api && generation == _previewGeneration && _selected?.Id == asset.Id && !cancellation.IsCancellationRequested;
+        bool Current() => !_closing && generation == _previewGeneration && _selectedKey == key && !cancellation.IsCancellationRequested;
         try
         {
+            // Input can arrive before ProcessFrame. Leave a full frame for the selection and loading message to draw.
+            var tree = GetTree();
+            for (int frame = 0; frame < 2; frame++)
+            {
+                await ToSignal(tree, SceneTree.SignalName.ProcessFrame);
+                cancellation.Token.ThrowIfCancellationRequested();
+                if (!Current()) return;
+            }
             using var activity = api.BeginActivity();
             var path = await api.Storage.AcquireLocalFileAsync(asset.VirtualPath, cancellation.Token);
             if (!Current()) return;
-            using var source = new PreviewSource(path);
             LoadAssetRetargetConfiguration();
-            if (_previewCharacterId.Length > 0 && source.HasAnimation)
+            var ct = cancellation.Token;
+            string? cacheKey = null;
+            RetargetOptions? options = null;
+            MotionPlayback.SourceData? motion = null;
+            if (MotionJson.IsMotion(path))
             {
-                SetRetargetCharacter(_previewCharacterId);
-                _retargetTargetHash = ""; _retargetSourceHash = ""; _retargetSourceRig = "";
-                var options = api.InspectRetarget(asset.Id, ReadRetargetOptions());
-                _characterStatus.Text = "正在应用角色 · " + RetargetCharacter.Name;
-                var result = await _characterCache.Get(path, options, () => api.PreviewRetargetAsync(asset.Id, options, cancellation.Token), cancellation.Token);
-                if (!Current()) { result.Root.Free(); return; }
-                try { _preview.AttachRetarget(result, options, path, 1, source, newSource: true); }
-                catch { if (result.Root.GetParent() == null) result.Root.Free(); throw; }
-                SetRetargetOptions(options); _retargetView.Select(1); SyncRetargetSummary();
-                _characterStatus.Text = "Ready · " + RetargetCharacter.Name;
+                using var preloadedMotion = await TakePreloadedSourceAsync(library, asset, path, ct);
+                if (!Current()) return;
+                motion = await Task.Run(() => MotionPlayback.ReadSource(path, verifySourceObjects: true, ct,
+                    preloadedMotion?.Motion), ct);
+                if (!Current()) return;
+            }
+            if (_previewCharacterId.Length > 0 && asset.Type != "Model")
+            {
+                options = SelectedPreviewOptions();
+                cacheKey = await RetargetPreviewCache.KeyAsync(path, options, ct, motion);
+                if (!Current()) return;
+            }
+            if (_characterCache.Find(cacheKey) is { } cached)
+            {
+                _ = StopLibraryPreviewWarmupAsync();
+                AttachCharacter(cached, null);
             }
             else
             {
+                using var prepared = motion == null ? await TakePreloadedSourceAsync(library, asset, path, ct) : null;
                 if (!Current()) return;
-                _preview.AttachSource(source, notify: false);
+                using var source = prepared?.Scene is not { } parsed
+                    ? await PreviewSource.LoadAsync(path, ct, fullTracks: _previewCharacterId.Length > 0, decodedMotion: motion)
+                    : PreviewSource.FromParsed(path, parsed, fullTracks: _previewCharacterId.Length > 0);
+                if (!Current()) return;
+                if (_previewCharacterId.Length > 0 && source.HasAnimation)
+                {
+                    RetargetPreviewCache.Preview? preview = null;
+                    try
+                    {
+                        options ??= SelectedPreviewOptions();
+                        RetargetBaker.RejectAdditive(path);
+                        var readiness = await AssetReadiness.InspectPreviewAsync(source.Root, tree, ct);
+                        if (!Current()) return;
+                        var resolved = WorkspaceApi.ResolveRetargetRig(source.Root, options, readiness, out var rig);
+                        _stage.SetLoadStatus("正在应用角色 · " + RetargetCharacter.Name + "…");
+                        _characterStatus.Text = "正在应用角色 · " + RetargetCharacter.Name;
+                        var result = await api.PreviewRetargetAsync(source, resolved, rig,
+                            () => _previewTargets.InstantiateAsync(resolved, ct), ct);
+                        if (!Current()) { result.Root.Free(); return; }
+                        try { preview = _characterCache.Store(cacheKey, new(result, resolved, readiness, source.FrameRate)); }
+                        catch { result.Root.Free(); throw; }
+                    }
+                    catch (NotSupportedException error) when (source.HasSkeletonWithoutMesh)
+                    {
+                        if (!Current()) return;
+                        _preview.AttachSource(source, notify: false, switchingAsset: true);
+                        _retargetEnabled.ButtonPressed = false;
+                        SyncRetargetSummary();
+                        _retargetInfo.Text = error.Message;
+                        _characterStatus.Text = "已显示原始骨架 · " + error.Message;
+                    }
+                    if (preview != null) AttachCharacter(preview, source);
+                }
+                else _preview.AttachSource(source, notify: false, switchingAsset: true);
             }
-            _previewAssetId = asset.Id; _previewName.Text = asset.Name; _exportSummary.Text = "导出资产：" + asset.Name;
-            _commands?.TrackSelection(asset.Id);
-            _stage.SetClips(_preview.Clips, _preview.CurrentClip); _preview.SetSpeed(_speed.Value);
+
+            RetargetOptions SelectedPreviewOptions()
+            {
+                SetRetargetCharacter(_previewCharacterId);
+                _retargetTargetHash = ""; _retargetSourceHash = ""; _retargetSourceRig = "";
+                return ReadRetargetOptions();
+            }
+
+            void AttachCharacter(RetargetPreviewCache.Preview preview, PreviewSource? source)
+            {
+                var result = preview.Result;
+                try
+                {
+                    if (source != null) _preview.AttachRetarget(result, preview.Options, path, 1, source,
+                        newSource: true, preparedReadiness: preview.Readiness);
+                    else _preview.AttachCachedRetarget(preview, path);
+                }
+                catch { if (result.Root.GetParent() == null) result.Root.Free(); throw; }
+                SetRetargetOptions(preview.Options); _retargetView.Select(1); SyncRetargetSummary();
+                _characterStatus.Text = "Ready · " + RetargetCharacter.Name;
+            }
+            _previewAssetId = key; _previewName.Text = asset.Name; _exportSummary.Text = "导出资产：" + asset.Name;
+            if (library.Api == _api) _commands?.TrackSelection(asset.Id);
+            else _commands?.ForgetSelection();
+            _preview.SetSpeed(_speed.Value);
             _detail.Text = $"{asset.SourceFormat} · {_preview.MeshCount} 网格 · {_preview.BoneCount} 骨骼 · {_preview.Clips.Length} 动画";
             var type = _preview.Clips.Length > 0 ? "Animation" : "Model";
-            if (type != asset.Type) { api.SetAssetType(asset.Id, type); asset.Type = type; }
+            if (type == "Animation") RememberPreviewAsset(library, asset);
+            bool typeChanged = type != _selected!.Type;
+            if (typeChanged) { api.SetAssetType(asset.Id, type); _selected.Type = type; }
             if (resumePlayback && !_preview.Playing) _preview.TogglePlay();
             _stage.SetLoadStatus(""); SetStatus("预览已就绪 · " + asset.Name);
-            UpdateTransport(); Refresh();
+            UpdateTransport();
+            if (typeChanged) Refresh();
         }
         catch (OperationCanceledException)
         {
-            if (_retargetCancellation == cancellation && generation == _previewGeneration)
+            if (!_closing && _retargetCancellation == cancellation && generation == _previewGeneration)
                 _stage.SetLoadStatus("切换已取消，保留当前预览。");
         }
         catch (Exception e)
@@ -232,8 +347,10 @@ public partial class MainShell : Control
     private void SyncConsoleSelection(AssetItem asset)
     {
         _previewGeneration++;
-        _assetSelection.Clear();_assetSelection.Add(asset.Id);_assetAnchor=asset.Id;
-        _previewAssetId=asset.Id;_previewName.Text=asset.Name;_exportSummary.Text="导出资产："+asset.Name;
+        _selectedLibrary = _libraries.Active;
+        _selectedKey = AssetKey(_selectedLibrary!, asset.Id);
+        _assetSelection.Clear();_assetSelection.Add(_selectedKey);_assetAnchor=_selectedKey;
+        _previewAssetId=_selectedKey;_previewName.Text=asset.Name;_exportSummary.Text="导出资产："+asset.Name;
         _selected=asset;_title.Text=asset.Name;_tags.Text=asset.Tags;
         LoadAssetRetargetConfiguration();
         if (_preview.AppliedRetarget is { } appliedRetarget)
@@ -244,88 +361,122 @@ public partial class MainShell : Control
         SyncExportControls();UpdateTransport();Refresh();
         if(_previewCharacterId.Length>0&&_preview.AppliedRetarget==null)PendingRetargetPreview=ApplyCharacterForSource();
     }
-    internal async Task Import(string[] paths,bool uasset=false, bool autoCharacters=true)
+    private void ImportIntoLibrary(string[] paths, bool uasset = false, bool autoCharacters = true) =>
+        ChooseOpenLibrary("导入到资产库", library => _ = Import(paths, uasset, autoCharacters, library.Api, review: true));
+
+    internal async Task Import(string[] paths,bool uasset=false, bool autoCharacters=true, WorkspaceApi? target = null, bool review = false)
     {
-        if(_api==null){SetStatus("请先打开或新建资产库。");return;}
+        var api = target ?? _api;
+        if(api==null){SetStatus("请先打开或新建资产库。");return;}
         if(_busy){SetStatus("已有导入任务正在运行，请等待或取消。");return;}
         _busy=true;_cancel.Visible=true;_importCancellation=new CancellationTokenSource();
         try
         {
-            using var activity=_api.BeginActivity();
+            using var activity=api.BeginActivity();
             SetStatus("正在扫描导入文件…");
-            var plan=uasset?_api.Planner.ImportUasset(paths):await _api.Planner.ImportAsync(paths,_importCancellation.Token);
-            var id=_api.Jobs.Enqueue(plan);_cancel.Visible=false;
+            var plan=uasset?api.Planner.ImportUasset(paths):await api.Planner.ImportAsync(paths,_importCancellation.Token);
+            var id=api.Jobs.Enqueue(plan);_cancel.Visible=false;
             _workspace.ShowPanel("jobs");RefreshJobs();
-            int jobIndex=_jobIds.IndexOf(id);if(jobIndex>=0){_jobsList.Select(jobIndex);ShowJobDetails();}
+            int jobIndex=_jobIds.FindIndex(job=>job.Api==api&&job.Id==id);if(jobIndex>=0){_jobsList.Select(jobIndex);ShowJobDetails();}
             SetStatus("导入已开始 · "+plan.Items.Count+" 个任务；可在任务面板查看进度或取消。");
-            var result=await _api.Jobs.WaitAsync(id);
+            var result=await api.Jobs.WaitAsync(id);
             if(_closing)return;
             while(_progress.TryDequeue(out _)){}
-            _page=0;Refresh();ShowImportResult(result);
+            if (review && result.State is JobState.Completed or JobState.CompletedWithErrors)
+                await ReviewImportedAnimationsAsync(api, result, _importCancellation.Token);
+            if (_closing) return;
+            _page=0;Refresh();
             await PendingBrowse;
             if(_closing)return;
-            if(_selected==null&&_items.Count>0&&_category!="Trash")SelectOnly(0);
+            if(_selected==null&&_browseRows.Length>0&&_category!="Trash")SelectOnly(0);
             if (autoCharacters && !uasset)
             {
                 var models = new List<string>();
-                foreach (var item in result.Items.Where(i => i.State is ItemState.Succeeded or ItemState.Skipped))
+                foreach (var item in result.Items.Where(i => i.State == ItemState.Skipped &&
+                    !i.Source.IsUasset && i.ExcludedWithoutAnimationAssets > 0))
                 {
-                    string input = item.Source.Input, ext = Path.GetExtension(input).ToLowerInvariant();
-                    if (ext is not (".fbx" or ".glb" or ".gltf")) continue;
+                    string input = item.Source.Input;
                     await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
                     if (_closing) return;
                     try
                     {
-                        if (Core.Browse.AssetAttributeReader.Read(input, ext, _importCancellation.Token).Duration > 0) continue;
                         var scene = SceneAsset.Load(input, out _);
-                        try
-                        {
-                            var nodes = Preview3DViewport.Descendants(scene).ToArray();
-                            if (nodes.OfType<MeshInstance3D>().Any(m => m.Mesh != null) && !nodes.OfType<AnimationPlayer>().Any(p => p.GetAnimationList().Any(c => c != "RESET"))) models.Add(input);
-                        }
+                        try { if (AssetReadiness.Inspect(scene, animation: false).Ready) models.Add(input); }
                         finally { scene.Free(); }
                     }
                     catch (Exception e) { GD.PushWarning("角色检查：" + e.Message); }
                 }
-                if (models.Count > 0) await ImportCharacters(models.ToArray());
+                if (models.Count > 0) await ImportCharacters(models.ToArray(), showDialog: false);
             }
+            if (!_closing) ShowImportResult(result);
         }
         catch(OperationCanceledException){if(!_closing){Refresh();SetStatus("导入已取消，已完成的资产已保留。");}}
         catch(Exception ex){if(!_closing)ShowError("导入失败",ex.Message);}
         finally{_busy=false;_importCancellation?.Dispose();_importCancellation=null;if(!_closing)_cancel.Visible=false;}
     }
+
+    private async Task ReviewImportedAnimationsAsync(WorkspaceApi api, JobRecord result, CancellationToken ct)
+    {
+        var added = result.Items.SelectMany(item => item.AddedAssetIds).ToHashSet();
+        if (added.Count == 0) return;
+        var assets = api.Database.Snapshot().Assets.Where(asset => added.Contains(asset.Id) && !asset.Trashed && asset.Type == "Animation").ToArray();
+        if (assets.Length == 0) return;
+
+        var dialog = new ImportReviewDialog(api, assets);
+        AddChild(dialog);
+        try
+        {
+            SetStatus($"已导入 {assets.Length} 个动画 · 预览与打标签");
+            PopupFit(dialog, new(980, 610));
+            dialog.SelectFirst();
+            await dialog.Finished.WaitAsync(ct);
+        }
+        finally
+        {
+            dialog.Hide();
+            dialog.QueueFree();
+        }
+    }
     private sealed class QueueProgress(ConcurrentQueue<string> queue):IProgress<string>{public void Report(string value)=>queue.Enqueue(value);}
     private void SaveTags()
     {
-        if(_selected==null)return;
-        try{_api.SetTags(_selected.Id,_tags.Text);Refresh();SetStatus("标签已保存，可立即搜索。");_workspace.Toast("标签已保存");}
+        if(_selected==null||_selectedLibrary==null)return;
+        try{_selectedLibrary.Api.SetTags(_selected.Id,_tags.Text);Refresh();SetStatus("标签已保存，可立即搜索。");_workspace.Toast("标签已保存");}
         catch(Exception ex){ShowError("保存失败",ex.Message);}
     }
     private void ToggleFavorite()
     {
-        if(_selected==null)return;
-        try{_api.SetFavorite(_selected.Id,!_selected.Favorite);Refresh();}
+        if(_selected==null||_selectedLibrary==null)return;
+        try{_selectedLibrary.Api.SetFavorite(_selected.Id,!_selected.Favorite);Refresh();}
         catch(Exception ex){ShowError("保存失败",ex.Message);}
     }
-    private void TogglePlayback(){_preview.TogglePlay();UpdateTransport();}
+    private void TogglePlayback(){_preview.ToggleTransport();UpdateTransport();}
+    private void SeekPlayback(double time){_preview.SeekTransport(time);UpdateTransport();}
     private void UpdateTransport()
     {
         if(_preview==null)return;
         if(!ReferenceEquals(_displayedClips,_preview.Clips)){_displayedClips=_preview.Clips;_stage.SetClips(_preview.Clips,_preview.CurrentClip);}
         _stage.SetCurrentClip(_preview.CurrentClip);
-        if (_previewAssetId == _selected?.Id && _preview.SourceReadiness is { } readiness)
+        if (_previewAssetId == _selectedKey && _preview.SourceReadiness is { } readiness)
         {
             _stage.SetReadiness(readiness.Ready, readiness.Summary);
             _inspector.Readiness.Text = readiness.Summary;
             _inspector.Readiness.TooltipText = readiness.Summary;
         }
         else { _stage.SetReadiness(false, "未检查"); _inspector.Readiness.Text = "未检查"; }
-        _stage.SetPlaying(_preview.Playing);_play.Disabled=_preview.Clips.Length==0;
-        _timeline.Editable=_preview.Duration>0;_timeline.MaxValue=Math.Max(_preview.Duration,0.001);
-        _timeline.SetValueNoSignal(Math.Min(_preview.Playhead,_preview.Duration));
-        _stage.SetTime(_preview.Playhead, _preview.Duration, _preview.DisplayFps);
+        _stage.SetComparing(_preview.AssetComparison != null);
+        _preview.LocateAssetButton.Visible = _previewAssetId.Length > 0 &&
+            (_preview.Clips.Length > 0 || _preview.AssetComparison != null);
+        _stage.SetPlaying(_preview.TransportPlaying);
+        _play.Disabled=_preview.TransportDuration<=0;
+        _timeline.Editable=_preview.TransportDuration>0;
+        if (_preview.AssetComparison is { } comparison)
+            _stage.SetComparisonTime(comparison.Playhead, comparison.Duration);
+        else
+            _stage.SetTime(_preview.Playhead, _preview.Duration, _preview.DisplayFps);
         if(_preview.Motion is {} motion)_detail.Text=_detail.Text.Split('\n')[0]+"\n"+motion.Summary;
-        _favorite.Disabled=_selected==null;
+        _favorite.Disabled=_selectedLibrary==null;
+        _retargetSave.Disabled=_selectedLibrary==null;
         SyncInspector();SyncExportControls();
     }
     public override void _Process(double delta)
@@ -340,25 +491,31 @@ public partial class MainShell : Control
     public override void _UnhandledKeyInput(InputEvent ev)
     {
         if(ev is not InputEventKey {Pressed:true,Echo:false} key)return;
-        if(_consoleOpen||Animanager.UI.Workspace.DisplayScaleController.IsComposing)return;
+        if(_preview==null||_consoleOpen||Animanager.UI.Workspace.DisplayScaleController.IsComposing)return;
         if(key.Keycode==Key.Escape&&_workspace.Docking.DragActive){_workspace.Docking.CancelDrag();GetViewport().SetInputAsHandled();return;}
         if(key.Keycode==Key.Escape&&_workspace.ActiveDrawer.Length>0){_workspace.CloseDrawer();GetViewport().SetInputAsHandled();return;}
         if(key.CtrlPressed&&key.Keycode==Key.F){_workspace.ShowPanel("assets");Callable.From(()=>{_assetSearch.GrabFocus();_assetSearch.SelectAll();}).CallDeferred();GetViewport().SetInputAsHandled();return;}
         if(key.Keycode==Key.F6){_workspace.CycleFocus();GetViewport().SetInputAsHandled();return;}
         if(GetViewport().GuiGetFocusOwner() is LineEdit or TextEdit)return;
         if(!_workspace.IsPanelVisible("preview"))return;
+        if (key is { Keycode: Key.Space, CtrlPressed: false, AltPressed: false, ShiftPressed: false, MetaPressed: false })
+        {
+            TogglePlayback();
+            GetViewport().SetInputAsHandled();
+            return;
+        }
         if(!_preview.HasFocus()&&!_preview.GetGlobalRect().HasPoint(GetGlobalMousePosition()))return;
-        if(key.Keycode==Key.Space){TogglePlayback();GetViewport().SetInputAsHandled();}
+        if(key.Keycode==Key.Escape&&AnimationComparisonActive){EndAnimationComparison();GetViewport().SetInputAsHandled();return;}
         if(key.Keycode==Key.F){_preview.FrameModel();GetViewport().SetInputAsHandled();}
     }
-    public override void _ExitTree(){_closing=true;CancelAssetBrowse();SaveWorkspace();_preview?.Bones?.Clear();_characterCache.Dispose();if(_api!=null)_api.Jobs.Changed-=OnWorkspaceJob;_importCancellation?.Cancel();_exportCancellation?.Cancel();_libraries?.Dispose();}
+    public override void _ExitTree(){_closing=true;_retargetCancellation?.Cancel();StopRequest(ref _retargetSourceRequest);StopRequest(ref _comparisonRequest);_ = StopLibraryPreviewWarmupAsync();CancelAssetBrowse();SaveWorkspace();_preview?.Bones?.Clear();_characterCache.Dispose();_previewTargets.Dispose();foreach(var api in _jobLibraries)api.Jobs.Changed-=OnWorkspaceJob;_importCancellation?.Cancel();_exportCancellation?.Cancel();_pluginCancellation?.Cancel();_libraries?.Dispose();}
     private static string FormatSize(long bytes)=>bytes>=1048576?$"{bytes/1048576.0:F1} MB":$"{bytes/1024.0:F1} KB";
     private void SetStatus(string message){_workspace.Status.Report(message);}
     private void ShowError(string title,string message){SetStatus(title+" · "+message);_message.Title=title;_messageBody.Text=message;_workspace.Status.Report(title+" · "+message,Tokens.Danger);PopupFit(_message,new(560,240));}
     private void ShowHelp()
     {
         _message.Title="Animanager · 使用说明";
-        _messageBody.Text="1. 拖入文件或文件夹，或点击工具栏的导入。资产复制到本地库，按内容去重。\n2. 动画卡片默认在底部，viewport 在中央；拖动面板标签可合并或分区，拖动分隔条调整大小，双击标签最大化／恢复。\n3. 小窗口通过标签或快捷导航切换内容；布局自动保存，更多菜单可恢复默认布局和设置 100%–200% 缩放。\n4. 点击资产预览；空格播放，中键/右键旋转，Shift+中键或 Shift+左键平移，滚轮缩放。\n5. 添加标签和收藏。Ctrl+F 搜索，F6 切换面板焦点，F12 打开 Limbo Console。\n6. 导出支持当前资产、跨页多选或筛选结果，选择网格、片段、时间范围及采样帧率；.res / .glb / .fbx 均可在任务面板取消或重试。\n7. 资产列表自动生成缩略图；属性筛选支持骨架、时长、源帧率和未知值。\n\n可通过角色库和重定向工具预览并导出目标角色动画。FBX 外部纹理未自动打包。FBX 导出需要安装 Blender；其他基础操作不需要。";
+        _messageBody.Text="1. 拖入文件或文件夹，或点击工具栏的导入。资产复制到本地库，按内容去重。\n2. 动画卡片默认在底部，viewport 在中央；拖动面板标签可合并或分区，拖动分隔条调整大小，双击标签最大化／恢复。\n3. 小窗口通过标签或快捷导航切换内容；布局自动保存，更多菜单可恢复默认布局和设置 100%–200% 缩放。\n4. 用 Tab 把焦点移到资产区，方向键选择，Enter 或双击打开预览，空格播放／暂停。中键／右键旋转，Shift+中键或 Shift+左键平移，滚轮缩放。\n5. 添加标签和收藏。Ctrl+F 搜索，F6 切换面板焦点，F12 打开 Limbo Console。\n6. 导出支持当前资产、跨页多选或筛选结果，选择网格、片段、时间范围及采样帧率；.res / .glb / .fbx 均可在任务面板取消或重试。\n7. 资产列表自动生成缩略图；属性筛选支持骨架、时长、源帧率和未知值。\n\n可通过角色库和重定向工具预览并导出目标角色动画。FBX 外部纹理未自动打包。FBX 导出需要安装 Blender；其他基础操作不需要。";
         PopupFit(_message,new(640,360));
     }
 }

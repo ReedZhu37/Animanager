@@ -46,53 +46,66 @@ internal sealed class AssetBrowseCache(LocalStorageProvider storage, Action<Acti
 
     internal AssetAttributes ReadAttributes(AssetItem asset, CancellationToken cancellationToken)
     {
-        try
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var path = storage.Resolve(asset.VirtualPath);
-            var stamp = Stamp(path);
-            MotionManifest? motion = null;
-            (string Path, string Stamp)? rig = null;
-            if (MotionJson.IsMotion(path))
-            {
-                motion = MotionJson.ReadManifest(path);
-                try
-                {
-                    var rigPath = MotionJson.ResolveObject(path, motion.Objects["rig"], verify: false);
-                    rig = (rigPath, Stamp(rigPath));
-                }
-                catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException) { }
-                stamp += "\n" + (rig?.Stamp ?? "missing-rig");
-            }
-            var key = asset.FileHash + "\n" + asset.SourceFormat;
-            var memory = _attributes;
-            if (memory.TryGetValue(key, out var info) && Valid(info, stamp)) return info.Attributes;
-            var relative = AttributesDirectory + Hash(key) + ".json";
-            try
-            {
-                var bytes = ReadCache(relative);
-                var fromDisk = bytes == null ? null : JsonSerializer.Deserialize<CachedAttributes>(bytes, MotionJson.Options);
-                if (Valid(fromDisk, stamp))
-                {
-                    memory[key] = fromDisk!;
-                    return fromDisk!.Attributes;
-                }
-            }
-            catch (JsonException) { }
-
-            var attributes = motion == null ? AssetAttributeReader.Read(path, asset.SourceFormat, cancellationToken) :
-                new AssetAttributes(rig is { } rigSource ? _rigs.GetOrAdd(rigSource, source => ReadRig(source.Path)) : [],
-                    motion.Duration, motion.SourceFps);
-            cancellationToken.ThrowIfCancellationRequested();
-            var cached = new CachedAttributes(stamp, attributes);
-            memory[key] = cached;
-            WriteCache(relative, MotionJson.Bytes(cached));
-            return attributes;
-        }
+        try { return ReadCheckedAttributes(asset, cancellationToken); }
         catch (Exception ex) when (ex is not (OperationCanceledException or OutOfMemoryException))
         {
             return AssetAttributes.Unknown;
         }
+    }
+
+    internal AssetAttributes? ReadCachedAttributes(AssetItem asset)
+    {
+        try
+        {
+            var bytes = ReadCache(AttributesDirectory + Hash(asset.FileHash + "\n" + asset.SourceFormat) + ".json");
+            var cached = bytes == null ? null : JsonSerializer.Deserialize<CachedAttributes>(bytes, MotionJson.Options);
+            return cached != null && !string.IsNullOrEmpty(cached.SourceStamp) && Valid(cached, cached.SourceStamp) ? cached.Attributes : null;
+        }
+        catch (JsonException) { return null; }
+    }
+
+    internal AssetAttributes ReadCheckedAttributes(AssetItem asset, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var path = storage.Resolve(asset.VirtualPath);
+        var stamp = Stamp(path);
+        MotionManifest? motion = null;
+        (string Path, string Stamp)? rig = null;
+        if (MotionJson.IsMotion(path))
+        {
+            motion = MotionJson.ReadManifest(path);
+            try
+            {
+                var rigPath = MotionJson.ResolveObject(path, motion.Objects["rig"], verify: false);
+                rig = (rigPath, Stamp(rigPath));
+            }
+            catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException) { }
+            stamp += "\n" + (rig?.Stamp ?? "missing-rig");
+        }
+        var key = asset.FileHash + "\n" + asset.SourceFormat;
+        var memory = _attributes;
+        if (memory.TryGetValue(key, out var info) && Valid(info, stamp)) return info.Attributes;
+        var relative = AttributesDirectory + Hash(key) + ".json";
+        try
+        {
+            var bytes = ReadCache(relative);
+            var fromDisk = bytes == null ? null : JsonSerializer.Deserialize<CachedAttributes>(bytes, MotionJson.Options);
+            if (Valid(fromDisk, stamp))
+            {
+                memory[key] = fromDisk!;
+                return fromDisk!.Attributes;
+            }
+        }
+        catch (JsonException) { }
+
+        var attributes = motion == null ? AssetAttributeReader.Read(path, asset.SourceFormat, cancellationToken) :
+            new AssetAttributes(rig is { } rigSource ? _rigs.GetOrAdd(rigSource, source => ReadRig(source.Path)) : [],
+                motion.Duration, motion.SourceFps);
+        cancellationToken.ThrowIfCancellationRequested();
+        var cached = new CachedAttributes(stamp, attributes);
+        memory[key] = cached;
+        WriteCache(relative, MotionJson.Bytes(cached));
+        return attributes;
     }
 
     internal AssetThumbnailRequest PrepareThumbnail(AssetItem asset)

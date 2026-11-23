@@ -27,10 +27,12 @@ public sealed record AssetNumberFilter(double? Minimum = null, double? Maximum =
         if (UnknownOnly) return value == null;
         if (value is not { } number) return false;
         // Keep whole-number boundaries useful with source times stored as float32.
-        var tolerance = Math.Max(1e-7, Math.Abs(number) * 1e-6);
-        return (Minimum == null || number >= Minimum.Value - tolerance) &&
-            (Maximum == null || number <= Maximum.Value + tolerance);
+        return (Minimum == null || AtLeast(number, Minimum.Value)) &&
+            (Maximum == null || AtMost(number, Maximum.Value));
     }
+
+    internal static bool AtLeast(double number, double minimum) => number >= minimum - Math.Max(1e-7, Math.Abs(number) * 1e-6);
+    internal static bool AtMost(double number, double maximum) => number <= maximum + Math.Max(1e-7, Math.Abs(number) * 1e-6);
 
     internal static AssetNumberFilter? Parse(string text, string field)
     {

@@ -49,5 +49,8 @@ public sealed class UassetResult
 }
 public sealed record UassetImportOutcome(int Added,int Skipped,int Unsupported,string ReportPath,List<string> Errors)
 {
+    public string[] AddedAssetIds { get; init; } = [];
+    public int ExcludedInPlace { get; init; }
+    public int ExcludedWithoutAnimation { get; init; }
     public List<string> Warnings { get; init; }=[];
 }

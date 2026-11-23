@@ -7,6 +7,7 @@ using Animanager.Core.Pipeline;
 using Animanager.Core.Retarget;
 using Animanager.UI;
 using Animanager.UI.Components;
+using Animanager.UI.Shell;
 
 namespace Animanager.Tests;
 
@@ -137,6 +138,7 @@ public static class RetargetTests
                 preview.Redraw(); await owner.ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
                 using var img = owner.GetViewport().GetTexture().GetImage(); img.SavePng(Path.Combine(folder, "retarget-preview.png"));
             }
+            await RetargetIntegrationChecks.CheckMotionCache(owner, preview, api, Check);
             File.WriteAllLines(Path.Combine(folder, "results.txt"), checks.Select(s => "PASS " + s)); owner.GetTree().Quit();
         }
         catch (Exception e) { File.WriteAllText(Path.Combine(folder, "results.txt"), string.Join("\n", checks) + "\nFAIL " + e); GD.PushError(e.ToString()); owner.GetTree().Quit(1); }
@@ -174,6 +176,18 @@ public static class RetargetTests
         var job = await api.Jobs.WaitAsync(api.Jobs.LatestId!);
         check(job.Succeeded == 1 && job.ExportOptions?.Retarget is { InPlace: true, HipHeight: .15f, TargetRig: "ue5-mannequin" },
             "export panel queues the exact active retarget configuration");
+
+        var browser = (AssetBrowser)owner.FindChild("AssetBrowser", true, false)!;
+        browser.Selection.SetAll([api.Find("ue5-mannequin").Id]);
+        var menu = (PopupMenu)owner.FindChild("AssetContextMenu", true, false)!;
+        var primaryMesh = MotionTests.MeshHash(preview.Model!);
+        menu.EmitSignal(PopupMenu.SignalName.IdPressed, 13L);
+        await owner.PendingAnimationComparison;
+        check(preview.AssetComparison is { Count: 2 } comparison &&
+            comparison.Entries.All(entry => MotionTests.MeshHash(entry.Root) == primaryMesh),
+            "animations from different source rigs use the same applied character mesh in comparison");
+        ((Button)preview.FindChild("ExitAnimationComparison", true, false)!).EmitSignal(BaseButton.SignalName.Pressed);
+
         Control<Button>("RetargetRestore").EmitSignal(BaseButton.SignalName.Pressed);
         check(preview.AppliedRetarget == null && preview.BoneCount == 68 && !Control<CheckBox>("RetargetEnabled").ButtonPressed,
             "restore source clears preview and export retarget state");

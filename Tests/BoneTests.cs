@@ -60,7 +60,7 @@ public static class BoneTests
             string glb=ExportService.Export(preview,root,"with-overlay",false);preview.LoadFile(glb);
             Check(preview.MeshCount==meshes&&preview.BoneCount==count&&!Preview3DViewport.Descendants(preview.Model!).Any(n=>n.Name.ToString().Contains("Overlay")),"GLB export excludes all overlay geometry");
             Check(bones.Selected==null&&bones.Trajectory==null&&!bones.TrailEnabled,"loading a different asset clears selection and trajectory");
-            await Execute("preview load StudioBot_Rig");await Execute("bone select LeftFoot");
+            preview.LoadFile(RuntimePaths.Bundled("BuiltinAssets/Samples/StudioBot_Rig.glb"));await Execute("bone select LeftFoot");
             console.Call("execute_command","trail show true");Check(commands.LastResult.StartsWith("ERROR:")&&!bones.TrailEnabled,"static rig still supports selection and rejects trajectory clearly");
             preview.AttachModel(new Node3D{Name="Empty"});Check(bones.Tree().Contains("No skeletons"),"model without a skeleton has an explicit empty state");
 

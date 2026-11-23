@@ -6,6 +6,7 @@ namespace Animanager.Core.Motion;
 /// <summary>One AnimationPlayer drives the fixed body and independent prop. No retarget or contact solver.</summary>
 public sealed class MotionPlayback
 {
+    internal const float ReferenceBladeLength = .8f;
     public string ManifestPath {get;}
     public MotionManifest Manifest {get;}
     public MotionPresentation Presentation {get;}
@@ -19,17 +20,38 @@ public sealed class MotionPlayback
     public string Summary=>$"人体 {Skeleton.GetBoneCount()} 骨骼 · 独立武器 1 · 接触 {Contact}（仅记录） · 握持{(Presentation.GripConfirmed?"已校准":"待校准")}";
     public MotionPlayback(string path) : this(path, verifySourceObjects: true) { }
 
-    internal MotionPlayback(string path, bool verifySourceObjects)
+    internal sealed record SourceData(MotionManifest Manifest, MotionPresentation Presentation, string PresetPath,
+        MotionRig Rig, MotionGlb Body, MotionGlb Prop);
+
+    internal static SourceData ReadSource(string path, bool verifySourceObjects, CancellationToken ct = default,
+        SourceData? prepared = null)
     {
-        ManifestPath=path;Manifest=verifySourceObjects?MotionJson.Load(path):MotionJson.ReadManifest(path);Presentation=MotionJson.Presentation(path,Manifest);
-        var preset=MotionJson.ResolveObject(path,Manifest.Objects["preset"],false);
-        using var doc=new GltfDocument();using var state=new GltfState();
-        if(doc.AppendFromFile(preset,state,(uint)GltfDocument.ImportFlags.UseNamedSkinBinds)!=Error.Ok)throw new IOException("Cannot load motion character preset.");
-        Root=doc.GenerateScene(state) as Node3D??throw new IOException("Invalid character preset scene.");
+        ct.ThrowIfCancellationRequested();
+        var manifest = verifySourceObjects ? MotionJson.Load(path) : MotionJson.ReadManifest(path);
+        var presentation = MotionJson.Presentation(path, manifest);
+        string ObjectPath(string key) => MotionJson.ResolveObject(path, manifest.Objects[key], false);
+        var preset = ObjectPath("preset");
+        if (prepared != null && new[] { "rig", "body", "prop" }.All(key =>
+            prepared.Manifest.Objects[key].Sha256 == manifest.Objects[key].Sha256))
+            return prepared with { Manifest = manifest, Presentation = presentation, PresetPath = preset };
+        var rig = MotionJson.Read<MotionRig>(ObjectPath("rig"));
+        ct.ThrowIfCancellationRequested();
+        var body = MotionGlb.Read(ObjectPath("body"));
+        ct.ThrowIfCancellationRequested();
+        var prop = MotionGlb.Read(ObjectPath("prop"));
+        return new(manifest, presentation, preset, rig, body, prop);
+    }
+
+    internal MotionPlayback(string path, bool verifySourceObjects) : this(path, ReadSource(path, verifySourceObjects)) { }
+
+    internal MotionPlayback(string path, SourceData source, Node3D? preparedPreset = null)
+    {
+        ManifestPath=path;Manifest=source.Manifest;Presentation=source.Presentation;
+        Root = preparedPreset ?? LoadPreset(source.PresetPath);
         try
         {
             Skeleton=Preview3DViewport.Descendants(Root).OfType<Skeleton3D>().Single();
-            var rig=MotionJson.Read<MotionRig>(MotionJson.ResolveObject(path,Manifest.Objects["rig"],false));
+            var rig=source.Rig;
             if(rig.SchemaVersion!=1||rig.Id!="ue5-mannequin-v1"||rig.Bones.Length!=161||rig.Bones.Any(b=>b.Name=="Nodachi_Weapon_R"))throw new InvalidDataException("Invalid standard UE5 preset rig.");
             foreach(var bone in rig.Bones)
             {
@@ -51,14 +73,14 @@ public sealed class MotionPlayback
             // The Skin resource and every vertex/inverse-bind buffer remain exactly as imported (89 binds).
             if(Skeleton.GetBoneCount()!=161)throw new InvalidDataException("Unexpected bones in preset.");
             Anchor=new BoneAttachment3D{Name="PrimaryWeaponAnchor",BoneName=Manifest.Props[0].Anchor,OverridePose=false};Skeleton.AddChild(Anchor);Anchor.Owner=Root;
-            var propData=MotionGlb.Read(MotionJson.ResolveObject(path,Manifest.Objects["prop"],false));
+            var propData=source.Prop;
             if(propData.Nodes.Length!=1)throw new InvalidDataException("Invalid rigid prop graph.");
             Prop=new Node3D{Name="PrimaryWeaponMotion",Transform=Transform(propData.Nodes[0])};Anchor.AddChild(Prop);Prop.Owner=Root;
             Grip=new Node3D{Name="GripCalibration",Transform=new Transform3D(new Basis(Quat(Presentation.GripRotation)),Vec(Presentation.GripPosition)),Visible=Presentation.Visible};Prop.AddChild(Grip);Grip.Owner=Root;
             AddMarker(Grip,Root);
             Player=new AnimationPlayer{Name="MotionPlayer",RootNode=new NodePath("..")};Root.AddChild(Player);Player.Owner=Root;
             var animation=new Animation{Length=Manifest.Duration,Step=(float)(1/Manifest.SourceFps)};
-            var body=MotionGlb.Read(MotionJson.ResolveObject(path,Manifest.Objects["body"],false));
+            var body=source.Body;
             foreach(var channel in body.Channels)
             {
                 string bone=body.Nodes[channel.Node].Name;if(Skeleton.FindBone(bone)<0)throw new InvalidDataException("Body channel targets a nonstandard bone: "+bone);
@@ -68,6 +90,14 @@ public sealed class MotionPlayback
             var library=new AnimationLibrary();library.AddAnimation(Manifest.Clip,animation);Player.AddAnimationLibrary("",library);
         }
         catch{Root.Free();throw;}
+    }
+    private static Node3D LoadPreset(string path)
+    {
+        using var doc = new GltfDocument();
+        using var state = new GltfState();
+        if (doc.AppendFromFile(path, state, (uint)GltfDocument.ImportFlags.UseNamedSkinBinds) != Error.Ok)
+            throw new IOException("Cannot load motion character preset.");
+        return doc.GenerateScene(state) as Node3D ?? throw new IOException("Invalid character preset scene.");
     }
     public void Sync()=>Anchor.OnSkeletonUpdate();
     public static Vector3 Vec(float[] v)=>new(v[0],v[1],v[2]);
@@ -84,14 +114,14 @@ public sealed class MotionPlayback
             case "scale":animation.ScaleTrackInsertKey(track,c.Times[i],Vec(c.Values[i]));break;
         }
     }
-    private static void AddMarker(Node3D grip,Node3D owner)
+    internal static void AddMarker(Node3D grip,Node3D? owner = null)
     {
         // An application-owned diagnostic prop, not the pack's mesh or a claim about its actual dimensions.
         void Box(string name,Vector3 size,Vector3 position,string color)
         {
             var node=new MeshInstance3D{Name=name,Mesh=new BoxMesh{Size=size},Position=position,MaterialOverride=new StandardMaterial3D{AlbedoColor=new Color(color),Roughness=.65f}};
-            node.SetMeta("animanager_prop_visual",true);grip.AddChild(node);node.Owner=owner;
+            node.SetMeta("animanager_prop_visual",true);grip.AddChild(node);if(owner!=null)node.Owner=owner;
         }
-        Box("Blade",new(.035f,.008f,.8f),new(0,0,.4f),"eab65a");Box("Guard",new(.15f,.018f,.025f),Vector3.Zero,"485766");Box("Handle",new(.025f,.025f,.18f),new(0,0,-.09f),"303a44");
+        Box("Blade",new(.035f,.008f,ReferenceBladeLength),new(0,0,ReferenceBladeLength/2),"eab65a");Box("Guard",new(.15f,.018f,.025f),Vector3.Zero,"485766");Box("Handle",new(.025f,.025f,.18f),new(0,0,-.09f),"303a44");
     }
 }

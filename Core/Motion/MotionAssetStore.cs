@@ -1,4 +1,5 @@
 using Animanager.Core.Models;
+using Animanager.Core.Pipeline;
 using Animanager.Core.Storage;
 
 namespace Animanager.Core.Motion;
@@ -6,9 +7,16 @@ namespace Animanager.Core.Motion;
 public static class MotionAssetStore
 {
     public static async Task<bool> Import(string path,AssetDatabase db,IStorageProvider storage,CancellationToken ct)
+        => (await ImportAssetAsync(path, db, storage, ct)).Id != null;
+
+    internal static async Task<(string? Id, bool HasAnimation)> ImportAssetAsync(string path, AssetDatabase db,
+        IStorageProvider storage, CancellationToken ct)
     {
         var manifest=MotionJson.Load(path);string digest=MotionJson.Hash(File.ReadAllBytes(path));
-        if(db.HasHash(digest))return false;
+        var displacement=AnimationDisplacement.InspectMotion(path,manifest,ct);
+        if(displacement==null)return (null,false);
+        if(db.HasHash(digest))return (null,true);
+        string tags=AnimationDisplacement.WithTag("Nodachi UE5 separated-motion",displacement);
         foreach(var item in manifest.Objects.Values.DistinctBy(o=>o.Path))
         {
             ct.ThrowIfCancellationRequested();string target="motion/"+item.Path;
@@ -21,8 +29,9 @@ public static class MotionAssetStore
         }
         string relative="motion/"+digest+".motion.json";
         await storage.PutFileAsync(path,relative,ct);ct.ThrowIfCancellationRequested();
-        var asset=new AssetItem{Name=manifest.Name,VirtualPath=relative,SourceFormat=".motion",FileHash=digest,Type="Animation",Tags="Nodachi UE5 separated-motion",Size=new FileInfo(path).Length+new[]{"body","prop"}.Sum(k=>manifest.Objects[k].Bytes)};
-        return db.Insert(asset);
+        var asset=new AssetItem{Name=manifest.Name,VirtualPath=relative,SourceFormat=".motion",FileHash=digest,Type="Animation",Tags=tags,Size=new FileInfo(path).Length+new[]{"body","prop"}.Sum(k=>manifest.Objects[k].Bytes)};
+        var storedPath = await storage.AcquireLocalFileAsync(relative, ct);
+        return (db.Insert(asset, StoredDuration.Inspect(digest, storedPath, () => manifest.Duration)) ? asset.Id : null,true);
     }
     public static void SavePresentation(string path,MotionPresentation presentation)
     {

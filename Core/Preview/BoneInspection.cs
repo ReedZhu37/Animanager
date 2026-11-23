@@ -22,6 +22,7 @@ public sealed partial class BoneInspection
     private Node3D? _model;
     private AnimationPlayer? _player;
     private PoseSnapshot? _baseline;
+    private bool _showSkeleton, _skeletonOnly;
     public IReadOnlyList<SkeletonEntry> Skeletons { get; private set; }=[];
     public BoneId? Selected=>_selection.Count>0?_selection[^1]:null;
     public IReadOnlyList<BoneId> SelectedBones { get; }
@@ -50,11 +51,13 @@ public sealed partial class BoneInspection
         _overlay=new BoneOverlay{Name="BoneInspectionOverlay"};stage.AddChild(_overlay);
     }
 
-    public void Bind(Node3D model,AnimationPlayer? player,PoseSnapshot baseline)
+    public void Bind(Node3D model,AnimationPlayer? player,PoseSnapshot baseline,bool skeletonOnly)
     {
         Clear();_model=model;_player=player;_baseline=baseline;
         Skeletons=Preview3DViewport.Descendants(model).OfType<Skeleton3D>()
             .Select(s=>new SkeletonEntry(model.GetPathTo(s).ToString(),s)).ToArray();
+        _skeletonOnly = skeletonOnly && Skeletons.Count > 0;
+        _overlay.ShowSkeleton = _skeletonOnly || _showSkeleton;
         _overlay.SetScaleFromSkeletons(Skeletons);
         if(player!=null)player.MixerApplied+=RefreshPose;
         RefreshPose();Changed?.Invoke();
@@ -66,6 +69,8 @@ public sealed partial class BoneInspection
         if(_player!=null&&GodotObject.IsInstanceValid(_player))_player.MixerApplied-=RefreshPose;
         _model=null;_player=null;_baseline=null;Skeletons=[];_selection.Clear();_pins.Clear();Reference=null;
         RootMotionSource=null;RootMotionEnabled=false;RootMotion=null;TrailEnabled=false;Trajectories=[];Status="Off";ClearCache();
+        _skeletonOnly = false;
+        _overlay.ShowSkeleton = _showSkeleton;
         _overlay.Clear();ModelRevision++;Changed?.Invoke();
     }
 
@@ -189,7 +194,12 @@ public sealed partial class BoneInspection
         var s=Skeletons[id.Skeleton].Node;int parent=s.GetBoneParent(id.Index);var local=s.GetBonePose(id.Index);var world=WorldPose(id);
         return $"{IdText(id)} {Name(id)} | skeleton {Skeletons[id.Skeleton].Path}\nParent: {(parent<0?"none":IdText(new(id.Skeleton,parent))+" "+s.GetBoneName(parent))}\nTime: {_preview.Playhead:F4} s\nLocal position: {local.Origin}; rotation (Euler XYZ degrees): {local.Basis.Orthonormalized().GetEuler(EulerOrder.Xyz)*180/Mathf.Pi}\nWorld position: {world.Origin}; rotation (Euler XYZ degrees): {world.Basis.Orthonormalized().GetEuler(EulerOrder.Xyz)*180/Mathf.Pi}";
     }
-    public void ShowSkeleton(bool enabled){_overlay.ShowSkeleton=enabled;RefreshPose();Changed?.Invoke();}
+    public void ShowSkeleton(bool enabled)
+    {
+        if (!_skeletonOnly) _showSkeleton = enabled;
+        _overlay.ShowSkeleton = enabled;
+        RefreshPose();Changed?.Invoke();
+    }
     public void SetXray(bool enabled){_overlay.SetXray(enabled);_preview.Redraw();Changed?.Invoke();}
     public void Focus()
     {

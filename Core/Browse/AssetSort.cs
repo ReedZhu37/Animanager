@@ -1,6 +1,6 @@
 namespace Animanager.Core.Browse;
 
-public enum AssetSortField { Imported, Name, Size, Favorite, Duration, Fps }
+public enum AssetSortField { Imported, Name, Size, Favorite, Duration, Fps, LibraryMix }
 
 public sealed record AssetSort(AssetSortField Field = AssetSortField.Imported, bool Descending = true)
 {

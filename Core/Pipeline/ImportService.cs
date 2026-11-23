@@ -6,13 +6,31 @@ using Animanager.Core.Motion;
 
 namespace Animanager.Core.Pipeline;
 
-public sealed record ImportResult(int Added, int Skipped, List<string> Errors);
+public sealed record ImportResult(int Added, int Skipped, List<string> Errors)
+{
+    public string[] AddedAssetIds { get; init; } = [];
+    public int ExcludedInPlace { get; init; }
+    public int ExcludedWithoutAnimation { get; init; }
+    public List<string> Warnings { get; init; } = [];
+}
 
 public sealed class ImportService(AssetDatabase database, IStorageProvider storage)
 {
     public Task<ImportResult> ImportAsync(IEnumerable<string> inputs, IProgress<string>? progress=null, CancellationToken ct=default)
         => Task.Run(async () => {
-            int added=0, skipped=0; var errors=new List<string>();
+            int skipped=0, excludedInPlace=0, excludedWithoutAnimation=0;
+            var addedAssetIds = new List<string>();
+            var errors=new List<string>(); var warnings=new List<string>();
+            void SkipInPlace(string file)
+            {
+                excludedInPlace++;
+                progress?.Report("跳过 InPlace 动画 · " + Path.GetFileName(file));
+            }
+            void SkipWithoutAnimation(string file)
+            {
+                excludedWithoutAnimation++;
+                progress?.Report("跳过无可用动画的文件 · " + Path.GetFileName(file));
+            }
             foreach(var input in inputs)
             {
                 ct.ThrowIfCancellationRequested();
@@ -25,9 +43,15 @@ public sealed class ImportService(AssetDatabase database, IStorageProvider stora
                     try
                     {
                         progress?.Report("正在入库 · "+Path.GetFileName(file));
+                        bool namedInPlace=AnimationDisplacement.IsInPlaceSource(file);
                         if(MotionJson.IsMotion(file))
                         {
-                            if(await MotionAssetStore.Import(file,database,storage,ct))added++;
+                            var manifest=MotionJson.ReadManifest(file);
+                            if(namedInPlace||AnimationDisplacement.IsInPlace(manifest))
+                            { SkipInPlace(file); continue; }
+                            var (id, hasAnimation) = await MotionAssetStore.ImportAssetAsync(file, database, storage, ct);
+                            if (!hasAnimation) { SkipWithoutAnimation(file); continue; }
+                            if (id != null) addedAssetIds.Add(id);
                             else
                             {
                                 skipped++;
@@ -45,25 +69,39 @@ public sealed class ImportService(AssetDatabase database, IStorageProvider stora
                             while((read=await stream.ReadAsync(buffer,ct))>0) hash.AppendData(buffer,0,read);
                         }
                         var digest=Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
-                        if(database.FindByHash(digest) is {} duplicate)
+                        var duplicate=database.FindByHash(digest);
+                        var motion=AnimationDisplacement.InspectScene(file,ct,namedInPlace);
+                        if(motion.InPlace) { SkipInPlace(file); continue; }
+                        if(!motion.HasAnimation)
+                        {
+                            SkipWithoutAnimation(file);
+                            continue;
+                        }
+                        if(duplicate!=null)
                         {
                             if(duplicate.Trashed)progress?.Report("资产已在回收站，可从回收站恢复："+duplicate.Name);
                             skipped++;continue;
                         }
+                        if(motion.Warning is { } warning)
+                            warnings.Add(Path.GetFileName(file)+" · 无法判定位移 · "+warning);
                         var prefix="assets/"+digest+"/";
                         foreach(var dependency in dependencies) await storage.PutFileAsync(dependency.Source,prefix+dependency.Relative,ct);
                         var relative=prefix+Path.GetFileName(file);
                         await storage.PutFileAsync(file,relative,ct);
                         var a=new AssetItem {Name=Path.GetFileNameWithoutExtension(file),VirtualPath=relative,SourceFormat=ext,
-                            FileHash=digest,Size=new FileInfo(file).Length,Tags="",Type=HasAnimation(file,ext)?"Animation":"Model"};
+                            FileHash=digest,Size=new FileInfo(file).Length,Tags=motion.Tag??"",Type="Animation"};
                         ct.ThrowIfCancellationRequested();
-                        if(database.Insert(a)) added++; else skipped++;
+                        var storedPath = await storage.AcquireLocalFileAsync(relative, ct);
+                        var timing = StoredDuration.Inspect(digest, storedPath,
+                            () => Browse.AssetAttributeReader.Read(storedPath, ext, ct).Duration);
+                        if(database.Insert(a, timing)) addedAssetIds.Add(a.Id); else skipped++;
                     }
                     catch(OperationCanceledException) {throw;}
                     catch(Exception ex) {errors.Add(Path.GetFileName(file)+": "+ex.Message);}
                 }
             }
-            return new ImportResult(added,skipped,errors);
+            return new ImportResult(addedAssetIds.Count,skipped,errors){AddedAssetIds=addedAssetIds.ToArray(),ExcludedInPlace=excludedInPlace,
+                ExcludedWithoutAnimation=excludedWithoutAnimation,Warnings=warnings};
         },ct);
 
     private static IEnumerable<string> EnumerateFiles(string folder)
@@ -101,25 +139,5 @@ public sealed class ImportService(AssetDatabase database, IStorageProvider stora
             }
         }
         return result.Distinct().ToList();
-    }
-    private static bool HasAnimation(string file,string ext)
-    {
-        try
-        {
-            using var stream=File.OpenRead(file); using var reader=new BinaryReader(stream);
-            string json;
-            if(ext==".gltf") json=File.ReadAllText(file);
-            else if(ext==".glb")
-            {
-                if(reader.ReadUInt32()!=0x46546C67) return false;
-                reader.ReadUInt32();reader.ReadUInt32(); var length=reader.ReadInt32();
-                if(length<=0 || length>16*1024*1024 || reader.ReadUInt32()!=0x4E4F534A) return false;
-                json=System.Text.Encoding.UTF8.GetString(reader.ReadBytes(length));
-            }
-            else return false;
-            using var doc=JsonDocument.Parse(json);
-            return doc.RootElement.TryGetProperty("animations",out var animations)&&animations.GetArrayLength()>0;
-        }
-        catch {return false;}
     }
 }

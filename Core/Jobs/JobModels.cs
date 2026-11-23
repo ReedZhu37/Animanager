@@ -54,7 +54,10 @@ public sealed class JobItem
     public string Error { get; set; }="";
     public string Log { get; set; }="";
     public int ImportedAssets { get; set; }
+    public string[] AddedAssetIds { get; set; } = [];
     public int DuplicateAssets { get; set; }
+    public int ExcludedInPlaceAssets { get; set; }
+    public int ExcludedWithoutAnimationAssets { get; set; }
     public int UnsupportedAssets { get; set; }
     public List<string> Warnings { get; set; }=[];
 }

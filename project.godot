@@ -27,6 +27,21 @@ window/subwindows/embed_subwindows=false
 [dotnet]
 project/assembly_name="Animanager"
 
+[input]
+
+limbo_console_toggle={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"keycode":96)]
+}
+limbo_auto_complete_reverse={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"shift_pressed":true,"keycode":4194306)]
+}
+limbo_console_search_history={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"ctrl_pressed":true,"keycode":82)]
+}
+
 [rendering]
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"

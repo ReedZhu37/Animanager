@@ -15,18 +15,25 @@ internal sealed record Clip(string Name,int Frames,float Duration,string Additiv
 internal static class AnimationReader
 {
     private enum FkMode {Replace,Additive,Direct}
+    public static bool IsUe4RawVersion(int major,int minor) => major==4&&minor is 18 or 21 or 23 or 27;
+    public static bool IsEarlyDataModelVersion(int major,int minor) => major==5&&minor is 0 or 1;
+    public static bool SupportsVersion(int major,int minor) => IsUe4RawVersion(major,minor)||IsEarlyDataModelVersion(major,minor)||major==5&&minor==6;
+
     public static Clip Read(Package package,UAnimSequence anim,int major,int minor)
     {
-        if(anim.bForceRootLock)throw new NotSupportedException("Force root lock evaluation is not supported.");
+        // A UE4 root-motion clip can retain its source trajectory without baking the runtime root lock.
+        if(anim.bForceRootLock&&!(IsUe4RawVersion(major,minor)&&anim.bEnableRootMotion))
+            throw new NotSupportedException("Force root lock evaluation is not supported.");
         if((int)anim.Interpolation!=0)throw new NotSupportedException("Non-linear sequence interpolation is not supported.");
         if(anim.AdditiveAnimType is not (EAdditiveAnimationType.AAT_None or EAdditiveAnimationType.AAT_RotationOffsetMeshSpace))throw new NotSupportedException("This additive animation type is not validated.");
-        if(major==4&&minor is 23 or 27&&anim.RawAnimationData is {Length:>0})
+        if(IsUe4RawVersion(major,minor))
         {
+            if(anim.RawAnimationData is not {Length:>0})throw new NotSupportedException("UE4 editor sequence has no source raw animation tracks.");
             var names=anim.GetOrDefault<FName[]>("AnimationTrackNames",[]).Select(x=>x.Text).ToArray();
             if(names.Length!=anim.RawAnimationData.Length)throw new InvalidDataException("Raw track name count differs from data count.");
-            return Validate(new(anim.Name,anim.NumFrames,anim.SequenceLength,anim.AdditiveAnimType.ToString(),anim.RawAnimationData.Select((t,i)=>new BoneTrack(names[i],t.PosKeys.Select(v=>new[]{v.X,v.Y,v.Z}).ToArray(),t.RotKeys.Select(q=>new[]{q.X,q.Y,q.Z,q.W}).ToArray(),t.ScaleKeys.Select(v=>new[]{v.X,v.Y,v.Z}).ToArray())).ToArray(),"ue4-raw"));
+            return Validate(new(anim.Name,anim.NumFrames,anim.SequenceLength,anim.AdditiveAnimType.ToString(),anim.RawAnimationData.Select((t,i)=>ReadNativeTrack(names[i],t)).ToArray(),"ue4-raw"));
         }
-        if(major==5&&minor==0)return ReadEarlyDataModel(anim);
+        if(IsEarlyDataModelVersion(major,minor))return ReadEarlyDataModel(anim,minor==1);
         if(major!=5||minor!=6)throw new NotSupportedException($"Editor animation reader is not validated for UE {major}.{minor}.");
         var model=anim.GetOrDefault<FScriptInterface>("DataModelInterface")?.Object?.Load();
         if(model?.ExportType!="AnimationSequencerDataModel")throw new NotSupportedException("Only UE5.6 AnimationSequencerDataModel is validated; this asset uses another data model.");
@@ -74,10 +81,15 @@ internal static class AnimationReader
         }
         return Validate(new(anim.Name,frames,anim.SequenceLength,anim.AdditiveAnimType.ToString(),tracks.ToArray(),"ue5-sequencer-fk-direct"));
     }
-    private static Clip ReadEarlyDataModel(UAnimSequence anim)
+    private static BoneTrack ReadNativeTrack(string name,FRawAnimSequenceTrack raw) => new(name,
+        raw.PosKeys.Select(v=>new[]{v.X,v.Y,v.Z}).ToArray(),
+        raw.RotKeys.Select(q=>new[]{q.X,q.Y,q.Z,q.W}).ToArray(),
+        raw.ScaleKeys.Select(v=>new[]{v.X,v.Y,v.Z}).ToArray());
+
+    private static Clip ReadEarlyDataModel(UAnimSequence anim,bool nativeTrackData)
     {
         var model=anim.GetOrDefault<FPackageIndex>("DataModel")?.Load();
-        if(model?.ExportType!="AnimDataModel")throw new NotSupportedException("UE5.0 source AnimDataModel is missing.");
+        if(model?.ExportType!="AnimDataModel")throw new NotSupportedException("Source AnimDataModel is missing.");
         var duration=model.GetOrDefault<float>("PlayLength");var intervals=model.GetOrDefault<int>("NumberOfFrames");var keys=model.GetOrDefault<int>("NumberOfKeys");
         var rate=model.GetOrDefault<FStructFallback>("FrameRate")??throw new InvalidDataException("Missing source frame rate.");
         double fps=(double)rate.GetOrDefault<int>("Numerator")/rate.GetOrDefault("Denominator",1);
@@ -86,12 +98,23 @@ internal static class AnimationReader
         if(tracks.Length>1024||(long)tracks.Length*keys>2000000)throw new NotSupportedException("Animation exceeds the bone-frame budget.");
         return Validate(new(anim.Name,keys,duration,anim.AdditiveAnimType.ToString(),tracks.Select(t=>
         {
-            var raw=t.GetOrDefault<FStructFallback>("InternalTrackData")??throw new NotSupportedException("Expected tagged UE5.0 source transform arrays.");
-            var p=raw.GetOrDefault<TIntVector3<float>[]>("PosKeys",[]);var r=raw.GetOrDefault<FQuat[]>("RotKeys",[]);var s=raw.GetOrDefault<TIntVector3<float>[]>("ScaleKeys",[]);
+            var name=t.GetOrDefault<FName>("Name").Text;
+            BoneTrack track;
+            if(nativeTrackData)
+            {
+                var raw=t.GetOrDefault<FRawAnimSequenceTrack>("InternalTrackData")??throw new NotSupportedException("Expected native UE5.1 source transform arrays.");
+                track=ReadNativeTrack(name,raw);
+            }
+            else
+            {
+                var raw=t.GetOrDefault<FStructFallback>("InternalTrackData")??throw new NotSupportedException("Expected tagged UE5.0 source transform arrays.");
+                var p=raw.GetOrDefault<TIntVector3<float>[]>("PosKeys",[]);var r=raw.GetOrDefault<FQuat[]>("RotKeys",[]);var s=raw.GetOrDefault<TIntVector3<float>[]>("ScaleKeys",[]);
+                track=new(name,p.Select(v=>new[]{v.X,v.Y,v.Z}).ToArray(),r.Select(q=>new[]{q.X,q.Y,q.Z,q.W}).ToArray(),s.Select(v=>new[]{v.X,v.Y,v.Z}).ToArray());
+            }
             // Some authored pose assets have fewer keys than their timeline declares. Only collapse exactly identical values; never stretch moving tracks.
             float[][] Constant(float[][] values)=>values.Length>1&&values.Length!=keys&&values.Skip(1).All(v=>v.SequenceEqual(values[0]))?[values[0]]:values;
-            return new BoneTrack(t.GetOrDefault<FName>("Name").Text,Constant(p.Select(v=>new[]{v.X,v.Y,v.Z}).ToArray()),Constant(r.Select(q=>new[]{q.X,q.Y,q.Z,q.W}).ToArray()),Constant(s.Select(v=>new[]{v.X,v.Y,v.Z}).ToArray()));
-        }).ToArray(),"ue5-tagged-anim-data-model"));
+            return track with {Positions=Constant(track.Positions),Rotations=Constant(track.Rotations),Scales=Constant(track.Scales)};
+        }).ToArray(),nativeTrackData?"ue5-native-anim-data-model":"ue5-tagged-anim-data-model"));
     }
     private static void ValidateChannel(FMovieSceneChannel<float> channel,int frames,double fps)
     {
@@ -120,7 +143,7 @@ internal static class AnimationReader
     private static Clip Validate(Clip clip)
     {
         if(clip.Frames<1||clip.Frames>100000||!float.IsFinite(clip.Duration)||clip.Duration<=0||(clip.Frames-1)/clip.Duration>600||clip.Tracks.Length==0||clip.Tracks.Length>1024)throw new InvalidDataException("Invalid animation size, duration, or sample rate.");
-        if(clip.Tracks.Select(t=>t.Name).Distinct().Count()!=clip.Tracks.Length)throw new InvalidDataException("Duplicate bone tracks.");
+        if(clip.Tracks.Select(t=>t.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count()!=clip.Tracks.Length)throw new InvalidDataException("Duplicate bone tracks.");
         foreach(var t in clip.Tracks)
         {
             if(t.Positions.Length==0||t.Rotations.Length==0)throw new InvalidDataException("Missing bone transform keys.");

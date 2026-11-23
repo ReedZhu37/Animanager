@@ -17,7 +17,7 @@ public static class BundleSmokeTests
             Check(File.Exists(api.Blender.ScriptPath),"external Blender script resolves beside application");
             Check(api.Uasset.Available,"independent CUE4Parse helper is packaged beside application");
             var console=owner.GetNode("/root/LimboConsole");console.Call("execute_command","baseline import");await commands.PendingTask;
-            Check(api.Search().Total==4,"bundled official baselines import into SQLite through Limbo");
+            Check(api.Search().Total==1&&api.Find("UE5_Manny_Idle").Type=="Animation","only the animated bundled FBX enters SQLite through Limbo");
             console.Call("execute_command","preview load UE5_Manny_Idle");await commands.PendingTask;
             Check(preview.BoneCount==89&&preview.Clips.Length>0,"packaged FBX loader previews the official animated skeleton");
             var output=Path.Combine(api.Storage.Root,"exports");

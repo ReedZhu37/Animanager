@@ -20,14 +20,15 @@ internal static class SourceSamples
             var package=AssetCatalog.Load(asset,out _);int index=Array.FindIndex(package.ExportMap,e=>e.ClassIndex.Name=="AnimSequence");
             if(index<0)continue;
             var anim=(UAnimSequence)package.ExportsLazy[index].Value;
-            if(package.Summary.SavedByEngineVersion is {Major:4,Minor:23 or 27})
+            var version=package.Summary.SavedByEngineVersion!;
+            if(AnimationReader.IsUe4RawVersion(version.Major,version.Minor))
             {
                 var names=anim.GetOrDefault<FName[]>("AnimationTrackNames",[]);
                 var raw=anim.RawAnimationData??throw new InvalidDataException("Source raw tracks are missing.");
                 int count4=anim.NumFrames;
                 var samples4=new[]{0,(count4-1)/4,(count4-1)/2,(count4-1)*3/4,count4-1}.Distinct().Select(frame=>new
                 {
-                    frame,time=(double)anim.SequenceLength*frame/(count4-1),bones=raw.Select((t,i)=>
+                    frame,time=(double)anim.SequenceLength*frame/Math.Max(1,count4-1),bones=raw.Select((t,i)=>
                     {
                         var p=t.PosKeys[Math.Min(frame,t.PosKeys.Length-1)];var q=t.RotKeys[Math.Min(frame,t.RotKeys.Length-1)];
                         var s=t.ScaleKeys.Length==0?new[]{1f,1f,1f}:new[]{t.ScaleKeys[Math.Min(frame,t.ScaleKeys.Length-1)].X,t.ScaleKeys[Math.Min(frame,t.ScaleKeys.Length-1)].Y,t.ScaleKeys[Math.Min(frame,t.ScaleKeys.Length-1)].Z};
@@ -37,17 +38,27 @@ internal static class SourceSamples
                 rows.Add(new{source=asset.Relative,name=Path.ChangeExtension(asset.Relative,null).Replace('\\','/').Replace("/","__"),duration=anim.SequenceLength,frames=count4,samples=samples4});
                 continue;
             }
-            if(package.Summary.SavedByEngineVersion is not {Major:5,Minor:0})throw new NotSupportedException("Reference sampler supports UE4.23/4.27 raw tracks and tagged UE5.0 DataModels.");
+            if(!AnimationReader.IsEarlyDataModelVersion(version.Major,version.Minor))
+                throw new NotSupportedException("Reference sampler supports UE4 editor raw tracks and UE5.0/5.1 AnimDataModels.");
             var model=anim.GetOrDefault<FPackageIndex>("DataModel")!.Load()!;
             var count=model.GetOrDefault<int>("NumberOfKeys");var duration=model.GetOrDefault<float>("PlayLength");
             var tracks=model.GetOrDefault<FStructFallback[]>("BoneAnimationTracks",[]);
             var frames=new[]{0,(count-1)/4,(count-1)/2,(count-1)*3/4,count-1}.Distinct().ToArray();
             var samples=frames.Select(frame=>new{frame,time=(double)duration*frame/(count-1),bones=tracks.Select(t=>
             {
+                var name=t.GetOrDefault<FName>("Name").Text;
+                if(version.Minor==1)
+                {
+                    var native=t.GetOrDefault<FRawAnimSequenceTrack>("InternalTrackData")!;
+                    var p=native.PosKeys[Math.Min(frame,native.PosKeys.Length-1)];
+                    var q=native.RotKeys[Math.Min(frame,native.RotKeys.Length-1)];
+                    var s=native.ScaleKeys.Length==0?new FVector(1f,1f,1f):native.ScaleKeys[Math.Min(frame,native.ScaleKeys.Length-1)];
+                    return new{name,p=new[]{p.X,p.Y,p.Z},r=new[]{q.X,q.Y,q.Z,q.W},s=new[]{s.X,s.Y,s.Z}};
+                }
                 var raw=t.GetOrDefault<FStructFallback>("InternalTrackData")!;
                 var ps=raw.GetOrDefault<TIntVector3<float>[]>("PosKeys",[]);var qs=raw.GetOrDefault<FQuat[]>("RotKeys",[]);var ss=raw.GetOrDefault<TIntVector3<float>[]>("ScaleKeys",[]);
-                var p=ps[Math.Min(frame,ps.Length-1)];var q=qs[Math.Min(frame,qs.Length-1)];var s=ss.Length==0?new TIntVector3<float>(1,1,1):ss[Math.Min(frame,ss.Length-1)];
-                return new{name=t.GetOrDefault<FName>("Name").Text,p=new[]{p.X,p.Y,p.Z},r=new[]{q.X,q.Y,q.Z,q.W},s=new[]{s.X,s.Y,s.Z}};
+                var p0=ps[Math.Min(frame,ps.Length-1)];var q0=qs[Math.Min(frame,qs.Length-1)];var s0=ss.Length==0?new TIntVector3<float>(1,1,1):ss[Math.Min(frame,ss.Length-1)];
+                return new{name,p=new[]{p0.X,p0.Y,p0.Z},r=new[]{q0.X,q0.Y,q0.Z,q0.W},s=new[]{s0.X,s0.Y,s0.Z}};
             }).ToArray()}).ToArray();
             rows.Add(new{source=asset.Relative,name=Path.ChangeExtension(asset.Relative,null).Replace('\\','/').Replace("/","__"),duration,frames=count,samples});
         }

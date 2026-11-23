@@ -8,14 +8,17 @@ public partial class ConsoleCommands
 {
     private LibraryManager _libraries = null!;
     private Action _beforeLibrarySwitch = null!;
+    private Func<Func<Task<LibrarySession>>, Task> _switchLibrary = null!;
     private Action<LibrarySession> _activateLibrary = null!;
     private Task _maintenanceTask = Task.CompletedTask;
     private CachePlan? _approvedCacheScope;
 
-    private void RegisterLibraryCommands(LibraryManager manager, Action beforeSwitch, Action<LibrarySession> activate)
+    private void RegisterLibraryCommands(LibraryManager manager, Action beforeSwitch,
+        Func<Func<Task<LibrarySession>>, Task> switchLibrary, Action<LibrarySession> activate)
     {
         _libraries = manager;
         _beforeLibrarySwitch = beforeSwitch;
+        _switchLibrary = switchLibrary;
         _activateLibrary = activate;
         Bind("library current", nameof(LibraryCurrent), "Show active library ID, name and path");
         Bind("library list", nameof(LibraryList), "List registered and recently opened libraries");
@@ -24,6 +27,7 @@ public partial class ConsoleCommands
         Bind("library open", nameof(LibraryOpen), "Open a registered ID or existing library path");
         Bind("library relocate", nameof(LibraryRelocate), "Replace a missing registered path: <id> <path>");
         Bind("library check", nameof(LibraryCheck), "Check library files, hashes and index");
+        Bind("library organize_motion", nameof(LibraryOrganizeMotion), "Tag the active library by root displacement and move InPlace variants to trash");
         Bind("library backup", nameof(LibraryBackup), "Back up the active library to a new directory");
         Bind("library restore", nameof(LibraryRestore), "Verify and open a backup in a new directory: <backup> <destination>");
         Bind("library rebuild", nameof(LibraryRebuild), "Rebuild the index of a library directory from persistent metadata");
@@ -62,35 +66,34 @@ public partial class ConsoleCommands
     internal void ForgetSelection() => SelectedId = null;
     internal void TrackSelection(string id) => SelectedId = id;
 
-    private void OpenSession(Func<LibrarySession> open)
+    private void OpenSession(Func<Task<LibrarySession>> open) => Maintain(async () =>
     {
-        _beforeLibrarySwitch();
-        _activateLibrary(open());
+        await _switchLibrary(open);
         LibraryCurrent();
-    }
+    }, cancelPreview: false);
 
     public void LibraryCurrent() => Info(_libraries.Active is { } active
         ? JsonSerializer.Serialize(new { active.Identity.Id, active.Identity.Name, active.Root })
         : "No active library.");
     public void LibraryList() => Guard(() => Info(JsonSerializer.Serialize(_libraries.Entries())));
-    public void LibraryCreate(string path, string name) => Guard(() => OpenSession(() => _libraries.CreateAndOpen(Expand(path), name)));
-    public void LibraryRegister(string path) => Guard(() => Info(JsonSerializer.Serialize(_libraries.Register(Expand(path)))));
-    public void LibraryOpen(string pathOrId) => Guard(() => OpenSession(() => Guid.TryParseExact(pathOrId, "N", out _)
-        ? _libraries.OpenById(pathOrId) : _libraries.Open(Expand(pathOrId))));
+    public void LibraryCreate(string path, string name) => OpenSession(() => _libraries.OpenAsync(Expand(path), newName: name));
+    public void LibraryRegister(string path) => Maintain(async () => Info(JsonSerializer.Serialize(await _libraries.RegisterAsync(Expand(path)))), cancelPreview: false);
+    public void LibraryOpen(string pathOrId) => OpenSession(() => Guid.TryParseExact(pathOrId, "N", out _)
+        ? _libraries.OpenByIdAsync(pathOrId) : _libraries.OpenAsync(Expand(pathOrId)));
     public void LibraryRelocate(string id, string path) => Guard(() => Info(JsonSerializer.Serialize(_libraries.Relocate(id, Expand(path)))));
 
     private LibraryMaintenance Maintenance() => new(_api);
-    private void Maintain(Func<Task> action)
+    private void Maintain(Func<Task> action, bool cancelPreview = true)
     {
         if (!_maintenanceTask.IsCompleted) { Info("ERROR: Wait for the current library operation."); return; }
-        _maintenanceTask = PendingTask = MaintainAsync(action);
+        _maintenanceTask = PendingTask = MaintainAsync(action, cancelPreview);
     }
 
-    private async Task MaintainAsync(Func<Task> action)
+    private async Task MaintainAsync(Func<Task> action, bool cancelPreview)
     {
         try
         {
-            _beforeLibrarySwitch();
+            if (cancelPreview) _beforeLibrarySwitch();
             await action();
         }
         catch (Exception ex) { Fail(ex); }
@@ -100,6 +103,16 @@ public partial class ConsoleCommands
     {
         var issues = await Maintenance().CheckAsync();
         Info(issues.Length == 0 ? "Integrity check passed." : string.Join("\n", issues.Select(LibraryMaintenance.FormatIssue)));
+    });
+
+    public void LibraryOrganizeMotion() => Maintain(async () =>
+    {
+        Info("正在分析动画根轨迹…");
+        var result = await _api.OrganizeAnimationsAsync();
+        _refresh();
+        Info($"已分类 {result.Tagged.Values.Sum()} 个动画 · InPlace 移入回收站 {result.MovedToTrash} 个"
+            + "\n" + string.Join(" · ", result.Tagged.Select(entry => $"{entry.Key} {entry.Value}"))
+            + (result.Errors.Count > 0 ? "\n无法判定位移 " + result.Errors.Count + " 个\n" + string.Join("\n", result.Errors) : ""));
     });
 
     public void LibraryBackup(string destination) => Maintain(async () => Info("Backup complete: " + await Maintenance().BackupAsync(Expand(destination))));
@@ -155,21 +168,37 @@ public partial class ConsoleCommands
         Info(JsonSerializer.Serialize(result));
     });
 
-    public void CollectionList() => Guard(() => Info(JsonSerializer.Serialize(_api.Database.Collections())));
+    internal AppCollectionCatalog AppCollections { get; set; } = null!;
+
+    public void CollectionList() => Guard(() => Info(JsonSerializer.Serialize(AppCollections.Read().Collections)));
     public void CollectionCreate(string name) => Guard(() =>
     {
-        var collection = _api.CreateCollection(name);
+        var collection = AppCollections.Create(name);
         _refresh();
         Info(JsonSerializer.Serialize(collection));
     });
-    public void CollectionRename(string id, string name) => AssetEdit(() => _api.RenameCollection(id, name));
-    public void CollectionDelete(string id) => AssetEdit(() => _api.DeleteCollection(id));
-    public void CollectionAdd(string id, string ids) => AssetEdit(() => _api.SetCollectionMembership(id, AssetIds(ids), true));
-    public void CollectionRemove(string id, string ids) => AssetEdit(() => _api.SetCollectionMembership(id, AssetIds(ids), false));
+    public void CollectionRename(string id, string name) => AssetEdit(() => AppCollections.Rename(id, name));
+    public void CollectionDelete(string id) => AssetEdit(() => AppCollections.Delete(id));
+    public void CollectionAdd(string id, string ids) => EditCollectionMembers(id, ids, add: true);
+    public void CollectionRemove(string id, string ids) => EditCollectionMembers(id, ids, add: false);
+
+    private void EditCollectionMembers(string id, string ids, bool add) => AssetEdit(() =>
+    {
+        var library = _libraries.Active ?? throw new InvalidOperationException("Open a library first.");
+        var assetIds = AssetIds(ids);
+        if (add && library.Api.Database.ExistingIds(assetIds, trash: false).Length != assetIds.Length)
+            throw new InvalidOperationException("Some assets are no longer in the active library.");
+        AppCollections.SetMembership(id, assetIds.Select(assetId => new CollectionAssetLink(library.Identity.Id, assetId)).ToArray(), add);
+    });
+
     public void CollectionSearch(string id, string query) => Guard(() =>
     {
-        if (!_api.Database.Collections().Any(c => c.Id == id)) throw new KeyNotFoundException("Collection not found: " + id);
-        PrintAssets(_api.Database.SearchAll(query == "*" ? "" : query, id));
+        var collection = AppCollections.Read().Collections.FirstOrDefault(item => item.Id == id)
+            ?? throw new KeyNotFoundException("Collection not found: " + id);
+        var members = collection.Members.ToLookup(member => member.LibraryId, member => member.AssetId);
+        PrintAssets(_libraries.OpenLibraries().Where(library => members.Contains(library.Identity.Id))
+            .SelectMany(library => library.Api.Database.SearchAll(query == "*" ? "" : query, "All",
+                JsonSerializer.Serialize(members[library.Identity.Id]))));
     });
     private void PrintAssets(IEnumerable<AssetItem> assets) =>
         Info(string.Join("\n", assets.Select(a => $"{a.Id} | {a.Name} | {a.Tags}")));

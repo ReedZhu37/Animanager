@@ -59,7 +59,11 @@ public static class BatchTests
             var exportPlan=api.Planner.Export("*",output);
             Check(api.Planner.Load(exportPlan.Id).Items.Select(i=>i.AssetId).SequenceEqual(exportPlan.Items.Select(i=>i.AssetId)),"saved export plan preserves the selection and order");
             // A broken source between two valid files proves one failure does not abort subsequent conversions.
-            var bad=Path.Combine(root,"Broken.glb");File.WriteAllText(bad,"not a GLB");await api.ImportAsync([bad]);
+            var bad=Path.Combine(root,"Broken.glb");File.WriteAllText(bad,"not a GLB");
+            Check((await api.ImportAsync([bad])).Errors.Count==1,"unreadable GLB reports an import error");
+            const string legacyPath="assets/legacy-broken/Broken.glb";
+            await api.Storage.PutFileAsync(bad,legacyPath);
+            api.Database.Insert(new(){Name="Broken",SourceFormat=".glb",VirtualPath=legacyPath,FileHash="legacy-broken"});
             var a=api.Find("Walk 中文");var b=api.Find("Broken");var c=api.Find("Idle");
             PlanItem Item(AssetItem asset)=>new(){AssetId=asset.Id,Name=asset.Name,Input=asset.VirtualPath};
             var mixed=new BatchPlan{Kind=JobKind.ExportFbx,OutputFolder=output,Items=[Item(a),Item(b),Item(c)]};api.Planner.Save(mixed);

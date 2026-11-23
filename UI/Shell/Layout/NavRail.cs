@@ -24,7 +24,7 @@ public partial class NavRow : Button
         var pad = new MarginContainer { MouseFilter = MouseFilterEnum.Ignore };
         pad.AddThemeConstantOverride("margin_left", 14);
         pad.AddThemeConstantOverride("margin_right", 10);
-        pad.AddChild(new Control { CustomMinimumSize = new Vector2(0, Tokens.Size.Row) });
+        pad.AddChild(new Control { CustomMinimumSize = new Vector2(0, Tokens.Size.Row), MouseFilter = MouseFilterEnum.Ignore });
         AddChild(pad);
         pad.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
 
@@ -59,6 +59,7 @@ public partial class NavRow : Button
     public void SetIcon(string icon) => _icon.Set(icon);
 
     public void SetCount(int count) => _count.Text = count > 0 ? count.ToString("N0") : "";
+    internal void SetTrailingLabel(string text) => _count.Text = text;
 
     public void SetActive(bool active)
     {
@@ -74,23 +75,26 @@ public partial class NavRow : Button
 /// <summary>Section caption above a group of navigation rows, with an optional add action.</summary>
 public partial class NavSection : MarginContainer
 {
-    public NavSection(string title, Action? onAdd = null)
+    private readonly HBoxContainer _row = new();
+
+    public NavSection(string title, Action? onAdd = null, string addTooltip = "新建")
     {
         AddThemeConstantOverride("margin_left", 14);
         AddThemeConstantOverride("margin_right", 10);
         AddThemeConstantOverride("margin_top", 6);
         AddThemeConstantOverride("margin_bottom", 4);
-        var row = new HBoxContainer();
-        row.AddThemeConstantOverride("separation", 4);
-        AddChild(row);
+        _row.AddThemeConstantOverride("separation", 4);
+        AddChild(_row);
         var label = Type.Build(title, Typography.Semi, Type.Micro, Tokens.Text3);
         label.SizeFlagsHorizontal = SizeFlags.ExpandFill;
         label.VerticalAlignment = VerticalAlignment.Center;
-        row.AddChild(label);
+        _row.AddChild(label);
         if (onAdd == null) return;
-        var add = new IconButton(Icons.Plus, 12, "新建");
+        var add = new IconButton(Icons.Plus, 12, addTooltip);
         add.CustomMinimumSize = new Vector2(18, 18);
         add.Pressed += onAdd;
-        row.AddChild(add);
+        _row.AddChild(add);
     }
+
+    internal void AddAction(Button button) => _row.AddChild(button);
 }

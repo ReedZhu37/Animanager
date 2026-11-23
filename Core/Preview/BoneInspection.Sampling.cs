@@ -117,19 +117,10 @@ public sealed partial class BoneInspection
         {
             await _preview.ToSignal(_preview.GetTree(),SceneTree.SignalName.ProcessFrame);cancellation.Token.ThrowIfCancellationRequested();
             var model=_model!;var player=_player!;var baseline=_baseline!;
-            clone=(Node3D)model.Duplicate(0);clone.Name="TrajectorySampler";clone.Visible=false;clone.ProcessMode=Node.ProcessModeEnum.Disabled;
-            var sampler=clone.GetNode<AnimationPlayer>(model.GetPathTo(player));
-            foreach(var mixer in Preview3DViewport.Descendants(clone).OfType<AnimationMixer>())mixer.Active=false;
-            sampler.Autoplay="";sampler.Stop();
-            foreach(var library in sampler.GetAnimationLibraryList())sampler.RemoveAnimationLibrary(library);
-            var animation=(Animation)player.GetAnimation(missing[0].Clip).Duplicate(true);animation.LoopMode=Animation.LoopModeEnum.None;
-            for(int track=0;track<animation.GetTrackCount();track++)
-                if(animation.TrackGetType(track) is not (Animation.TrackType.Position3D or Animation.TrackType.Rotation3D or Animation.TrackType.Scale3D))animation.TrackSetEnabled(track,false);
-            var libraryCopy=new AnimationLibrary();libraryCopy.AddAnimation("sample",animation);sampler.AddAnimationLibrary("",libraryCopy);
-            sampler.RootMotionTrack=new NodePath("");sampler.CallbackModeProcess=AnimationMixer.AnimationCallbackModeProcess.Manual;
-            sampler.PlaybackAutoCapture=false;sampler.Active=true;_stage.AddChild(clone);baseline.Restore(clone);
+            AnimationPlayer sampler;
+            (clone,sampler)=TrajectorySampler.Create(_stage,model,player,baseline,missing[0].Clip);
+            var animation=sampler.GetAnimation("sample");
             var skeletons=Skeletons.Select(s=>clone.GetNode<Skeleton3D>(s.Path)).ToArray();
-            sampler.Play("sample",0);sampler.Advance(0);sampler.Pause();
             var results=new Dictionary<PoseKey,PoseSample[]>();SamplingRuns++;var budget=Stopwatch.StartNew();
             // One isolated scene and one seek per time/rate, regardless of the number of selected bones.
             foreach(var group in missing.GroupBy(k=>k.Rate))

@@ -37,10 +37,11 @@ internal static class Program
                     row.type=export.x?.ClassIndex.Name??"Unknown";
                     if(row.type=="Skeleton"){row.status="dependency";continue;}
                     if(row.type!="AnimSequence")throw new NotSupportedException("Unsupported asset class: "+row.type);
-                    if(!((engine.Major==4&&engine.Minor is 23 or 27)||(engine.Major==5&&engine.Minor is 0 or 6)))throw new NotSupportedException($"Editor animation reader is not validated for UE {engine.Major}.{engine.Minor}.");
+                    if(!AnimationReader.SupportsVersion(engine.Major,engine.Minor))throw new NotSupportedException($"Editor animation reader is not validated for UE {engine.Major}.{engine.Minor}.");
                     var anim=(UAnimSequence)package.ExportsLazy[export.i].Value;
                     row.skeleton=AssetCatalog.ImportPath(package,anim.Skeleton);
                     row.rootMotion=anim.bEnableRootMotion;row.forceRootLock=anim.bForceRootLock;row.additive=anim.AdditiveAnimType.ToString();row.notifies=anim.Notifies?.Length??0;
+                    if(row.forceRootLock)row.rootLockMode=anim.RootMotionRootLock.ToString();
                     var clip=AnimationReader.Read(package,anim,engine.Major,engine.Minor);
                     row.frames=clip.Frames;row.duration=clip.Duration;row.tracks=clip.Tracks.Select(t=>t.Name).ToArray();row.encoding=clip.Encoding;
                     var rig=profiles.Resolve(catalog,row.skeleton,clip,args[3]);
@@ -48,6 +49,7 @@ internal static class Program
                     row.name=Path.ChangeExtension(asset.Relative,null).Replace('\\','/').Replace("/","__");
                     if(args[0]=="convert")
                     {
+                        clip = rig.BindTrackNames(clip);
                         byte[] bytes;
                         if(MotionWriter.Matches(rig))
                         {
@@ -56,7 +58,7 @@ internal static class Program
                             row.storage="motion-v1";row.previewBones=rig.Profile.bones.Length;
                             row.output=Path.Combine(output,row.name+".motion.json");
                         }
-                        else {bytes=GlbWriter.Convert(rig,clip);row.output=Path.Combine(output,row.name+".glb");}
+                        else {bytes=GlbWriter.Convert(rig,clip,row.rootLockMode);row.output=Path.Combine(output,row.name+".glb");}
                         using(var stream=new FileStream(row.output,FileMode.CreateNew))stream.Write(bytes);
                         row.outputSha256=Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
                     }
@@ -66,7 +68,7 @@ internal static class Program
                 catch(Exception e){row.status="failed";row.error=e.ToString();}
                 finally{Console.WriteLine($"CUE_PROGRESS {rows.Count}/{catalog.Assets.Count} {row.status} {asset.Relative}");}
             }
-            var report=new{version=3,backend="CUE4Parse",revision=Revision,localPatches=new[]{"ue50-tagged-raw-track-v1"},input,profile=args[3],semantics="Source skeletal transforms only. Notifications, curves, Montage, additive blending and retargeting are not evaluated. Missing Skeleton substitutions are recorded per item.",items=rows,converted=rows.Count(r=>r.status=="converted"),unsupported=rows.Count(r=>r.status=="unsupported"),failed=rows.Count(r=>r.status=="failed")};
+            var report=new{version=3,backend="CUE4Parse",revision=Revision,localPatches=new[]{"ue50-tagged-raw-track-v1"},input,profile=args[3],semantics="Source skeletal transforms only. Notifications, curves, Montage, additive blending, runtime root locking and retargeting are not evaluated. Missing Skeleton substitutions are recorded per item.",items=rows,converted=rows.Count(r=>r.status=="converted"),unsupported=rows.Count(r=>r.status=="unsupported"),failed=rows.Count(r=>r.status=="failed")};
             File.WriteAllText(Path.Combine(output,"conversion-report.json"),JsonSerializer.Serialize(report,Json));
             Console.WriteLine("CUE_REPORT "+Path.Combine(output,"conversion-report.json"));
             return rows.Count==0||rows.Any(r=>r.status=="failed")?2:0;
@@ -81,4 +83,5 @@ public sealed class Result
     public string status{get;set;}="";public string error{get;set;}="";public string output{get;set;}="";public string outputSha256{get;set;}="";public string skeleton{get;set;}="";
     public string profile{get;set;}="";public string encoding{get;set;}="";public string skeletonSource{get;set;}="";public string skeletonSha256{get;set;}="";public bool dependencySubstituted{get;set;}public int skeletonBones{get;set;}public int previewBones{get;set;}
     public int frames{get;set;}public float duration{get;set;}public string[] tracks{get;set;}=[];public bool rootMotion{get;set;}public bool forceRootLock{get;set;}public string additive{get;set;}="";public int notifies{get;set;}
+    public string rootLockMode{get;set;}="";
 }

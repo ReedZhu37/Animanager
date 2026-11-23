@@ -23,7 +23,8 @@ public partial class BoneScreenLabels : Control
             occupied.AddRange(navigation.GetChildren().OfType<Control>().Where(c => c.IsVisibleInTree())
                 .Select(c => new Rect2(c.GlobalPosition - GlobalPosition, c.Size).Grow(3)));
         float ascent = font.GetAscent(FontPixels), lineHeight = font.GetHeight(FontPixels) + 4;
-        foreach (var anchor in Preview3DViewport.Descendants(Preview.Bones.Overlay).OfType<BoneLabelAnchor>())
+        var labels = Preview.AssetComparison?.Labels ?? Preview3DViewport.Descendants(Preview.Bones.Overlay).OfType<BoneLabelAnchor>();
+        foreach (var anchor in labels)
         {
             if (!anchor.IsVisibleInTree() || Preview.ProjectLabel(anchor.GlobalPosition) is not { } point) continue;
             var textSize = font.GetStringSize(anchor.Text, fontSize: FontPixels);

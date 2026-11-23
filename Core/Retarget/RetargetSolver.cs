@@ -14,11 +14,15 @@ public sealed class RetargetSolver
     private readonly Dictionary<int, int> _direct = new();
     private readonly float _hipRatio;
     private readonly Dictionary<int, Quaternion> _offsets = new();
+    private readonly Quaternion[] _sourceInverseRestRotations;
+    private readonly Quaternion[] _targetRestRotations;
 
     public RetargetSolver(RigDescriptor source, RigDescriptor target, RetargetOptions options)
     {
         Source = source; Target = target; Options = options.Snapshot();
         HumanoidMap.RequireReady(source); HumanoidMap.RequireReady(target);
+        _sourceInverseRestRotations = source.GlobalRest.Select(rest => Rotation(rest).Inverse()).ToArray();
+        _targetRestRotations = target.GlobalRest.Select(Rotation).ToArray();
         if (Options.SourceRig.Length > 0 && Options.SourceRig != source.Id)
             throw new InvalidOperationException("预设的源骨架与此动画不匹配。");
         foreach (var p in Options.RotationOffsets)
@@ -104,7 +108,7 @@ public sealed class RetargetSolver
                 throw new NotSupportedException("动画包含镜像、奇异或非均匀缩放。");
             globals[i] = (Source.Parents[i] < 0 ? sourceFrame : globals[Source.Parents[i]]) * sourcePose[i];
         }
-        Quaternion Delta(int i) => (Rotation(globals[i]) * Rotation(Source.GlobalRest[i]).Inverse()).Normalized();
+        Quaternion Delta(int i) => (Rotation(globals[i]) * _sourceInverseRestRotations[i]).Normalized();
         var output = Target.Rest.ToArray(); var targetGlobal = new Transform3D[output.Length];
         bool same = Source.Id == Target.Id || Source.Fingerprint == Target.Fingerprint;
         foreach (int i in Target.Order)
@@ -133,7 +137,7 @@ public sealed class RetargetSolver
                 output[i].Basis = new Basis((change * local * change.Inverse() * Rotation(Target.Rest[i])).Normalized()).Scaled(Target.Rest[i].Basis.Scale);
             }
             else if (delta is { } d)
-                output[i].Basis = new Basis((Rotation(parent).Inverse() * d * Rotation(Target.GlobalRest[i])).Normalized()).Scaled(Target.Rest[i].Basis.Scale);
+                output[i].Basis = new Basis((Rotation(parent).Inverse() * d * _targetRestRotations[i]).Normalized()).Scaled(Target.Rest[i].Basis.Scale);
 
             if (same && _direct.TryGetValue(i, out int direct))
             {
@@ -167,9 +171,9 @@ public sealed class RetargetSolver
             targetGlobal[i] = parent * output[i];
         }
         foreach (var (i, offset) in _offsets) output[i].Basis *= new Basis(offset);
-        targetGlobal = Target.Globals(output);
         if (!same)
         {
+            if (_offsets.Count > 0) targetGlobal = Target.Globals(output);
             // Reconstruct helper markers after all deform bones have been solved. No limb IK is run.
             foreach (string side in new[] { "l", "r" })
                 foreach (string limb in new[] { "hand", "foot" })

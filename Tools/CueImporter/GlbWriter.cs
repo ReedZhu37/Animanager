@@ -10,7 +10,7 @@ internal static class GlbWriter
 {
     // Baseline keeps Z-up bone-local axes; its parent converts to glTF Y-up.
     // Reflect Y and convert centimetres to metres in the bone-local space.
-    public static byte[] Convert(ResolvedRig rig,Clip anim)
+    public static byte[] Convert(ResolvedRig rig,Clip anim,string rootLockMode="")
     {
         var baseline=rig.Mesh;
         int jsonLength=BitConverter.ToInt32(baseline,12),binOffset=20+jsonLength;
@@ -87,6 +87,7 @@ internal static class GlbWriter
         }
         gltf["animations"]=new JsonArray(new JsonObject{["name"]=anim.Name,["samplers"]=samplers,["channels"]=channels});
         gltf["extras"]=new JsonObject{["animanagerSourceFps"]=Math.Max(1,(anim.Frames-1)/anim.Duration),["animanagerBackend"]="CUE4Parse",["sourceAdditiveType"]=anim.AdditiveType,["poseSemantics"]="raw-source-pose",["skeletonProfile"]=rig.Profile.id,["sourceEncoding"]=anim.Encoding,["dependencySubstituted"]=rig.Substituted};
+        if(rootLockMode.Length>0)gltf["extras"]!["sourceForceRootLockMode"]=rootLockMode;
         gltf["buffers"]![0]!["byteLength"]=bin.Length;
         byte[] json=Encoding.UTF8.GetBytes(gltf.ToJsonString());int padded=(json.Length+3)&~3;
         using var resultStream=new MemoryStream();using var output=new BinaryWriter(resultStream);

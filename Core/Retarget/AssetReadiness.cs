@@ -1,4 +1,5 @@
 using Animanager.UI.Components;
+using System.Diagnostics;
 using Godot;
 
 namespace Animanager.Core.Retarget;
@@ -6,9 +7,16 @@ namespace Animanager.Core.Retarget;
 public sealed record AssetReadiness(bool Ready, string[] Errors)
 {
     public string Summary => Ready ? "Ready · 人体兼容检查通过" : "待修复 · " + string.Join("；", Errors);
-    public static AssetReadiness Inspect(Node3D root, bool animation)
+    public static AssetReadiness Inspect(Node3D root, bool animation) =>
+        InspectAsync(root, animation, null, default).GetAwaiter().GetResult();
+
+    internal static Task<AssetReadiness> InspectPreviewAsync(Node3D root, SceneTree tree, CancellationToken ct) =>
+        InspectAsync(root, true, tree, ct);
+
+    private static async Task<AssetReadiness> InspectAsync(Node3D root, bool animation, SceneTree? tree, CancellationToken ct)
     {
         var errors = new List<string>();
+        var budget = tree != null ? Stopwatch.StartNew() : null;
         try
         {
             var skeletons = Preview3DViewport.Descendants(root).OfType<Skeleton3D>().ToArray();
@@ -21,6 +29,7 @@ public sealed record AssetReadiness(bool Ready, string[] Errors)
                 {
                     var player = Preview3DViewport.Descendants(root).OfType<AnimationPlayer>().FirstOrDefault();
                     var clips = player?.GetAnimationList().Where(c => c != "RESET").ToArray() ?? [];
+                    var playerRoot = player?.GetNodeOrNull(player.RootNode);
                     if (clips.Length == 0) errors.Add("没有可播放动画片段");
                     foreach (string clip in clips)
                     {
@@ -29,28 +38,42 @@ public sealed record AssetReadiness(bool Ready, string[] Errors)
                         bool boneTrack = false;
                         for (int t = 0; t < a.GetTrackCount(); t++)
                         {
-                            if (!a.TrackIsEnabled(t) || a.TrackGetType(t) is not (Animation.TrackType.Position3D or Animation.TrackType.Rotation3D or Animation.TrackType.Scale3D)) continue;
+                            var type = a.TrackGetType(t);
+                            if (!a.TrackIsEnabled(t) || type is not (Animation.TrackType.Position3D or Animation.TrackType.Rotation3D or Animation.TrackType.Scale3D)) continue;
                             var path = a.TrackGetPath(t);
                             if (path.GetSubNameCount() == 0) continue;
                             string bone = path.GetSubName(0);
-                            var node = player.GetNodeOrNull(player.RootNode)?.GetNodeOrNull(new NodePath(path.GetConcatenatedNames()));
+                            var node = playerRoot?.GetNodeOrNull(new NodePath(path.GetConcatenatedNames()));
+                            int keyCount = a.TrackGetKeyCount(t);
                             if (node != skeletons[0] || skeletons[0].FindBone(bone) < 0) errors.Add(clip + "：骨骼轨道无法绑定 " + path);
-                            else boneTrack |= a.TrackGetKeyCount(t) > 0;
-                            for (int k = 0; k < a.TrackGetKeyCount(t); k++)
+                            else boneTrack |= keyCount > 0;
+                            for (int k = 0; k < keyCount; k++)
                             {
                                 double time = a.TrackGetKeyTime(t, k);
-                                var value = a.TrackGetKeyValue(t, k);
+                                using var value = a.TrackGetKeyValue(t, k);
                                 // FBX import can retain support keys just beyond the clip interval.
                                 // They define interpolation at the endpoint and are valid Godot tracks.
                                 bool valid = double.IsFinite(time);
-                                if (a.TrackGetType(t) == Animation.TrackType.Rotation3D)
+                                if (type == Animation.TrackType.Rotation3D)
                                 { var q = value.AsQuaternion(); valid &= q.IsFinite() && q.LengthSquared() > 1e-8; }
                                 else
                                 {
                                     var v = value.AsVector3(); valid &= v.IsFinite();
-                                    if (a.TrackGetType(t) == Animation.TrackType.Scale3D) valid &= v.X > 0 && RigDescriptor.Uniform(v);
+                                    if (type == Animation.TrackType.Scale3D) valid &= v.X > 0 && RigDescriptor.Uniform(v);
                                 }
-                                if (!valid) { errors.Add($"{clip}：无效关键帧 / 不支持的骨骼缩放 {path} ({a.TrackGetType(t)}, t={time:G7}, 时长={a.Length:G7}, 值={value})"); break; }
+                                if (!valid) { errors.Add($"{clip}：无效关键帧 / 不支持的骨骼缩放 {path} ({type}, t={time:G7}, 时长={a.Length:G7}, 值={value})"); break; }
+                                if (budget != null && (k & 255) == 255 && budget.ElapsedMilliseconds >= 8)
+                                {
+                                    await tree!.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
+                                    ct.ThrowIfCancellationRequested();
+                                    budget.Restart();
+                                }
+                            }
+                            if (budget != null && budget.ElapsedMilliseconds >= 8)
+                            {
+                                await tree!.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
+                                ct.ThrowIfCancellationRequested();
+                                budget.Restart();
                             }
                         }
                         if (!boneTrack) errors.Add(clip + "：没有有效的骨骼动画轨道");

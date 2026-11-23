@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.ExceptionServices;
 using Godot;
 using Animanager.Core.Motion;
 using Animanager.Core.Pipeline;
@@ -12,8 +13,20 @@ public sealed record RetargetResult(Node3D Root, RigDescriptor Source, RigDescri
 public static class RetargetBaker
 {
     public const string PropNodeName = "PrimaryWeaponMotion";
+    private const int PreviewBatchSize = 48;
+    private sealed record SamplePose(Transform3D[] Bones)
+    {
+        internal double Time;
+        internal Transform3D Frame;
+        internal Transform3D Prop;
+        internal Transform3D[] Solved = [];
+    }
     public static Task<RetargetResult> BakeAsync(string source, ExportOptions export, IProgress<string>? progress = null, CancellationToken ct = default)
         => BakeCoreAsync(source, null, export, progress, ct);
+
+    internal static Task<RetargetResult> BakePreviewAsync(string source, RetargetOptions options, CancellationToken ct,
+        PreviewSource? prepared = null, RigDescriptor? sourceRig = null, Func<Task<Node3D>>? loadTarget = null)
+        => BakeCoreAsync(source, null, new() { Retarget = options, IncludeMesh = true }, null, ct, preview: true, prepared, sourceRig, loadTarget);
 
     // Explicit custom target: TargetRig chooses the required naming/hierarchy family, not replacement geometry.
     // Callers own the target-file identity; this entry point does not create or persist a catalogue preset.
@@ -21,37 +34,48 @@ public static class RetargetBaker
         IProgress<string>? progress = null, CancellationToken ct = default)
         => BakeCoreAsync(source, Path.GetFullPath(targetFile), export, progress, ct);
 
-    private static async Task<RetargetResult> BakeCoreAsync(string source, string? targetFile, ExportOptions export, IProgress<string>? progress, CancellationToken ct)
+    private static async Task<RetargetResult> BakeCoreAsync(string source, string? targetFile, ExportOptions export, IProgress<string>? progress,
+        CancellationToken ct, bool preview = false, PreviewSource? prepared = null, RigDescriptor? sourceRig = null,
+        Func<Task<Node3D>>? loadTarget = null)
     {
         export = export.Snapshot(animationLibrary: false);
         var options = export.Retarget ?? throw new ArgumentException("Retarget configuration is required.");
-        targetFile ??= options.Character?.VerifiedPath();
+        targetFile ??= loadTarget != null ? options.Character?.ModelPath : options.Character?.VerifiedPath();
         var tree = Engine.GetMainLoop() as SceneTree ?? throw new InvalidOperationException("Retarget requires the Godot runtime.");
         // Startup preview may be requested from MainShell._Ready while the root still adds children.
         ct.ThrowIfCancellationRequested();
         await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame);
         ct.ThrowIfCancellationRequested();
-        var stage = new Node3D(); tree.Root.AddChild(stage);
+        var stage = new Node3D { Visible = false }; tree.Root.AddChild(stage);
         Node3D? output = null;
+        PoseSnapshot? baseline = null;
+        AnimationPlayer? player = null;
+        Animation? sampling = null;
+        Animation.LoopModeEnum sourceLoop = default;
         try
         {
             ct.ThrowIfCancellationRequested();
-            RejectAdditive(source);
-            var motion = MotionJson.IsMotion(source) ? new MotionPlayback(source) : null;
-            float? sourceRate = null;
-            var sourceRoot = motion?.Root ?? SceneAsset.Load(source, out sourceRate, forExport: true, sampleFps: export.SampleFps, ct: ct);
+            if (prepared == null) RejectAdditive(source);
+            var motion = prepared != null ? prepared.Motion : MotionJson.IsMotion(source) ? new MotionPlayback(source) : null;
+            float? sourceRate = prepared?.ReportedFrameRate;
+            var sourceRoot = prepared?.Root ?? motion?.Root ?? SceneAsset.Load(source, out sourceRate, forExport: true, sampleFps: export.SampleFps, ct: ct);
             stage.AddChild(sourceRoot);
-            var readiness = AssetReadiness.Inspect(sourceRoot, true);
-            if (!readiness.Ready) throw new NotSupportedException(readiness.Summary);
+            if (sourceRig == null)
+            {
+                var readiness = AssetReadiness.Inspect(sourceRoot, true);
+                if (!readiness.Ready) throw new NotSupportedException(readiness.Summary);
+            }
             var skeletons = Preview3DViewport.Descendants(sourceRoot).OfType<Skeleton3D>().ToArray();
             if (skeletons.Length != 1) throw new NotSupportedException("Retarget 首版需要一个人体 Skeleton。");
-            var sk = skeletons[0]; var src = HumanoidMap.Describe(sk, sourceRoot);
-            var player = Preview3DViewport.Descendants(sourceRoot).OfType<AnimationPlayer>().FirstOrDefault()
+            var sk = skeletons[0]; var src = sourceRig ?? HumanoidMap.Describe(sk, sourceRoot);
+            player = Preview3DViewport.Descendants(sourceRoot).OfType<AnimationPlayer>().FirstOrDefault()
                 ?? throw new IOException("源资产没有动画播放器。");
-            var baseline = new PoseSnapshot(sourceRoot);
+            baseline = new PoseSnapshot(sourceRoot);
             output = new Node3D { Name = "Retargeted" }; stage.AddChild(output);
-            var character = targetFile == null ? RigCatalog.Load(options.TargetRig, out _) : SceneAsset.Load(targetFile, out _, forExport: true);
+            var character = loadTarget != null ? await loadTarget() :
+                targetFile == null ? RigCatalog.Load(options.TargetRig, out _) : SceneAsset.Load(targetFile, out _, forExport: true);
             character.Name = "Character"; output.AddChild(character);
+            ct.ThrowIfCancellationRequested();
             var targetSkeletons = Preview3DViewport.Descendants(character).OfType<Skeleton3D>().ToArray();
             if (targetSkeletons.Length != 1) throw new NotSupportedException("目标角色需要一个人体 Skeleton。");
             var target = targetSkeletons[0];
@@ -76,6 +100,14 @@ public static class RetargetBaker
             var available = player.GetAnimationList().Where(c => c != "RESET").ToArray();
             var selected = export.Clips ?? available;
             if (selected.Length == 0 || selected.Any(c => !available.Contains(c))) throw new IOException("源动画不存在所选片段。");
+            int sourceHand = prop != null ? src.Indices["hand_r"] : -1;
+            int targetHand = prop != null ? dst.Indices["hand_r"] : -1;
+            var handChain = new List<int>();
+            for (int bone = targetHand; bone >= 0; bone = dst.Parents[bone]) handChain.Add(bone);
+            handChain.Reverse();
+            var propCorrection = prop != null
+                ? new Transform3D(dst.GlobalRest[targetHand].Basis.Orthonormalized().Inverse() * src.GlobalRest[sourceHand].Basis.Orthonormalized(), Vector3.Zero)
+                : Transform3D.Identity;
             var budget = Stopwatch.StartNew();
             foreach (string clip in selected)
             {
@@ -89,6 +121,7 @@ public static class RetargetBaker
                 var baked = new Animation { Length = (float)duration, Step = (float)(1 / rate),
                     LoopMode = start == 0 && end == animation.Length ? animation.LoopMode : Animation.LoopModeEnum.None };
                 // Disable source looping so the exact end pose is sampled instead of wrapping to frame zero.
+                sampling = animation; sourceLoop = animation.LoopMode;
                 animation.LoopMode = Animation.LoopModeEnum.None;
                 player.Stop(); baseline.Restore(sourceRoot); player.Play(clip); player.Advance(0); player.Pause();
                 var tracks = dst.Names.Select(n => AddTracks(baked, new NodePath(output.GetPathTo(target) + ":" + n))).ToArray();
@@ -96,33 +129,61 @@ public static class RetargetBaker
                 Sample(start);
                 var initialRoot = RigDescriptor.SceneFrame(sk, sourceRoot) * sk.GetBoneGlobalPose(src.Indices["root"]);
                 var initialDisplacement = initialRoot.Origin - src.GlobalRest[src.Indices["root"]].Origin;
-                for (int sample = 0; sample <= intervals; sample++)
+                bool parallelPreview = preview && intervals >= PreviewBatchSize && System.Environment.ProcessorCount > 1;
+                var batch = Enumerable.Range(0, parallelPreview ? PreviewBatchSize : 1)
+                    .Select(_ => new SamplePose(new Transform3D[src.Names.Length])).ToArray();
+                var workers = new ParallelOptions { CancellationToken = ct, MaxDegreeOfParallelism = 4 };
+                for (int first = 0; first <= intervals; first += batch.Length)
                 {
                     ct.ThrowIfCancellationRequested();
-                    double t = sample == intervals ? duration : Math.Min(sample / rate, duration);
-                    if (sample < intervals && (float)t >= (float)duration) continue;
-                    Sample(start + t);
-                    var poses = solver.Evaluate(Enumerable.Range(0, sk.GetBoneCount()).Select(sk.GetBonePose).ToArray(), RigDescriptor.SceneFrame(sk, sourceRoot), initialDisplacement);
-                    for (int i = 0; i < poses.Length; i++) Insert(baked, tracks[i], t, poses[i]);
-                    if (propTracks != null && motion != null)
+                    int last = Math.Min(first + batch.Length - 1, intervals);
+                    int count = 0;
+                    for (int sample = first; sample <= last; sample++)
                     {
-                        motion.Sync();
-                        int sh = src.Indices["hand_r"], th = dst.Indices["hand_r"];
-                        // The verified motion schema stores this node directly below the hand attachment.
-                        var relative = motion.Prop.Transform;
-                        var correction = new Transform3D(dst.GlobalRest[th].Basis.Orthonormalized().Inverse() * src.GlobalRest[sh].Basis.Orthonormalized(), Vector3.Zero);
-                        var world = dst.Globals(poses)[th] * correction * relative;
-                        Insert(baked, propTracks, t, world);
+                        double t = sample == intervals ? duration : Math.Min(sample / rate, duration);
+                        if (sample < intervals && (float)t >= (float)duration) continue;
+                        Sample(start + t);
+                        var pose = batch[count++];
+                        pose.Time = t;
+                        pose.Frame = RigDescriptor.SceneFrame(sk, sourceRoot);
+                        for (int i = 0; i < pose.Bones.Length; i++) pose.Bones[i] = sk.GetBonePose(i);
+                        if (propTracks != null) pose.Prop = motion!.Prop.Transform;
                     }
-                    if (sample % 64 == 63 || budget.ElapsedMilliseconds > 8)
+                    if (count == 0) continue;
+                    // Only the FK math runs on workers. Sampling Godot nodes and writing animation keys stay on the main thread.
+                    if (parallelPreview)
                     {
-                        progress?.Report($"Retarget {clip}: {sample + 1}/{intervals + 1}");
+                        try { await Task.Run(() => Parallel.For(0, count, workers, Solve), ct); }
+                        catch (AggregateException e) { ExceptionDispatchInfo.Capture(e.Flatten().InnerExceptions[0]).Throw(); }
+                    }
+                    else Solve(0);
+
+                    ct.ThrowIfCancellationRequested();
+                    for (int frame = 0; frame < count; frame++)
+                    {
+                        var pose = batch[frame];
+                        for (int i = 0; i < pose.Solved.Length; i++) Insert(baked, tracks[i], pose.Time, pose.Solved[i]);
+                        if (propTracks != null)
+                        {
+                            var hand = dst.Frame;
+                            foreach (int bone in handChain) hand *= pose.Solved[bone];
+                            Insert(baked, propTracks, pose.Time, hand * propCorrection * pose.Prop);
+                        }
+                    }
+                    if (!parallelPreview && (last % 64 == 63 || budget.ElapsedMilliseconds > 8))
+                    {
+                        progress?.Report($"Retarget {clip}: {last + 1}/{intervals + 1}");
                         await tree.ToSignal(tree, SceneTree.SignalName.ProcessFrame); budget.Restart();
                     }
                 }
                 AddAnimation(bakedPlayer, clip, baked);
-                animation.LoopMode = baked.LoopMode;
+                animation.LoopMode = sourceLoop; sampling = null;
                 void Sample(double t) { baseline.Restore(sourceRoot); player.Seek(t, true, true); }
+                void Solve(int index)
+                {
+                    var pose = batch[index];
+                    pose.Solved = solver.Evaluate(pose.Bones, pose.Frame, initialDisplacement);
+                }
             }
             target.ResetBonePoses();
             if (!export.IncludeMesh)
@@ -133,7 +194,17 @@ public static class RetargetBaker
             return new(output, src, dst, solver.Diagnostics, rate, prop != null);
         }
         catch { if (output != null && output.GetParent() == null) output.Free(); throw; }
-        finally { stage.GetParent()?.RemoveChild(stage); stage.Free(); }
+        finally
+        {
+            if (prepared != null && prepared.Root.GetParent() == stage)
+            {
+                if (sampling != null) sampling.LoopMode = sourceLoop;
+                player?.Stop();
+                baseline?.Restore(prepared.Root);
+                stage.RemoveChild(prepared.Root);
+            }
+            stage.GetParent()?.RemoveChild(stage); stage.Free();
+        }
     }
     internal static void AddAnimation(AnimationPlayer player, string clip, Animation animation)
     {

@@ -9,6 +9,7 @@ public static class HumanoidMap
     public static readonly string[] Required = ["pelvis", "spine_01", "head", "upperarm_l", "lowerarm_l", "hand_l",
         "upperarm_r", "lowerarm_r", "hand_r", "thigh_l", "calf_l", "foot_l", "thigh_r", "calf_r", "foot_r"];
     private static readonly Dictionary<string, string> Aliases = BuildAliases();
+    internal static string Role(string name) => Aliases.GetValueOrDefault(Normalize(name), name);
     private static string Normalize(string value)
     {
         value = value.Split(':', '|').Last().ToLowerInvariant();
@@ -40,7 +41,7 @@ public static class HumanoidMap
         var seen = new Dictionary<string, int>();
         for (int i = 0; i < rig.Names.Length; i++)
         {
-            string role = Aliases.GetValueOrDefault(Normalize(rig.Names[i]), rig.Names[i]);
+            string role = Role(rig.Names[i]);
             rig.Roles[i] = role;
             if (seen.TryGetValue(role, out int other)) problems.Add($"映射冲突：{rig.Names[other]} / {rig.Names[i]} → {role}");
             else { seen[role] = i; rig.Indices[role] = i; }

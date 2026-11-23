@@ -142,9 +142,15 @@ public sealed class WorkspacePreferences
     public Dictionary<string,WorkspaceLayout> SavedLayouts { get; set; }=[];
     public double Scale { get; set; } // 0 = system; otherwise total UI scale.
     public bool Comfortable { get; set; }
+    public bool ResetCameraOnAnimationChange { get; set; }
     public string AssetView { get; set; } = "Grid";
-    public Animanager.Core.Browse.AssetSortField SortField { get; set; }
+    public string[] BrowseLibraryIds { get; set; } = [];
+    public string[]? OpenLibraryIds { get; set; }
+    public Dictionary<string, string> RecentPreviewAssets { get; set; } = new();
+    public HashSet<string> DisabledAnimationPlugins { get; set; } = new(StringComparer.Ordinal);
+    public Animanager.Core.Browse.AssetSortField SortField { get; set; } = Animanager.Core.Browse.AssetSortField.LibraryMix;
     public bool SortDescending { get; set; } = true;
+    public bool AssetSortChosen { get; set; }
     public int Width { get; set; }=1440;
     public int Height { get; set; }=900;
     public int X { get; set; }
@@ -173,11 +179,18 @@ public sealed class WorkspacePreferences
             if(!File.Exists(path))return new();
             var p=JsonSerializer.Deserialize<WorkspacePreferences>(File.ReadAllText(path))??throw new IOException("Empty layout");
             if(p.Version!=1)throw new IOException("Unsupported workspace version");
+            if(!p.AssetSortChosen && p.SortField==Animanager.Core.Browse.AssetSortField.Imported)
+                p.SortField=Animanager.Core.Browse.AssetSortField.LibraryMix;
             p.Layout??=new();p.Layout.Normalize();p.SavedLayouts??=[];
             p.DockLayout?.Normalize();
             foreach(var key in p.SavedLayouts.Keys.ToArray()){if(p.SavedLayouts[key]==null)p.SavedLayouts.Remove(key);else p.SavedLayouts[key].Normalize();}
             if(!double.IsFinite(p.Scale)||p.Scale<1||p.Scale>2)p.Scale=0;
             if(p.AssetView is not ("Grid" or "List"))p.AssetView="Grid";
+            p.BrowseLibraryIds = (p.BrowseLibraryIds ?? []).Where(id => Guid.TryParseExact(id, "N", out _)).Distinct().ToArray();
+            p.OpenLibraryIds = p.OpenLibraryIds?.Where(id => Guid.TryParseExact(id, "N", out _)).Distinct().ToArray();
+            p.RecentPreviewAssets = (p.RecentPreviewAssets ?? new()).Where(pair => Guid.TryParse(pair.Key, out _) &&
+                Guid.TryParse(pair.Value, out _)).TakeLast(32).ToDictionary();
+            p.DisabledAnimationPlugins ??= new(StringComparer.Ordinal);
             if(!Enum.IsDefined(p.SortField))p.SortField=Animanager.Core.Browse.AssetSortField.Imported;
             return p;
         }

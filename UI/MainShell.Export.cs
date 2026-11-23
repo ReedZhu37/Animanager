@@ -1,6 +1,7 @@
 using System.Globalization;
 using Animanager.Core.Jobs;
 using Animanager.Core.Pipeline;
+using Animanager.Core.Storage;
 using Godot;
 using static Animanager.UI.Controls.AppControls;
 
@@ -8,7 +9,9 @@ namespace Animanager.UI;
 
 public partial class MainShell
 {
+    private const int CollectionExportScope = 3;
     private OptionButton _exportScope = null!, _exportClipMode = null!;
+    private OptionButton _exportCollectionChoice = null!;
     private CheckBox _exportMesh = null!;
     private ItemList _exportClipList = null!;
     private Label _exportClipHelp = null!;
@@ -23,8 +26,13 @@ public partial class MainShell
         _exportScope.AddItem("已选资产（含其他页）");
         _exportScope.AddItem("当前资产");
         _exportScope.AddItem("当前筛选结果");
+        _exportScope.AddItem("集合（含子集合）");
         _exportScope.ItemSelected += _ => SyncExportControls();
         column.AddChild(_exportScope);
+        _exportCollectionChoice = new OptionButton { Name = "ExportCollectionChoice", FitToLongestItem = false, Visible = false };
+        _exportCollectionChoice.ItemSelected += _ => SyncExportControls();
+        column.AddChild(_exportCollectionChoice);
+        RefreshExportCollectionChoices();
         _exportSummary = Wrapped("选择要导出的资产。");
         column.AddChild(_exportSummary);
 
@@ -89,23 +97,58 @@ public partial class MainShell
         return column;
     }
 
+    private void RefreshExportCollectionChoices()
+    {
+        string selectedId = _exportCollectionChoice.GetSelectedMetadata().AsString();
+        _exportCollectionChoice.Clear();
+        var byId = _collections.ToDictionary(item => item.Id);
+        foreach (var collection in _collections)
+        {
+            var names = new Stack<string>();
+            for (AppCollection? item = collection; item != null; item = byId.GetValueOrDefault(item.ParentId ?? ""))
+                names.Push(item.Name);
+            _exportCollectionChoice.AddItem(string.Join(" / ", names));
+            _exportCollectionChoice.SetItemMetadata(_exportCollectionChoice.ItemCount - 1, collection.Id);
+        }
+        int index = Array.FindIndex(_collections, item => item.Id == selectedId);
+        if (_collections.Length > 0) _exportCollectionChoice.Select(Math.Max(0, index));
+    }
+
+    private AppCollection? SelectedExportCollection() =>
+        _collections.FirstOrDefault(item => item.Id == _exportCollectionChoice.GetSelectedMetadata().AsString());
+
+    private void OpenCollectionExport(AppCollection collection)
+    {
+        _exportScope.Select(CollectionExportScope);
+        _exportCollectionChoice.Select(Array.FindIndex(_collections, item => item.Id == collection.Id));
+        SyncExportControls();
+        _workspace.ShowPanel("export");
+    }
+
     private void SyncExportControls()
     {
         if (_export == null || _closing) return;
         int scope = _exportScope.Selected;
-        int count = _api == null || _category == "Trash" ? 0 : scope switch
+        bool collectionScope = scope == CollectionExportScope;
+        _exportCollectionChoice.Visible = collectionScope;
+        var collection = collectionScope ? SelectedExportCollection() : null;
+        var members = collection == null ? [] : ExportCollectionMembers(collection, _collections);
+        int availableMembers = members.Count(member => _libraries.FindOpenLibrary(member.LibraryId) != null);
+        int count = _libraryLoading || (!collectionScope && _category == "Trash") ? 0 : scope switch
         {
-            1 => _selected == null ? 0 : 1,
-            2 => FilteredAssetCount,
-            _ => _assetSelection.Count
+            1 => _selectedLibrary != null ? 1 : 0,
+            2 => _onlineFilteredAssetCount,
+            CollectionExportScope => availableMembers,
+            _ => CanEditAssetSelection() ? _assetSelection.Count : 0
         };
         _exportSummary.Text = scope == 1 && count > 0 ? _selected!.Name
             : count == 0 ? "此范围内没有可导出的资产。" : $"{count} 个资产";
+        if (availableMembers < members.Length) _exportSummary.Text += $"\n来源库未打开 · {members.Length - availableMembers} 项";
         if (_retargetEnabled?.ButtonPressed == true) _exportSummary.Text += "\nRetarget → " + RetargetCharacter.Name;
         if (_exportFps != null) _exportFps.PlaceholderText = _retargetEnabled?.ButtonPressed == true ? "默认自动选择；独立武器 600 FPS" : "默认使用源采样";
         _exportMesh.Visible = (JobKind)_exportType.GetSelectedId() != JobKind.ExportRes;
 
-        var preview = _previewAssetId.Length > 0 && _previewAssetId == _selected?.Id ? _preview : null;
+        var preview = _selectedLibrary != null && _previewAssetId == _selectedKey ? _preview : null;
         var available = preview?.Clips;
         if (!ReferenceEquals(_exportAvailableClips, available))
         {
@@ -134,15 +177,33 @@ public partial class MainShell
 
     private async void Export(string folder)
     {
-        if (_api == null || _export.Disabled || _exportCancellation != null) return;
-        var api = _api;
+        if (_libraryLoading || _export.Disabled || _exportCancellation != null) return;
         using var cancellation = new CancellationTokenSource();
         _exportCancellation = cancellation;
         SyncExportControls();
+        var activities = new List<IDisposable>();
         try
         {
-            using var activity = api.BeginActivity();
             int scope = _exportScope.Selected;
+            int skipped = 0;
+            string selection = scope == 2 ? "当前筛选结果" : "已选资产";
+            var (browseScopes, query, filter, tags) = _publishedBrowseScope;
+            var selected = scope == 1
+                ? [(_selectedLibrary!, Ids: new[] { _selected!.Id })]
+                : _assetSelection.GroupBy(SelectionLibrary).Select(group => (group.Key!, Ids: group.Select(SelectionAssetId).ToArray())).ToArray();
+            if (scope == CollectionExportScope)
+            {
+                var collection = SelectedExportCollection() ?? throw new InvalidOperationException("请选择要导出的集合。");
+                selection = "集合 · " + collection.Name;
+                var members = ExportCollectionMembers(collection, _collections);
+                selected = members.GroupBy(member => member.LibraryId)
+                    .Select(group => (_libraries.FindOpenLibrary(group.Key), Ids: group.Select(member => member.AssetId).ToArray()))
+                    .Where(group => group.Item1 != null)
+                    .Select(group => (group.Item1!, group.Ids)).ToArray();
+                skipped = members.Length - selected.Sum(group => group.Ids.Length);
+            }
+            var sources = scope == 2 ? browseScopes.Select(source => source.Library) : selected.Select(group => group.Item1);
+            foreach (var library in sources) activities.Add(library.Api.BeginActivity());
             var kind = (JobKind)_exportType.GetSelectedId();
             var options = new ExportOptions
             {
@@ -154,33 +215,58 @@ public partial class MainShell
                 Retarget = _retargetEnabled?.ButtonPressed == true ? ReadRetargetOptions() : null
             }.Snapshot(kind == JobKind.ExportRes);
 
-            BatchPlan plan;
-            if (scope == 1) plan = api.Planner.ExportSingle(_selected!.Id, folder, kind, options);
-            else
+            if (scope == 2)
             {
-                var ids = scope == 2 ? (await GetAssetsForCurrentFilterAsync(cancellation.Token)).Select(asset => asset.Id).ToArray()
-                    : _assetSelection.ToArray();
-                if (_closing || _api != api) return;
-                plan = api.Planner.ExportSelection(ids, folder, kind, options, scope == 2 ? "当前筛选结果" : "已选资产");
+                selected = await Task.WhenAll(browseScopes.Select(async source => (source.Library, Ids:
+                    (await source.Library.Api.GetMatchingAssetsAsync(query, source.Category, filter, cancellation.Token, tags, source.MemberIdsJson))
+                    .Select(asset => asset.Id).ToArray())));
             }
 
-            var id = api.Jobs.Enqueue(plan);
-            SetStatus($"{JobKindName(kind)}已加入队列 · {plan.Items.Count} 项 · {id[..8]}");
-            using var cancelJob = cancellation.Token.Register(() => api.Jobs.Cancel(id));
-            var result = await api.Jobs.WaitAsync(id);
-            if (_closing || _api != api) return;
-            if (result.Items.FirstOrDefault(item => item.State == ItemState.Succeeded) is { } item) _lastExport = item.Output;
-            SetStatus($"{JobKindName(kind)} · {JobStateName(result.State)} · 成功 {result.Succeeded} · 失败 {result.Failed} · {id[..8]}");
+            if (scope == CollectionExportScope)
+            {
+                int before = selected.Sum(group => group.Ids.Length);
+                selected = selected.Select(group => (group.Item1, Ids: group.Item1.Api.Database.ExistingIds(group.Ids, trash: false))).ToArray();
+                skipped += before - selected.Sum(group => group.Ids.Length);
+            }
+
+            if (_closing) return;
+            var plans = selected.Where(group => group.Ids.Length > 0).Select(group =>
+            {
+                var api = group.Item1.Api;
+                var plan = scope == 1 ? api.Planner.ExportSingle(group.Ids[0], folder, kind, options)
+                    : api.Planner.ExportSelection(group.Ids, folder, kind, options, selection);
+                return (api.Jobs, Plan: plan);
+            }).ToArray();
+            if (plans.Length == 0) throw new InvalidOperationException(skipped > 0
+                ? $"集合中的 {skipped} 个资产不可用。请检查来源库和回收站。" : "没有可导出的匹配资产。");
+
+            int succeeded = 0, failed = 0, cancelled = 0;
+            foreach (var (jobs, plan) in plans)
+            {
+                cancellation.Token.ThrowIfCancellationRequested();
+                var id = jobs.Enqueue(plan);
+                SetStatus($"{JobKindName(kind)}已加入队列 · {plan.Items.Count} 项 · {id[..8]}");
+                using var cancelJob = cancellation.Token.Register(() => jobs.Cancel(id));
+                var result = await jobs.WaitAsync(id);
+                if (_closing) return;
+                if (result.Items.FirstOrDefault(item => item.State == ItemState.Succeeded) is { } item) _lastExport = item.Output;
+                succeeded += result.Succeeded;
+                failed += result.Failed;
+                cancelled += result.Cancelled;
+            }
+            SetStatus($"{JobKindName(kind)} · 成功 {succeeded} · 失败 {failed}" + (cancelled > 0 ? $" · 取消 {cancelled}" : "") +
+                (skipped > 0 ? $" · 跳过 {skipped} 个不可用资产" : ""));
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { }
         catch (Exception error)
         {
-            if (!_closing && _api == api) ShowError("导出失败", error.Message);
+            if (!_closing) ShowError("导出失败", error.Message);
         }
         finally
         {
+            foreach (var activity in activities) activity.Dispose();
             _exportCancellation = null;
-            if (!_closing && _api == api) SyncExportControls();
+            if (!_closing) SyncExportControls();
         }
     }
 

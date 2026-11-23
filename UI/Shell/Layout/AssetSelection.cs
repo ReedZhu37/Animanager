@@ -15,6 +15,7 @@ public sealed class AssetSelection : IReadOnlyCollection<string>
     private readonly List<string> _order = [];          // current view order, for range maths
     private readonly HashSet<string> _ids = new(StringComparer.Ordinal);
     private string? _anchor;
+    private string? _pendingClick;
 
     public IReadOnlyCollection<string> Ids => _ids;
     public int Count => _ids.Count;
@@ -29,6 +30,23 @@ public sealed class AssetSelection : IReadOnlyCollection<string>
     public void IntersectWith(IEnumerable<string> ids) => Prune(ids);
 
     public bool Contains(string id) => _ids.Contains(id);
+
+    internal void PressRow(string id, InputEventMouseButton button)
+    {
+        if (button.ShiftPressed) SelectRange(id);
+        else if (button.CtrlPressed) Toggle(id);
+        else if (Count > 1 && Contains(id) && !button.DoubleClick) _pendingClick = id;
+        else Select(id);
+    }
+
+    internal void ReleaseRow(string? id)
+    {
+        var pending = _pendingClick;
+        CancelPendingClick();
+        if (pending != null && pending == id) Select(id);
+    }
+
+    internal void CancelPendingClick() => _pendingClick = null;
 
     /// <summary>
     /// Re-points the selection at a new page. Ids that are gone from the view stay selected so a

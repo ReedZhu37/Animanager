@@ -40,6 +40,82 @@ public static class ThirdFeedbackTests
             await owner.Import([empty]);
             Check(Preview3DViewport.Descendants(owner).OfType<AcceptDialog>().Any(d=>d.Visible&&d.Title=="导入失败"),"empty directory has an explicit failure dialog");HideDialogs();
 
+            async Task Until(Func<bool> ready)
+            {
+                var deadline = DateTime.UtcNow.AddSeconds(20);
+                while (!ready() && DateTime.UtcNow < deadline) await Frames(1);
+                if (!ready()) throw new TimeoutException("Import review did not reach the expected state.");
+            }
+            ImportReviewDialog? Review() => owner.GetChildren().OfType<ImportReviewDialog>().FirstOrDefault(d => d.Visible);
+            string Sample(string name) => RuntimePaths.Bundled($"BuiltinAssets/Samples/StudioBot_{name}.glb");
+            void Press(Node dialog, string name) => dialog.FindChild(name, true, false)!.EmitSignal(BaseButton.SignalName.Pressed);
+            void ClickCell(ImportReviewDialog dialog, Tree table, TreeItem row, int column)
+            {
+                var cell = table.GetItemAreaRect(row, column);
+                Vector2 point = table.GetGlobalRect().Position + new Vector2(cell.Position.X + Math.Min(13, cell.Size.X / 2), cell.GetCenter().Y);
+                using var down = new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = true };
+                using var up = new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left };
+                dialog.PushInput(down, true);
+                dialog.PushInput(up, true);
+            }
+
+            var reviewTask = owner.Import([Sample("Walk"), Sample("Run"), Sample("Idle")], review: true);
+            await Until(() => Review() != null || reviewTask.IsCompleted);
+            var review = Review() ?? throw new Exception("Import review did not open.");
+            var table = (Tree)review.FindChild("ImportAnimations", true, false)!;
+            var reviewPreview = (Preview3DViewport)review.FindChild("ImportPreviewViewport", true, false)!;
+            var tagInput = (LineEdit)review.FindChild("ImportTags", true, false)!;
+            var first = table.GetRoot().GetFirstChild();
+            var second = first.GetNext();
+            Check(second.GetNext() == null && first.GetText(1) != "Walk" && second.GetText(1) != "Walk", "the review contains only newly imported animations");
+            await Until(() => reviewPreview.Duration > 0);
+            ulong firstModel = reviewPreview.Model!.GetInstanceId();
+            await Frames();
+            if (DisplayServer.GetName() == "headless") review.NotifyMouseEntered();
+            ClickCell(review, table, second, 1);
+            await Until(() => reviewPreview.Duration > 0 && reviewPreview.Model!.GetInstanceId() != firstModel);
+            Press(review, "PlayImportAnimation");
+            Check(reviewPreview.Playing, "selecting an imported animation loads its preview and enables playback");
+            ClickCell(review, table, first, 0);
+            Check(first.IsChecked(0) && !second.IsChecked(0), "the animation checkbox selects one target independently of the preview");
+            tagInput.Text = "单条标签";
+            Press(review, "AddImportTags");
+            ((CheckBox)review.FindChild("SelectAllImportAnimations", true, false)!).ButtonPressed = true;
+            tagInput.Text = "批量标签，其他";
+            Press(review, "AddImportTags");
+            string firstName = first.GetText(1), secondName = second.GetText(1);
+            Press(review, "SaveImportTags");
+            await reviewTask;
+            Check(api.Search("批量标签").Total == 2 && api.Find(firstName).Tags.Contains("单条标签") &&
+                !api.Find(secondName).Tags.Contains("单条标签") && api.Find("Walk").Tags == loaded.Tags,
+                "saving merges individual and batch tags only into the intended new assets");
+            HideDialogs();
+
+            const string idleFbx = "BuiltinAssets/Baselines/UE5_Manny_Idle.fbx";
+            var originalWindowSize = owner.GetWindow().Size;
+            var originalScale = owner.DisplayScale.RequestedScale;
+            owner.DisplayScale.SetScale(2);
+            owner.GetWindow().Size = new(1024, 700);
+            var skipTask = owner.Import([RuntimePaths.Bundled(idleFbx)], review: true);
+            await Until(() => Review() != null || skipTask.IsCompleted);
+            var skipped = Review() ?? throw new Exception("Import review did not open for the FBX.");
+            await Frames();
+            var bounds = new Rect2(Vector2.Zero, (Vector2)skipped.Size / skipped.ContentScaleFactor);
+            Check(skipped.Size.X <= owner.GetWindow().Size.X && skipped.Size.Y <= owner.GetWindow().Size.Y &&
+                new[] { "ImportAnimations", "ImportPreviewViewport", "ImportTags", "SkipImportReview", "SaveImportTags" }
+                    .All(name => bounds.Encloses(((Control)skipped.FindChild(name, true, false)!).GetGlobalRect())),
+                "the review keeps its preview, tags and actions visible at 200 percent");
+            ((CheckBox)skipped.FindChild("SelectAllImportAnimations", true, false)!).ButtonPressed = true;
+            ((LineEdit)skipped.FindChild("ImportTags", true, false)!).Text = "丢弃的标签";
+            Press(skipped, "AddImportTags");
+            Press(skipped, "SkipImportReview");
+            await skipTask;
+            owner.DisplayScale.SetScale(originalScale);
+            owner.GetWindow().Size = originalWindowSize;
+            Check(api.Find("UE5_Manny_Idle").Tags == "无位移" && api.Search("丢弃的标签").Total == 0,
+                "skipping discards staged tags while keeping the imported animation and its automatic tags");
+            HideDialogs();
+
             string? source=OS.GetCmdlineUserArgs().FirstOrDefault(s=>s.StartsWith("--uasset-feedback-source="))?.Split('=',2)[1];
             if(source!=null)
             {
@@ -124,6 +200,13 @@ public static class ThirdFeedbackTests
             Check(owner.GetViewport().GetVisibleRect().Encloses(search.GetGlobalRect())&&owner.GetViewport().GetVisibleRect().Encloses(Button("AssetPageLast").GetGlobalRect()),"search and page boundaries remain visible at 200 percent");
             Check(browser.Scroll.Size.Y>=AssetList.HeaderHeight+AssetList.RowHeight,"compact toolbar leaves room for asset rows below the fixed header");
             await Capture("list-200");
+            var tag = Preview3DViewport.Descendants(owner.Workspace.Panel("navigation")).OfType<Button>()
+                .Single(button => button.Text == "检索标签 1");
+            tag.EmitSignal(BaseButton.SignalName.Pressed);
+            await owner.PendingBrowse;await Frames();
+            Check(browser.Count == 1 && Button("AssetAttributeFilters").Text == "筛选 1" &&
+                browser.Scroll.Size.Y >= AssetList.HeaderHeight + AssetList.RowHeight,
+                "short asset docks retain a full result row with the active filter shown in the toolbar");
             if(DisplayServer.GetName()!="headless")
             {
                 owner.DisplayScale.SetScale(1);owner.GetWindow().Size=new(1440,1000);owner.Workspace.FocusPanel("preview");await Frames(15);
