@@ -165,43 +165,67 @@ public partial class MainShell
     private void BuildAssetBrowseControls(VBoxContainer column)
     {
         _thumbnailsEnabled = DisplayServer.GetName() != "headless";
-        _attributePanel = column;
-        BuildTagFilterControls(column);
-        BuildMotionFilter(column);
-        column.AddChild(new HSeparator());
-        column.AddChild(Label("资产属性", false, 13));
+        column.AddThemeConstantOverride("separation", Tokens.Space.Sm);
+        var heading = Row(column);
+        var title = Shell.Type.Build("资产筛选", Typography.Semi, Shell.Type.SectionTitle, Tokens.Text);
+        title.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+        heading.AddChild(title);
+        var close = Button("关闭", _workspace.CloseDrawer);
+        close.Name = "CloseAssetFilters";
+        StyleAssetToolbarButton(close, quiet: true);
+        heading.AddChild(close);
+
+        var tabs = new TabContainer { Name = "AssetFilterTabs", SizeFlagsVertical = SizeFlags.ExpandFill,
+            UseHiddenTabsForMinSize = false };
+        tabs.AddThemeColorOverride("font_selected_color", Tokens.Accent);
+        tabs.AddThemeStyleboxOverride("tab_selected", Surfaces.Fill(Tokens.AccentWash, Tokens.Radius.Control, 12, 5));
+        tabs.AddThemeStyleboxOverride("panel", Surfaces.Fill(Tokens.Panel, padY: Tokens.Space.Sm));
+        column.AddChild(tabs);
+        VBoxContainer Page(string caption)
+        {
+            var scroll = new ScrollContainer { Name = caption, HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
+            tabs.AddChild(scroll);
+            var inset = Surfaces.Padding(Tokens.Space.Xs);
+            inset.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+            scroll.AddChild(inset);
+            var fields = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill };
+            fields.AddThemeConstantOverride("separation", Tokens.Space.Sm);
+            inset.AddChild(fields);
+            return fields;
+        }
+        BuildMotionFilter(Page("动作"));
+        BuildTagFilterControls(Page("标签"));
+        _attributePanel = Page("属性");
+        _attributePanel.AddChild(Label("骨架", size: 13));
         _skeletonFilter = new OptionButton { Name = "AssetSkeletonFilter", FitToLongestItem = false, CustomMinimumSize = new(0, 32) };
         _attributePanel.AddChild(_skeletonFilter);
         SetSkeletonOptions([]);
 
-        var numbers = new HFlowContainer();
-        _attributePanel.AddChild(numbers);
-        _durationFilter = AddNumberFilter(numbers, "时长（秒）", "AssetDurationFilter", "例如 1..3", "按资产中最长片段的时长筛选。" + NumberFilterHelp);
-        _fpsFilter = AddNumberFilter(numbers, "源帧率", "AssetFpsFilter", "例如 60", "按文件记录的源帧率筛选。" + NumberFilterHelp);
-        var actions = new HFlowContainer();
-        _attributePanel.AddChild(actions);
+        _durationFilter = AddNumberFilter(_attributePanel, "时长（秒）", "AssetDurationFilter", "例如 1..3", "按资产中最长片段的时长筛选。" + NumberFilterHelp);
+        _fpsFilter = AddNumberFilter(_attributePanel, "源帧率", "AssetFpsFilter", "例如 60", "按文件记录的源帧率筛选。" + NumberFilterHelp);
         var apply = Button("应用属性筛选", ApplyAssetAttributeFilter);
         apply.Name = "AssetApplyFilters";
-        actions.AddChild(apply);
-        var clear = Button("清除筛选", () => ResetAssetFilters(refresh: true));
-        clear.Name = "AssetClearFilters";
-        actions.AddChild(clear);
+        _attributePanel.AddChild(apply);
         _attributeHint = Wrapped("");
         _attributeHint.Visible = false;
         _attributePanel.AddChild(_attributeHint);
+        column.AddChild(Hairline.Horizontal());
+        var clear = Button("清除全部筛选", () => ResetAssetFilters(refresh: true));
+        clear.Name = "AssetClearFilters";
+        column.AddChild(clear);
     }
 
     private void BuildTagFilterControls(VBoxContainer column)
     {
-        column.AddChild(Label("标签", false, 13));
-        _tagMatchMode = new OptionButton { Name = "AssetTagMatchMode", CustomMinimumSize = new(0, 32) };
-        _tagMatchMode.AddItem("交集 · 包含全部所选标签");
-        _tagMatchMode.AddItem("并集 · 包含任一所选标签");
+        column.AddChild(Label("匹配方式", size: 13));
+        _tagMatchMode = new OptionButton { Name = "AssetTagMatchMode", FitToLongestItem = false, CustomMinimumSize = new(0, 32) };
+        _tagMatchMode.AddItem("包含全部所选标签");
+        _tagMatchMode.AddItem("包含任一所选标签");
         _tagMatchMode.Select(0);
         _tagMatchMode.ItemSelected += _ => { if (_selectedTags.Count > 0) RefreshAfterFilterChange(); };
         column.AddChild(_tagMatchMode);
 
-        var actions = Row(column);
+        column.AddChild(Label("所选标签", size: 13));
         _tagPicker = new MenuButton
         {
             Name = "AssetTagPicker", Text = "选择标签 ▾", CustomMinimumSize = new(0, 32),
@@ -237,8 +261,8 @@ public partial class MainShell
             ToggleAssetTag(name);
             popup.SetItemChecked((int)index, _selectedTags.Contains(name));
         };
-        actions.AddChild(_tagPicker);
-        actions.AddChild(BuildTagGroupMenu());
+        column.AddChild(_tagPicker);
+        column.AddChild(BuildTagGroupMenu());
     }
 
     private void ToggleAssetTag(string tag)
@@ -266,7 +290,7 @@ public partial class MainShell
     {
         var field = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, CustomMinimumSize = new(102, 0) };
         parent.AddChild(field);
-        field.AddChild(Label(label, true, 12));
+        field.AddChild(Label(label, size: 13));
         var input = Input(placeholder);
         input.Name = name;
         input.TooltipText = hint;

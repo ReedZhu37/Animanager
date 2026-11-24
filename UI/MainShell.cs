@@ -189,9 +189,12 @@ public partial class MainShell : Control
             var audition = new MotionAudition();
             AddChild(audition);
             audition.PopupCenteredClamped(new(760, 520));
-            _ = audition.Prepare(reference.Library.Api.Storage.Resolve(reference.Asset.VirtualPath), reference.Clip,
-                reference.Asset.Name, reference.Start, reference.End, row.Library.Api.Storage.Resolve(row.Asset.VirtualPath),
-                hit.Clip, row.Asset.Name, hit.Start, hit.End);
+            var character = _preview.AppliedRetarget is { } applied && (applied.Character?.Id ?? applied.TargetRig) == _previewCharacterId
+                ? applied with { SourceRig = "", SourceHash = "" } :
+                _characterEntries.FirstOrDefault(c => c.Id == _previewCharacterId && c.Compatible)?.Options() ?? new RetargetOptions();
+            _ = audition.Prepare(new(reference.Library.Api.Storage.Resolve(reference.Asset.VirtualPath), reference.Clip,
+                reference.Asset.Name, reference.Start, reference.End), new(row.Library.Api.Storage.Resolve(row.Asset.VirtualPath),
+                hit.Clip, row.Asset.Name, hit.Start, hit.End), character);
             return;
         }
         var key = AssetKey(row.Library, row.Asset.Id);

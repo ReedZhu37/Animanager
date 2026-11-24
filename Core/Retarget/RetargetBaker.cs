@@ -28,6 +28,10 @@ public static class RetargetBaker
         PreviewSource? prepared = null, RigDescriptor? sourceRig = null, Func<Task<Node3D>>? loadTarget = null)
         => BakeCoreAsync(source, null, new() { Retarget = options, IncludeMesh = true }, null, ct, preview: true, prepared, sourceRig, loadTarget);
 
+    internal static Task<RetargetResult> BakePreviewRangeAsync(PreviewSource source, RigDescriptor rig, ExportOptions range,
+        Func<Task<Node3D>> loadTarget, CancellationToken ct) =>
+        BakeCoreAsync(source.Path, null, range, null, ct, preview: true, source, rig, loadTarget);
+
     // Explicit custom target: TargetRig chooses the required naming/hierarchy family, not replacement geometry.
     // Callers own the target-file identity; this entry point does not create or persist a catalogue preset.
     public static Task<RetargetResult> BakeToTargetAsync(string source, string targetFile, ExportOptions export,

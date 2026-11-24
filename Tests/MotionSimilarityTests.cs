@@ -1,6 +1,8 @@
 using Animanager.Core;
 using Animanager.Core.Browse;
 using Animanager.Core.Pipeline;
+using Animanager.Core.Motion;
+using Animanager.Core.Retarget;
 using Animanager.UI;
 using Animanager.UI.Components;
 using Animanager.UI.Shell;
@@ -38,7 +40,8 @@ internal static class MotionSimilarityTests
             var path = RuntimePaths.Bundled("BuiltinAssets/Baselines/UE5_Manny_Idle.fbx");
             var sampled = await MotionSampleReader.Read(path, owner.GetTree(), default);
             Check(sampled.Length > 0 && sampled[0].Frames.Any(f => !f.SequenceEqual(sampled[0].Frames[0])), "animated FBX skeleton sampling");
-            var root = SceneAsset.Load(path, out _);
+            var root = (await RetargetBaker.BakeAsync(path, new ExportOptions { IncludeMesh = true, SampleFps = 30,
+                StartSeconds = 0, EndSeconds = 1.5, Retarget = new() { TargetRig = "ue4-mannequin" } })).Root;
             string glb = Path.Combine(api.Storage.Root, "Candidate.glb");
             try
             {
@@ -76,8 +79,19 @@ internal static class MotionSimilarityTests
             var timer = System.Diagnostics.Stopwatch.StartNew();
             while (!popup!.IsProcessing() && timer.Elapsed.TotalSeconds < 18)
                 await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
-            Check(popup.IsProcessing() && popup.FindChildren("*", "SubViewport", true, false).Count >= 2,
-                "both animation clips are loaded for continuous playback");
+            Check(popup.IsProcessing(), "both source rigs are ready for playback on one character");
+            var view = Preview3DViewport.Descendants(popup).OfType<Preview3DViewport>().Single();
+            var camera = view.View.GetCamera3D();
+            var mesh = Preview3DViewport.Descendants(view.Model!).OfType<MeshInstance3D>().First(m => m.Skin != null);
+            Check(view.BoneCount == 161 && view.Clips.SequenceEqual(["From", "To"]), "UE5 and UE4 clips bind to one Manny skeleton");
+            view.Navigate("orbit", new(40, -20));
+            view.Zoom(.85f);
+            view.Navigate("pan", new(5, 4));
+            var cameraPose = camera.GlobalTransform;
+            var clipBefore = view.CurrentClip;
+            for (int i = 0; i < 100 && view.CurrentClip == clipBefore; i++) popup._Process(.025);
+            Check(view.CurrentClip != clipBefore && view.View.GetCamera3D() == camera && camera.GlobalTransform.IsEqualApprox(cameraPose) &&
+                mesh.IsVisibleInTree() && mesh.IsInsideTree(), "role mesh, orbit, zoom and pan survive the transition");
             if (DisplayServer.GetName() != "headless")
             {
                 for (int i = 0; i < 5; i++) await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
@@ -137,7 +151,72 @@ internal static class MotionSimilarityTests
                     var aligned = MotionSimilarity.Find(native, native.Duration * .35, native.Duration * .65, same, 0, default);
                     Check(aligned is { Score: > 95 } && Math.Abs(aligned.Start - native.Duration * .35) < .08,
                         $"Nodachi motion and independently imported UE clip align · {aligned?.Score:F1} points at {aligned?.Start:F3}s");
+                    var armed = new MotionAudition();
+                    owner.AddChild(armed);
+                    try
+                    {
+                        await armed.Prepare(new(counterpart, same[0].Name, "A", 0, .3),
+                            new(manifest, native.Name, "B", .1, .4), new() { TargetRig = "ue4-mannequin" });
+                        var shared = Preview3DViewport.Descendants(armed).OfType<Preview3DViewport>().Single();
+                        var prop = shared.Model?.GetNodeOrNull<Node3D>("CandidateWeapon");
+                        Check(armed.IsProcessing() && shared.BoneCount == 68 && prop is { Visible: false },
+                            "both actions use the requested UE4 mesh before the armed follow-up");
+                        armed._Process(.35);
+                        Check(shared.CurrentClip == "To" && prop!.Visible, "the follow-up weapon appears on the shared character at the cut");
+                    }
+                    finally { armed.QueueFree(); }
                 }
+            }
+            Press("CollectionRow" + collection.Id);
+            Press("AssetClearFilters");
+            var (json, data) = MotionGlb.Unpack(File.ReadAllBytes(RuntimePaths.Bundled("BuiltinAssets/Samples/StudioBot_Idle.glb")));
+            var pages = Directory.CreateDirectory(Path.Combine(api.Storage.Root, "paging-fixtures"));
+            var files = Enumerable.Range(1, 61).Select(i =>
+            {
+                var file = Path.Combine(pages.FullName, $"Paging-{i:D2}.glb");
+                json["asset"]!["generator"] = $"Paging test {i}";
+                File.WriteAllBytes(file, MotionGlb.Pack(json, data));
+                return file;
+            }).ToArray();
+            await api.ImportAsync(files);
+            Search("Paging");
+            await owner.PendingBrowse;
+            Press("AssetAttributeFilters");
+            var next = Find<Button>("AssetPageNext");
+            var previous = Find<Button>("AssetPagePrevious");
+            var filters = Find<PanelContainer>("FilterSidebar");
+            var window = owner.GetWindow();
+            var viewport = owner.GetViewport();
+            if (DisplayServer.GetName() == "headless") viewport.NotifyMouseEntered();
+            foreach (var (size, scale) in new[] { (new Vector2I(1280, 800), 1), (new Vector2I(720, 400), 1), (new Vector2I(1024, 700), 2) })
+            {
+                owner.DisplayScale.SetScale(scale);
+                window.Size = size;
+                await owner.ToSignal(owner.GetTree().CreateTimer(.4), SceneTreeTimer.SignalName.Timeout);
+                Check(filters.IsVisibleInTree() && !filters.GetGlobalRect().Intersects(next.GetGlobalRect()) &&
+                    window.GetVisibleRect().Encloses(next.GetGlobalRect()), $"filters leave the pager visible at {size}");
+                if (DisplayServer.GetName() != "headless")
+                {
+                    using var image = window.GetTexture().GetImage();
+                    image.SavePng(Path.Combine(api.Storage.Root, $"filters-{size.X}.png"));
+                }
+                await Click(next);
+                Check(browser.Count == 1 && filters.IsVisibleInTree(), $"mouse reaches Next with filters open at {size}");
+                await Click(previous);
+                Check(browser.Count == 60 && filters.IsVisibleInTree(), $"mouse reaches Previous with filters open at {size}");
+            }
+            async Task Click(Button button)
+            {
+                Vector2 point = button.GetGlobalRect().GetCenter();
+                using var move = new InputEventMouseMotion { Position = point, GlobalPosition = point };
+                using var down = new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = true };
+                using var up = (InputEventMouseButton)down.Duplicate();
+                up.Pressed = false;
+                viewport.PushInput(move, true);
+                viewport.PushInput(down, true);
+                viewport.PushInput(up, true);
+                await owner.PendingBrowse;
+                await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
             }
             GD.Print($"PASS {checks} motion similarity checks");
             owner.GetTree().Quit(0);

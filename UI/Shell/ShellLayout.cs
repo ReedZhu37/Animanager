@@ -18,6 +18,7 @@ public partial class ShellLayout : Control
     private readonly Dictionary<string, Control> _panels = [];
     private readonly Dictionary<string, Control> _drawers = [];
     private readonly PanelContainer _drawer = new() { Visible = false };
+    private readonly PanelContainer _filterDock = new() { Name = "FilterSidebar", Visible = false };
     private readonly VBoxContainer _drawerBody = new();
     private readonly Label _drawerTitle = Type.Build("", Typography.Semi, Type.SectionTitle, Tokens.Text);
     private readonly HFlowContainer _switcher = new() { Visible = false };
@@ -44,7 +45,15 @@ public partial class ShellLayout : Control
         var content = new VBoxContainer { SizeFlagsVertical = SizeFlags.ExpandFill };
         content.AddThemeConstantOverride("separation", Tokens.Space.Sm);
         var padding = Surfaces.Padding(Tokens.Space.Sm); padding.SizeFlagsVertical = SizeFlags.ExpandFill;
-        root.AddChild(padding); padding.AddChild(content);
+        root.AddChild(padding);
+        var body = new HBoxContainer();
+        padding.AddChild(body);
+        content.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+        body.AddChild(content);
+        body.AddChild(_filterDock);
+        body.AddThemeConstantOverride("separation", Tokens.Space.Sm);
+        _filterDock.AddThemeStyleboxOverride("panel", Surfaces.Fill(Tokens.Panel, Tokens.Radius.Card,
+            Tokens.Space.Md, Tokens.Space.Md, Tokens.LineStrong));
         content.AddChild(_switcher);
         Docking.SizeFlagsVertical = SizeFlags.ExpandFill; content.AddChild(Docking);
         Docking.LayoutChanged += () => { SyncNavigation(); LayoutChanged?.Invoke(); };
@@ -75,7 +84,8 @@ public partial class ShellLayout : Control
     public void Register(string id, string title, Control panel)
     {
         _panels.Add(id, panel);
-        if (id is "export" or "jobs" or "filters")
+        if (id == "filters") _filterDock.AddChild(panel);
+        else if (id is "export" or "jobs")
         {
             var scroll = new ScrollContainer { Visible = false, SizeFlagsVertical = SizeFlags.ExpandFill,
                 HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
@@ -90,26 +100,38 @@ public partial class ShellLayout : Control
     public void ShowPanel(string id)
     {
         if (!_panels.ContainsKey(id)) return;
-        if (_drawers.ContainsKey(id))
+        if (id == "filters")
         {
+            _drawer.Hide();
+            if (Docking.IsPanelVisible("assets")) Layout.CompactActive = "assets";
+            ActiveDrawer = id;
+            _filterDock.Show();
+        }
+        else if (_drawers.ContainsKey(id))
+        {
+            _filterDock.Hide();
             ActiveDrawer = id;
             foreach (var (key, host) in _drawers) host.Visible = key == id;
             _drawerTitle.Text = _drawers[id].GetMeta("title").AsString(); _drawer.Show();
         }
         else
         {
-            CloseDrawer();
+            if (ActiveDrawer != "filters" || id is not ("assets" or "preview" or "navigation")) CloseDrawer();
             if (id is "inspector" or "bones" or "retarget") ActiveTool = id;
             Docking.ShowPanel(id);
         }
     }
-    public void CloseDrawer() { _drawer.Hide(); ActiveDrawer = ""; }
+    public void CloseDrawer() { _drawer.Hide(); _filterDock.Hide(); ActiveDrawer = ""; }
     public void FocusPanel(string id) { ShowPanel(id); if (FocusedPanel != id) Docking.Maximize(id); }
     public void RestorePanels() { CloseDrawer(); Docking.Restore(WorkspaceLayout.Studio()); }
-    public void HidePanel(string id) { if (_drawers.ContainsKey(id)) CloseDrawer(); else Docking.HidePanel(id); }
+    public void HidePanel(string id) { if (id == "filters" || _drawers.ContainsKey(id)) CloseDrawer(); else Docking.HidePanel(id); }
     public void CycleFocus() => Docking.CycleFocus();
     public void Toast(string text) { _toast.Text = text; _toast.Show(); _toastTimer?.Start(); }
-    private void ResizeDrawer() { _drawer.OffsetLeft = -Math.Min(460, Math.Max(0, Size.X - 16)); _drawer.OffsetRight = -8; }
+    private void ResizeDrawer()
+    {
+        _drawer.OffsetLeft = -Math.Min(460, Math.Max(0, Size.X - 16)); _drawer.OffsetRight = -8;
+        _filterDock.CustomMinimumSize = new(Math.Clamp(Size.X * .29f, 202, 302), 0);
+    }
     private void SyncNavigation()
     {
         foreach (var group in Layout.Root.Groups())

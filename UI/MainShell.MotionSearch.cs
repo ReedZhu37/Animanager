@@ -24,34 +24,45 @@ public partial class MainShell
 
     private void BuildMotionFilter(VBoxContainer column)
     {
-        column.AddChild(new HSeparator());
-        column.AddChild(Label("动作相似度", false, 13));
-        var actions = new HFlowContainer();
-        column.AddChild(actions);
-        Add("使用当前帧", "MotionUsePose", () => CaptureMotion(false));
-        Add("标记片段起点", "MotionMarkStart", () =>
+        column.AddChild(Label("参考动作", size: 13));
+        var pose = Button("使用当前帧", () => CaptureMotion(false), primary: true);
+        pose.Name = "MotionUsePose";
+        column.AddChild(pose);
+        var range = Row(column);
+        Add("标记起点", "MotionMarkStart", () =>
         {
             if (CurrentMotionFrame() is not { } point) return;
             _motionStart = point;
-            _motionHint.Text = $"已标记 {point.Clip} · {point.Start:0.###} 秒。移动播放头后使用片段。";
+            SetMotionHint($"已标记 {point.Clip} · {point.Start:0.###} 秒。移动播放头后使用片段。");
         });
         Add("使用片段", "MotionUseRange", () => CaptureMotion(true));
-        _motionWindow = Number("搜索开头（秒，0 为全片）", "MotionWindow", 3600, .1, 1);
-        _motionMinimum = Number("最低相似度（分）", "MotionMinimum", 100, 1, 0);
         _motionHint = Wrapped("在预览中定位要匹配的姿势或片段。");
+        _motionHint.MaxLinesVisible = 2;
+        _motionHint.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
+        _motionHint.MouseFilter = MouseFilterEnum.Pass;
         column.AddChild(_motionHint);
+        column.AddChild(Hairline.Horizontal());
+        _motionWindow = Number("搜索前几秒", "MotionWindow", 3600, .1, 1);
+        _motionWindow.Suffix = "秒";
+        column.AddChild(Wrapped("设为 0 可搜索整段动画。"));
+        _motionMinimum = Number("最低相似度", "MotionMinimum", 100, 1, 0);
+        _motionMinimum.Suffix = "分";
 
         void Add(string text, string name, Action action)
         {
             var button = Button(text, action);
             button.Name = name;
-            actions.AddChild(button);
+            button.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+            range.AddChild(button);
         }
         SpinBox Number(string title, string name, double max, double step, double initial)
         {
             var row = Row(column);
-            row.AddChild(Label(title, true, 12));
-            var input = new SpinBox { Name = name, MaxValue = max, Step = step, Value = initial };
+            var label = Label(title, size: 13);
+            label.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+            row.AddChild(label);
+            var input = new SpinBox { Name = name, MaxValue = max, Step = step, Value = initial,
+                CustomMinimumSize = new(82, Tokens.Size.Control) };
             row.AddChild(input);
             input.ValueChanged += _ =>
             {
@@ -67,7 +78,7 @@ public partial class MainShell
         if (_selectedLibrary == null || _selected == null || _selectedKey != _previewAssetId ||
             !PendingAssetPreview.IsCompleted || _preview.CurrentClip.Length == 0 || AnimationComparisonActive)
         {
-            _motionHint.Text = "请先打开一个人体动画，在单动画预览中定位播放头。";
+            SetMotionHint("请先打开一个人体动画，在单动画预览中定位播放头。");
             return null;
         }
         double t = _preview.Playhead;
@@ -82,7 +93,7 @@ public partial class MainShell
             if (_motionStart is not { } mark || mark.Library != point.Library || mark.Asset.Id != point.Asset.Id ||
                 mark.Clip != point.Clip || point.End <= mark.Start)
             {
-                _motionHint.Text = "请在同一片段中先标记起点，再将播放头移到终点。";
+                SetMotionHint("请在同一片段中先标记起点，再将播放头移到终点。");
                 return;
             }
             point = point with { Start = mark.Start };
@@ -92,14 +103,14 @@ public partial class MainShell
             try
             {
                 point = point with { Pose = MotionSampleReader.CurrentPose(_preview) };
-                if (point.Pose == null) { _motionHint.Text = "当前姿势缺少可识别的人体骨骼。"; return; }
+                if (point.Pose == null) { SetMotionHint("当前姿势缺少可识别的人体骨骼。"); return; }
             }
-            catch (InvalidDataException ex) { _motionHint.Text = ex.Message; return; }
+            catch (InvalidDataException ex) { SetMotionHint(ex.Message); return; }
         }
         _motionReference = point;
         _motionStart = null;
         if (!_customMotionWindow) _motionWindow.SetValueNoSignal(range ? 0 : 1);
-        _motionHint.Text = $"{point.Asset.Name} · {point.Clip} · {point.Start:0.###}–{point.End:0.###} 秒";
+        SetMotionHint($"{point.Asset.Name} · {point.Clip} · {point.Start:0.###}–{point.End:0.###} 秒");
         RefreshAfterFilterChange();
     }
 
@@ -107,8 +118,10 @@ public partial class MainShell
     {
         _motionStart = _motionReference = null;
         _motionRows = [];
-        if (_motionHint != null) _motionHint.Text = "在预览中定位要匹配的姿势或片段。";
+        if (_motionHint != null) SetMotionHint("在预览中定位要匹配的姿势或片段。");
     }
+
+    private void SetMotionHint(string text) => _motionHint.TooltipText = _motionHint.Text = text;
 
     private async Task<MotionSamples[]> SamplesFor(LibrarySession library, AssetItem asset, CancellationToken ct)
     {
