@@ -116,6 +116,7 @@ public partial class MainShell
 
     private void ClearMotionFilter()
     {
+        _motionAudition?.Dismiss();
         _motionStart = _motionReference = null;
         _motionRows = [];
         if (_motionHint != null) SetMotionHint("在预览中定位要匹配的姿势或片段。");

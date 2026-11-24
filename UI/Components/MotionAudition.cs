@@ -11,21 +11,37 @@ internal sealed partial class MotionAudition : Window
     private sealed record BakedTake(RetargetResult Result, double Offset, double End);
     private readonly CancellationTokenSource _loading = new();
     private readonly Preview3DViewport _view = new();
-    private readonly Label _status = new() { TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis };
+    private readonly Label _status = new() { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+        TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis };
+    private readonly CheckButton _loop = new() { Text = "循环试接" };
     private double _start, _cut, _entry, _end, _elapsed, _fromOffset, _toOffset;
     private string _fromName = "", _toName = "";
     private Transform3D _alignment = Transform3D.Identity;
     private Node3D? _fromProp, _toProp;
 
-    public override void _Ready()
+    public MotionAudition()
     {
         Title = "动作试接";
+        Visible = false;
         Transient = true;
-        CloseRequested += QueueFree;
+    }
+
+    public override void _Ready()
+    {
+        CloseRequested += Dismiss;
+        FocusExited += Dismiss;
+        VisibilityChanged += () => { if (!Visible) Dismiss(); };
         var panel = new VBoxContainer();
         AddChild(panel);
         panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        panel.AddChild(_status);
+        var toolbar = new HBoxContainer();
+        panel.AddChild(toolbar);
+        toolbar.AddChild(_status);
+        toolbar.AddChild(_loop);
+        var close = new Button { Text = "关闭", TooltipText = "关闭试接（Esc）",
+            Shortcut = new Shortcut { Events = [new InputEventKey { Keycode = Key.Escape }] } };
+        close.Pressed += Dismiss;
+        toolbar.AddChild(close);
         panel.AddChild(_view);
         _status.Text = "正在准备试接…";
         SetProcess(false);
@@ -123,7 +139,12 @@ internal sealed partial class MotionAudition : Window
     public override void _Process(double delta)
     {
         double lead = Math.Max(.15, _cut - _start), tail = Math.Max(.15, _end - _entry);
-        _elapsed = (_elapsed + delta) % (lead + tail);
+        _elapsed += delta;
+        if (_elapsed >= lead + tail)
+        {
+            if (!_loop.ButtonPressed) { Dismiss(); return; }
+            _elapsed %= lead + tail;
+        }
         bool first = _elapsed < lead;
         string clip = first ? "From" : "To";
         if (_view.CurrentClip != clip)
@@ -136,6 +157,20 @@ internal sealed partial class MotionAudition : Window
         double t = first ? Math.Min(_cut, _start + _elapsed) : Math.Min(_end, _entry + _elapsed - lead);
         _view.Seek(t - (first ? _fromOffset : _toOffset));
         _status.Text = $"{(first ? _fromName : _toName)} · {t:0.00} 秒    |    {_fromName} {_cut:0.##}s → {_toName} {_entry:0.##}s";
+    }
+
+    internal void Dismiss()
+    {
+        if (!IsInsideTree() || IsQueuedForDeletion()) return;
+        QueueFree();
+        SetProcess(false);
+        _loading.Cancel();
+        Hide();
+    }
+
+    public override void _Notification(int what)
+    {
+        if (what == NotificationApplicationFocusOut && Visible) Dismiss();
     }
 
     public override void _ExitTree()

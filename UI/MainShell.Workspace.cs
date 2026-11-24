@@ -515,7 +515,8 @@ public partial class MainShell
         if(_closing)return;SaveWorkspace();_closing=true;CancelAssetBrowse();SetStatus("正在保存并停止任务…");
         _importCancellation?.Cancel();_exportCancellation?.Cancel();_pluginCancellation?.Cancel();
         _retargetCancellation?.Cancel();StopRequest(ref _retargetSourceRequest);StopRequest(ref _comparisonRequest);
-        await Task.WhenAll(PendingAssetPreview, PendingRetargetPreview, PendingAnimationComparison, PendingBrowse, _pendingRetargetSource, _pluginTask, StopLibraryPreviewWarmupAsync());
+        _motionAudition?.Dismiss();
+        await Task.WhenAll(PendingAssetPreview, PendingRetargetPreview, PendingAnimationComparison, PendingMotionAuditions, PendingBrowse, _pendingRetargetSource, _pluginTask, StopLibraryPreviewWarmupAsync());
         _characterCache.Dispose();
         _previewTargets.Dispose();
         await Task.WhenAll(_jobLibraries.Select(api => api.Jobs.ShutdownAsync()));

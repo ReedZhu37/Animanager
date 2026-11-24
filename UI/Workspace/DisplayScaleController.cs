@@ -6,7 +6,12 @@ namespace Animanager.UI.Workspace;
 /// <summary>Per-window scaling. Windows DPI is read from the actual HWND, never inferred from resolution.</summary>
 public partial class DisplayScaleController : Node
 {
-    public static bool IsComposing=>DisplayServer.HasFeature(DisplayServer.Feature.Ime)&&DisplayServer.ImeGetText().Length>0;
+    public static bool IsComposing => Window.GetFocusedWindow()?.GuiGetFocusOwner() switch
+    {
+        LineEdit line => line.HasImeText(),
+        TextEdit text => text.HasImeText(),
+        _ => false
+    };
     [DllImport("user32.dll")] private static extern uint GetDpiForWindow(nint hwnd);
     public double RequestedScale { get; private set; }
     public float EffectiveScale { get; private set; }=1;

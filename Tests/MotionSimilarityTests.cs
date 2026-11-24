@@ -73,13 +73,18 @@ internal static class MotionSimilarityTests
             Check(browser.Count == 1 && browser.Row(0)?.Id == second.Id && browser.Row(0)!.MotionLabel.Contains("分"),
                 "reference outside current filter finds candidate with time and score");
             browser.Selection.Select(second.Id);
-            browser.ActiveView.EmitSignal(Control.SignalName.GuiInput, new InputEventKey { Keycode = Key.Enter, Pressed = true });
-            var popup = owner.GetChildren().OfType<MotionAudition>().FirstOrDefault();
-            Check(popup != null, "opening a match starts transition audition");
-            var timer = System.Diagnostics.Stopwatch.StartNew();
-            while (!popup!.IsProcessing() && timer.Elapsed.TotalSeconds < 18)
-                await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
-            Check(popup.IsProcessing(), "both source rigs are ready for playback on one character");
+            MotionAudition OpenCandidate()
+            {
+                using var enter = new InputEventKey { Keycode = Key.Enter, Pressed = true };
+                browser.ActiveView.EmitSignal(Control.SignalName.GuiInput, enter);
+                return owner.GetChildren().OfType<MotionAudition>().Single(w => w.Visible && !w.IsQueuedForDeletion());
+            }
+            var superseded = OpenCandidate();
+            var popup = OpenCandidate();
+            Check(superseded.IsQueuedForDeletion() && !superseded.Visible, "a second audition dismisses the first while loading");
+            await owner.PendingMotionAuditions;
+            Check(!GodotObject.IsInstanceValid(superseded) && GodotObject.IsInstanceValid(popup) && popup.IsProcessing(),
+                "only the latest audition finishes loading and starts playback");
             var view = Preview3DViewport.Descendants(popup).OfType<Preview3DViewport>().Single();
             var camera = view.View.GetCamera3D();
             var mesh = Preview3DViewport.Descendants(view.Model!).OfType<MeshInstance3D>().First(m => m.Skin != null);
@@ -99,7 +104,43 @@ internal static class MotionSimilarityTests
                 Check(image != null && !image.IsEmpty() && image.SavePng(Path.Combine(api.Storage.Root, "audition.png")) == Error.Ok,
                     "rendered transition audition");
             }
-            popup.QueueFree();
+            CheckButton Repeat(MotionAudition audition) => Preview3DViewport.Descendants(audition).OfType<CheckButton>()
+                .Single(b => b.Text == "循环试接");
+            var repeat = Repeat(popup);
+            Check(!repeat.ButtonPressed, "audition plays once by default");
+            repeat.ButtonPressed = true;
+            popup._Process(10);
+            Check(popup.IsProcessing() && popup.Visible, "explicit repeat keeps the audition playing");
+            repeat.ButtonPressed = false;
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            while (GodotObject.IsInstanceValid(popup) && timer.Elapsed.TotalSeconds < 5)
+                await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
+            Check(!GodotObject.IsInstanceValid(popup), "finishing the pair automatically destroys the audition window");
+
+            var cancelled = OpenCandidate();
+            using var escape = new InputEventKey { Keycode = Key.Escape, Pressed = true };
+            cancelled.PushInput(escape, true);
+            await owner.PendingMotionAuditions;
+            await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
+            Check(!GodotObject.IsInstanceValid(cancelled), "Escape closes a loading audition and cancels its preparation");
+            var backgrounded = OpenCandidate();
+            await owner.PendingMotionAuditions;
+            Repeat(backgrounded).ButtonPressed = true;
+            if (DisplayServer.GetName() == "headless")
+                backgrounded.EmitSignal(Window.SignalName.FocusExited);
+            else if (backgrounded.IsEmbedded())
+            {
+                using var click = new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = true,
+                    Position = Vector2.One, GlobalPosition = Vector2.One };
+                owner.GetWindow().PushInput(click, true);
+                click.Pressed = false;
+                owner.GetWindow().PushInput(click, true);
+            }
+            else owner.GetWindow().GrabFocus();
+            timer.Restart();
+            while (GodotObject.IsInstanceValid(backgrounded) && timer.Elapsed.TotalSeconds < 3)
+                await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
+            Check(!GodotObject.IsInstanceValid(backgrounded), "returning focus to the main window destroys the audition");
             preview.Seek(.2);
             Press("MotionMarkStart");
             preview.Seek(.45);
@@ -153,6 +194,7 @@ internal static class MotionSimilarityTests
                         $"Nodachi motion and independently imported UE clip align · {aligned?.Score:F1} points at {aligned?.Start:F3}s");
                     var armed = new MotionAudition();
                     owner.AddChild(armed);
+                    armed.PopupCenteredClamped(new(760, 520));
                     try
                     {
                         await armed.Prepare(new(counterpart, same[0].Name, "A", 0, .3),
@@ -164,7 +206,7 @@ internal static class MotionSimilarityTests
                         armed._Process(.35);
                         Check(shared.CurrentClip == "To" && prop!.Visible, "the follow-up weapon appears on the shared character at the cut");
                     }
-                    finally { armed.QueueFree(); }
+                    finally { armed.Dismiss(); }
                 }
             }
             Press("CollectionRow" + collection.Id);
@@ -187,6 +229,7 @@ internal static class MotionSimilarityTests
             var filters = Find<PanelContainer>("FilterSidebar");
             var window = owner.GetWindow();
             var viewport = owner.GetViewport();
+            if (DisplayServer.GetName() != "headless") window.GrabFocus();
             if (DisplayServer.GetName() == "headless") viewport.NotifyMouseEntered();
             foreach (var (size, scale) in new[] { (new Vector2I(1280, 800), 1), (new Vector2I(720, 400), 1), (new Vector2I(1024, 700), 2) })
             {
@@ -213,13 +256,27 @@ internal static class MotionSimilarityTests
                 using var up = (InputEventMouseButton)down.Duplicate();
                 up.Pressed = false;
                 viewport.PushInput(move, true);
+                // A native audition can close with the OS cursor still outside the main window.
+                if (viewport.GuiGetHoveredControl() == null && DisplayServer.GetName() != "headless")
+                {
+                    viewport.NotifyMouseEntered();
+                    viewport.PushInput(move, true);
+                }
                 viewport.PushInput(down, true);
                 viewport.PushInput(up, true);
                 await owner.PendingBrowse;
                 await owner.ToSignal(owner.GetTree(), SceneTree.SignalName.ProcessFrame);
             }
+            Search("Candidate");
+            await owner.PendingBrowse;
+            Press("MotionUsePose");
+            await owner.PendingBrowse;
+            browser.Selection.Select(second.Id);
+            var last = OpenCandidate();
+            window.EmitSignal(Window.SignalName.CloseRequested);
+            Check(last.IsQueuedForDeletion() && !last.Visible, "quitting the app closes the audition during preparation");
+            await owner.PendingMotionAuditions;
             GD.Print($"PASS {checks} motion similarity checks");
-            owner.GetTree().Quit(0);
         }
         catch (Exception ex)
         {

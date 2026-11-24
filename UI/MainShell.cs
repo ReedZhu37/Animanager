@@ -178,6 +178,8 @@ public partial class MainShell : Control
     }
     private void Refresh()=>RefreshAssetBrowse();
     internal Task PendingAssetPreview { get; private set; } = Task.CompletedTask;
+    private MotionAudition? _motionAudition;
+    internal Task PendingMotionAuditions { get; private set; } = Task.CompletedTask;
     private void OpenAsset(int index)
     {
         if(_libraryLoading||index<0||index>=_browseRows.Length||_browseRows[index].Asset.Trashed)return;
@@ -186,15 +188,19 @@ public partial class MainShell : Control
         {
             if (_publishedMotionReference != reference || _browseRequest != null) return;
             var hit = _motionRows[_page * AssetPageSize + index].Hit;
+            _motionAudition?.Dismiss();
             var audition = new MotionAudition();
+            _motionAudition = audition;
+            audition.TreeExiting += () => { if (_motionAudition == audition) _motionAudition = null; };
             AddChild(audition);
             audition.PopupCenteredClamped(new(760, 520));
             var character = _preview.AppliedRetarget is { } applied && (applied.Character?.Id ?? applied.TargetRig) == _previewCharacterId
                 ? applied with { SourceRig = "", SourceHash = "" } :
                 _characterEntries.FirstOrDefault(c => c.Id == _previewCharacterId && c.Compatible)?.Options() ?? new RetargetOptions();
-            _ = audition.Prepare(new(reference.Library.Api.Storage.Resolve(reference.Asset.VirtualPath), reference.Clip,
+            var preparing = audition.Prepare(new(reference.Library.Api.Storage.Resolve(reference.Asset.VirtualPath), reference.Clip,
                 reference.Asset.Name, reference.Start, reference.End), new(row.Library.Api.Storage.Resolve(row.Asset.VirtualPath),
                 hit.Clip, row.Asset.Name, hit.Start, hit.End), character);
+            PendingMotionAuditions = Task.WhenAll(PendingMotionAuditions, preparing);
             return;
         }
         var key = AssetKey(row.Library, row.Asset.Id);
