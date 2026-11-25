@@ -31,6 +31,32 @@ New-Item -ItemType Directory -Path $output -Force | Out-Null
 $export = Join-Path $output $(if ($mac) { 'Animanager.app' } else { 'Animanager.exe' })
 $executable = if ($mac) { Join-Path $export 'Contents/MacOS/Animanager' } else { $export }
 $resources = if ($mac) { Join-Path $export 'Contents/Resources' } else { $output }
+if ($mac) {
+    # The official Mono template contains a universal executable. Godot's
+    # single-architecture export presets require a separately named slice.
+    $architecture = if ($Platform -eq 'MacArm64') { 'arm64' } else { 'x86_64' }
+    $template = Join-Path $env:HOME 'Library/Application Support/Godot/export_templates/4.7.2.stable.mono/macos.zip'
+    $customTemplate = Join-Path $PSScriptRoot ".runtime/$suffix-template.zip"
+    $staging = Join-Path $PSScriptRoot ('.runtime/mac-template-' + [guid]::NewGuid().ToString('N'))
+    $entries = @(unzip -Z1 $template)
+    if ($LASTEXITCODE -ne 0) { throw "Could not read the macOS Mono template: $template" }
+    $universal = $entries | Where-Object { $_ -match '(^|/)godot_macos_release\.universal$' } | Select-Object -First 1
+    if (-not $universal) { throw 'The macOS Mono template has no universal release executable' }
+    $thin = $universal -replace '\.universal$', ".$architecture"
+    New-Item -ItemType Directory -Path $staging -Force | Out-Null
+    Copy-Item -LiteralPath $template -Destination $customTemplate -Force
+    if ($thin -notin $entries) {
+        unzip -q $template $universal -d $staging
+        if ($LASTEXITCODE -ne 0) { throw 'Could not extract the universal Godot executable' }
+        Push-Location $staging
+        try {
+            lipo $universal -thin $architecture -output $thin
+            if ($LASTEXITCODE -ne 0) { throw "Could not extract the Godot $architecture slice" }
+            zip -q -0 $customTemplate $thin
+            if ($LASTEXITCODE -ne 0) { throw 'Could not update the macOS export template' }
+        } finally { Pop-Location }
+    }
+}
 dotnet build --nologo -p:NuGetAudit=false
 if ($LASTEXITCODE -ne 0) { throw 'C# build failed' }
 $importLog=Join-Path $PSScriptRoot '.runtime\build-import.log'
