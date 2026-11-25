@@ -1,10 +1,13 @@
 using System.Text.Json;
+using Animanager.Core.Models;
 using Animanager.Core.Retarget;
+using Animanager.UI.Components;
 
 namespace Animanager.Core.Console;
 
 public partial class ConsoleCommands
 {
+    internal Func<AssetItem, Preview3DViewport>? RetargetPreviewTarget { get; set; }
     private void RegisterRetargetCommands()
     {
         Bind("retarget inspect", nameof(RetargetInspect), "Validate source rig: <asset> <ue4-mannequin|ue5-mannequin>");
@@ -24,8 +27,15 @@ public partial class ConsoleCommands
     public void RetargetPreview(string asset, string target) => Job(async ct =>
     {
         var api = _api; var item = api.Find(asset); var options = api.InspectRetarget(asset, new() { TargetRig = target });
+        var viewport = RetargetPreviewTarget?.Invoke(item) ?? _preview;
+        var previousModel = viewport.Model;
         var result = await api.PreviewRetargetAsync(item.Id, options, ct);
-        _preview.AttachRetarget(result, options, api.Storage.Resolve(item.VirtualPath));
+        if (ct.IsCancellationRequested || api != _sessionApi || viewport != _preview || viewport.Model != previousModel)
+        {
+            result.Root.Free();
+            throw new OperationCanceledException();
+        }
+        viewport.AttachRetarget(result, options, api.Storage.Resolve(item.VirtualPath));
         if (item.Type != "Animation") { api.SetAssetType(item.Id, "Animation"); item.Type = "Animation"; }
         SelectedId = item.Id; _selection(item); Info($"Retarget {result.Source.Id} → {result.Target.Id}; {result.Target.Names.Length} bones; no contact IK");
     });

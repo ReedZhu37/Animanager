@@ -75,7 +75,7 @@ public static class SecondFeedbackTests
             commands.Load("A"); await commands.PendingTask;
             Check(preview.AppliedRetarget?.TargetRig == "ue5-mannequin", "console and asset browser share the atomic loader");
             owner.DisplayScale.SetScale(1); owner.GetWindow().Size = new(1440, 1000); owner.Workspace.ShowPanel("preview"); await Frames(15);
-            var stage = (PreviewStage)owner.Workspace.Panel("preview");
+            var stage = ((PreviewTabs)owner.Workspace.Panel("preview")).ActiveStage;
             Check(new Rect2(Vector2.Zero, preview.Size).Encloses(((Control)preview.FindChild("DragNavigation", true, false)!).GetRect()), "drag buttons stay inside the viewport");
             Check(preview.Position.Y == 0 && stage.CharacterSlot.GetWindow() == stage.SettingsDialog && !stage.SettingsDialog.Visible,
                 "character and metadata controls live in settings without reserving a stage header");

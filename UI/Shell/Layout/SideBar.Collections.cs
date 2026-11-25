@@ -12,8 +12,9 @@ public partial class SideBar
     internal event Action<string, string?, CollectionPlacement>? CollectionMoveRequested;
     internal Func<string, string[], bool>? CanDropAssetsOnCollection { get; set; }
     internal event Action<string, string[]>? AssetsDroppedOnCollection;
-    internal Func<string[], bool>? CanDropAssetsOnFavorites { get; set; }
+    internal Func<string[], bool>? CanDropEditableAssets { get; set; }
     internal event Action<string[]>? AssetsDroppedOnFavorites;
+    internal event Action<string?>? DropHintChanged;
 
     private readonly List<(string Id, string? ParentId, Control Line, IconButton? Disclosure)> _collectionLines = [];
     private readonly HashSet<string> _foldedCollections = [];
@@ -187,18 +188,21 @@ public partial class SideBar
             if (DraggedCollection(data) is { } id) DropCollection(id, null, CollectionPlacement.Inside);
         });
 
-    private void EnableFavoritesDrop(Control target) => EnableNavigationDrop(target, default, (_, data) =>
+    private void EnableFavoritesDrop(Control target) => EnableEditableAssetDrop(target, keys => AssetsDroppedOnFavorites?.Invoke(keys));
+
+    private void EnableEditableAssetDrop(Control target, Action<string[]> drop, Func<int, string>? hint = null) =>
+        EnableNavigationDrop(target, default, (_, data) =>
     {
         var keys = AssetBrowser.DraggedAssets(data);
-        return keys.Length > 0 && CanDropAssetsOnFavorites?.Invoke(keys) == true ? _dropOutline : null;
+        return keys.Length > 0 && CanDropEditableAssets?.Invoke(keys) == true ? _dropOutline : null;
     }, (_, data) =>
     {
         var keys = AssetBrowser.DraggedAssets(data);
-        if (keys.Length > 0) AssetsDroppedOnFavorites?.Invoke(keys);
-    });
+        if (keys.Length > 0) drop(keys);
+    }, hint == null ? null : data => hint(AssetBrowser.DraggedAssets(data).Length));
 
     private void EnableNavigationDrop(Control target, Callable getData, Func<Vector2, Variant, StyleBox?> dropStyle,
-        Action<Vector2, Variant> drop)
+        Action<Vector2, Variant> drop, Func<Variant, string>? hint = null)
     {
         var highlight = new Panel { Visible = false, MouseFilter = MouseFilterEnum.Ignore };
         target.AddChild(highlight);
@@ -213,7 +217,7 @@ public partial class SideBar
                     return false;
                 }
                 if (highlight.GetThemeStylebox("panel") != style) highlight.AddThemeStyleboxOverride("panel", style);
-                HighlightDrop(highlight);
+                if (_highlightedDrop != highlight) HighlightDrop(highlight, hint?.Invoke(data));
                 return true;
             }),
             Callable.From(drop));
@@ -225,11 +229,12 @@ public partial class SideBar
         if (what == NotificationDragEnd) HighlightDrop(null);
     }
 
-    private void HighlightDrop(Panel? highlight)
+    private void HighlightDrop(Panel? highlight, string? hint = null)
     {
         if (_highlightedDrop == highlight) return;
         _highlightedDrop?.Hide();
         _highlightedDrop = highlight;
         highlight?.Show();
+        DropHintChanged?.Invoke(hint);
     }
 }

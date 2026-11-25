@@ -72,7 +72,6 @@ public partial class MainShell
         _retargetName = Input("预设名称"); _retargetName.Name = "RetargetPresetName"; column.AddChild(_retargetName);
         _retargetSave = Button("保存预设与当前资产配置", SaveRetargetPreset); _retargetSave.Name = "RetargetSave"; column.AddChild(_retargetSave);
         column.AddChild(Button("前往导出", () => _workspace.ShowPanel("export")));
-        _preview.SourceLoaded += () => { _retargetCancellation?.Cancel(); _retargetEnabled.ButtonPressed = false; };
         RefreshRetargetPresets();
         return column;
     }
@@ -133,6 +132,7 @@ public partial class MainShell
         _retargetCancellation?.Cancel(); using var cancellation = new CancellationTokenSource(); _retargetCancellation = cancellation;
         var api = _selectedLibrary.Api; string id = _selected.Id;
         var key = _selectedKey;
+        var viewport = _preview;
         bool wasPlaying = _preview.Playing;
         try
         {
@@ -141,19 +141,19 @@ public partial class MainShell
             _characterStatus.Text = "正在应用角色 · " + RetargetCharacter.Name;
             var result = await _characterCache.Get(api.Storage.Resolve(api.Find(id).VirtualPath), options,
                 () => api.PreviewRetargetAsync(id, options, cancellation.Token), cancellation.Token);
-            if (_closing || _selectedKey != key || cancellation.IsCancellationRequested) { result.Root.Free(); return; }
+            if (_closing || _preview != viewport || _selectedKey != key || cancellation.IsCancellationRequested) { result.Root.Free(); return; }
             _preview.AttachRetarget(result, options, api.Storage.Resolve(api.Find(id).VirtualPath), _retargetView.Selected);
             SetRetargetOptions(options);
             _previewCharacterId = options.Character?.Id ?? options.TargetRig;
             _characters.Select(_previewCharacterId); RefreshCharacterChoices();
-            _characterStatus.Text = "Ready · " + RetargetCharacter.Name + $" · {result.Target.Names.Length} 骨骼";
+            _activePreviewTab.RetargetMessage = "";
+            _activePreviewTab.CharacterStatus = _characterStatus.Text = "Ready · " + RetargetCharacter.Name + $" · {result.Target.Names.Length} 骨骼";
             if (wasPlaying && !_preview.Playing) _preview.TogglePlay();
-            _preview.SetSpeed(_speed.Value);
             _stage.SetLoadStatus("");
             SyncRetargetSummary();
             UpdateTransport(); SyncExportControls(); SetStatus("Retarget 预览已就绪；导出将使用同一配置。");
         }
-        catch (OperationCanceledException) { if (_retargetCancellation == cancellation) _retargetInfo.Text = "已取消，保留当前预览。"; }
+        catch (OperationCanceledException) { if (_retargetCancellation == cancellation && _preview == viewport) _retargetInfo.Text = "已取消，保留当前预览。"; }
         catch (Exception e)
         {
             if (_retargetCancellation != cancellation || cancellation.IsCancellationRequested || _selectedKey != key) return;
@@ -236,7 +236,19 @@ public partial class MainShell
         _retargetCancellation?.Cancel();
         _previewCharacterId = ""; _characters.Select(""); RefreshCharacterChoices();
         if (_selected == null || _selectedLibrary == null) return;
-        try { _preview.LoadFile(_selectedLibrary.Api.Storage.Resolve(_selected.VirtualPath)); _retargetEnabled.ButtonPressed = false; _retargetInfo.Text = "已恢复源动画。"; UpdateTransport(); }
+        try
+        {
+            _activePreviewTab.Load?.Cancellation.Cancel();
+            _activePreviewTab.Load = null;
+            _preview.LoadFile(_selectedLibrary.Api.Storage.Resolve(_selected.VirtualPath));
+            _activePreviewTab.DisplayedLibrary = _selectedLibrary;
+            _activePreviewTab.DisplayedAsset = _selected;
+            _activePreviewTab.CharacterStatus = "";
+            _activePreviewTab.RetargetMessage = "已恢复源动画。";
+            _stage.SetLoadStatus("");
+            SyncFocusedPreviewSelection();
+            _retargetEnabled.ButtonPressed = false;
+        }
         catch (Exception e) { _retargetInfo.Text = e.Message; }
     }
 }

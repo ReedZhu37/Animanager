@@ -145,11 +145,22 @@ public partial class Preview3DViewport
         if (_weaponStage != null) ClearWeaponPreview(hideToggle: false);
         foreach (var visual in _weaponVisuals) visual.Root.Free();
         _weaponVisuals = next.ToArray();
+        AppliedWeaponProfile = profile;
         if (enable) _showWeapons = true;
         if (_weaponStage == null) return;
         foreach (var visual in _weaponVisuals) _weaponStage.AddChild(visual.Root);
         _weaponToggle.SetPressedNoSignal(_showWeapons);
         RefreshWeaponPreview();
+    }
+
+    internal WeaponProfile? AppliedWeaponProfile { get; private set; }
+    internal bool WeaponBoxVisible => _showWeaponBox;
+
+    internal void ReleaseWeaponProfile()
+    {
+        foreach (var visual in _weaponVisuals) visual.Root.Free();
+        _weaponVisuals = [];
+        AppliedWeaponProfile = null;
     }
 
     internal void SetWeaponPreviewEnabled(bool enabled)

@@ -142,7 +142,7 @@ public static class BoneInterfaceTests
             var selectedItem=Item("RightFoot");ulong itemId=selectedItem.GetInstanceId();
             preview.TogglePlay();await Frames(25);Check(Item("RightFoot").GetInstanceId()==itemId,"playback updates pose text without rebuilding tree items");preview.TogglePlay();
             await Execute("preview seek 0.31");await Frames(30);Check(Find<Label>("BonePose").Text.Contains("0.31"),"scrubbing updates selected bone time in the panel");
-            Check(Math.Abs(((Animanager.UI.Shell.PreviewStage)host.Panel("preview")).Timeline.Value-.31)<.001,"paused Console scrubbing also synchronizes the preview timeline");
+            Check(Math.Abs(((Animanager.UI.Shell.PreviewTabs)host.Panel("preview")).ActiveStage.Timeline.Value-.31)<.001,"paused Console scrubbing also synchronizes the preview timeline");
             await Query("Foot");var selection=bones.Selected;var panelId=panel.GetInstanceId();
             host.ShowPanel("inspector");await Frames();
             Check(panel.GetInstanceId()==panelId&&search.Text=="Foot"&&bones.Selected==selection,"docking preserves search, selection, and panel instance");

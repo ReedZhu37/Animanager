@@ -19,7 +19,7 @@ public partial class MainShell
     private WorkspacePreferences _preferences=new();
     private string _preferencesPath="",_workspaceError="";
     private Godot.Timer _saveLayout=null!;
-    private Label _scaleHint=null!,_previewName=null!;
+    private Label _scaleHint=null!;
     private ItemList _jobsList=null!;
     private RichTextLabel _jobDetails=null!;
     private List<(WorkspaceApi Api, string Id)> _jobIds=[];
@@ -37,7 +37,6 @@ public partial class MainShell
     private AssetSort _sort=AssetSort.Default;
     private OptionButton _sortControl=null!;
     private PopupMenu _morePopup=null!,_importPopup=null!;
-    private bool _loop=true;
 
     private bool _consoleOpen;
     private string _previewAssetId="";
@@ -70,7 +69,8 @@ public partial class MainShell
         _workspace.Register("assets","动画资产",BuildAssets());
         _workspace.Register("preview","预览",BuildPreview());
         _workspace.Register("inspector","属性",BuildInspector());
-        _workspace.Register("bones","骨骼",new BoneTreePanel{Preview=_preview});
+        _bonePanel = new BoneTreePanel { Preview = _preview };
+        _workspace.Register("bones","骨骼",_bonePanel);
         _workspace.Register("retarget","重定向",BuildRetarget());
         _workspace.Register("export","导出",BuildExport());
         _workspace.Register("jobs","任务",BuildJobs());
@@ -117,8 +117,10 @@ public partial class MainShell
         _sideBar.CollectionMoveRequested += (id, targetId, placement) => LibraryAction(() => MoveCollection(id, targetId, placement));
         _sideBar.CanDropAssetsOnCollection = CanDropAssetsOnCollection;
         _sideBar.AssetsDroppedOnCollection += (id, keys) => LibraryAction(() => DropAssetsOnCollection(id, keys));
-        _sideBar.CanDropAssetsOnFavorites = keys => keys.Any(key => DragSourceLibrary(key) != null);
+        _sideBar.CanDropEditableAssets = keys => keys.Any(key => DragSourceLibrary(key) != null);
         _sideBar.AssetsDroppedOnFavorites += keys => LibraryAction(() => DropAssetsOnFavorites(keys));
+        _sideBar.AssetsDroppedOnTag += (tag, keys) => LibraryAction(() => DropAssetsOnTag(tag, keys));
+        _sideBar.DropHintChanged += _workspace.Status.SetDropHint;
         _sideBar.TagSelected+=BrowseByTag;
         _sideBar.TagGroupSelected += BrowseByTagGroup;
         _sideBar.CreateTag += ShowAddAppTags;
@@ -330,38 +332,10 @@ public partial class MainShell
         _browser.Scroll.ScrollVertical = 0;
         _preferences.SortField=sort.Field;_preferences.SortDescending=sort.Descending;_preferences.AssetSortChosen=true;SaveSoon();_page=0;Refresh();
     }
-    private Control BuildPreview()
-    {
-        _stage=new PreviewStage();_preview=_stage.Viewport;_previewName=_stage.TitleLabel;
-        _play=_stage.PlayButton;_speed=_stage.SpeedControl;_timeline=_stage.Timeline;_time=_stage.TimeLabel;
-        BuildCharacterSelector(_stage.CharacterSlot);
-        _stage.SettingsPressed += () => PopupFit(_stage.SettingsDialog, new(520, 540));
-        _preview.ResetCameraOnAnimationChange = _preferences.ResetCameraOnAnimationChange;
-        _stage.ResetCameraToggle.SetPressedNoSignal(_preferences.ResetCameraOnAnimationChange);
-        _stage.ResetCameraToggle.Toggled += enabled =>
-        {
-            _preferences.ResetCameraOnAnimationChange = enabled;
-            _preview.ResetCameraOnAnimationChange = enabled;
-            SaveSoon();
-        };
-        _preview.ComparisonExitRequested += EndAnimationComparison;
-        _preview.ComparisonRemoveRequested += RemoveComparisonAsset;
-        BuildPreviewLocateMenu();
-        _comparisonDropHint = BuildComparisonDropHint(_preview, "ComparisonDropHint", "拖入视口即可对比");
-        _comparisonDropHint.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        _stage.PlayPressed+=TogglePlayback;_stage.SeekRequested+=SeekPlayback;
-        _stage.StepRequested+=direction=>SeekPlayback(_preview.TransportPlayhead+direction*_preview.TransportStep);
-        _stage.SpeedChanged+=speed=>_preview.SetSpeed(speed);
-        _stage.LoopToggled+=()=>{_loop=!_loop;_preview.SetLoop(_loop);_stage.SetLoop(_loop);};_stage.SetLoop(true);
-        bool clay=true;_stage.ClayToggled+=()=>{clay=!clay;_preview.SetClay(clay);};
-        _stage.FramePressed+=()=>_preview.FrameModel();_stage.BonesPressed+=()=>_workspace.ShowPanel("bones");
-        _stage.ClipSelected+=clip=>{bool playing=_preview.Playing;_preview.SelectClip(clip);if(playing)_preview.TogglePlay();_stage.SetCurrentClip(clip);UpdateTransport();};
-        return _stage;
-    }
     private Control BuildInspector()
     {
         _inspector=new Inspector();_title=_inspector.TitleLabel;_detail=_inspector.Summary;_tags=_inspector.TagsInput;_favorite=_inspector.FavoriteButton;
-        BuildWeaponProfiles(_inspector.WeaponOverview, _stage.WeaponSlot);
+        BuildWeaponProfiles(_inspector.WeaponOverview, _previewWeaponControls);
         _inspector.FavoriteToggled+=ToggleFavorite;_inspector.TagsSaved+=SaveTags;
         _inspector.TagAddRequested += () =>
         {
@@ -516,7 +490,8 @@ public partial class MainShell
         _importCancellation?.Cancel();_exportCancellation?.Cancel();_pluginCancellation?.Cancel();
         _retargetCancellation?.Cancel();StopRequest(ref _retargetSourceRequest);StopRequest(ref _comparisonRequest);
         _motionAudition?.Dismiss();
-        await Task.WhenAll(PendingAssetPreview, PendingRetargetPreview, PendingAnimationComparison, PendingMotionAuditions, PendingBrowse, _pendingRetargetSource, _pluginTask, StopLibraryPreviewWarmupAsync());
+        await Task.WhenAll(CancelPreviewLoads(), PendingRetargetPreview, PendingAnimationComparison, PendingMotionAuditions,
+            PendingBrowse, _pendingRetargetSource, _pluginTask, StopLibraryPreviewWarmupAsync());
         _characterCache.Dispose();
         _previewTargets.Dispose();
         await Task.WhenAll(_jobLibraries.Select(api => api.Jobs.ShutdownAsync()));

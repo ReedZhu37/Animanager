@@ -1,24 +1,30 @@
-# Windows 便携原型
+# Animanager 0.5 Beta 便携包
 
 ## 使用
 
-完整解压生成的 ZIP，双击 `Animanager.exe`。不要只复制 EXE：PCK、data 目录和 BuiltinAssets 都是包的一部分。包包含 Godot 与 .NET 运行所需文件；普通使用不需要 Godot 编辑器或 .NET SDK。首次启动导入内置基准资产，用户库默认写入 `%APPDATA%\Godot\app_userdata\Animanager\Library`，不写入安装目录。
+| 平台 | 启动方式 |
+| --- | --- |
+| Windows x64 | 完整解压 ZIP，双击 `Animanager.exe`。同目录的 PCK、运行库和 BuiltinAssets 需要一起保留。 |
+| macOS Apple Silicon / Intel | 选择与处理器对应的 ZIP，解压后打开 `Animanager.app`。可以将 APP 移到「应用程序」。 |
 
-FBX 导出需要单独安装 Blender。通过环境变量 `BLENDER_BIN` 指定 `blender.exe`，或在 F12 Console 执行 `pipeline blender "完整路径/blender.exe"`（本次会话生效）。GLB / FBX 预览与 GLB / RES 导出不依赖 Blender。
+包内附应用运行库与 CUE4Parse 导入器。素材库默认写入 Godot 的 `user://Library`。Windows 通常位于 `%APPDATA%\Godot\app_userdata\Animanager\Library`，macOS 通常位于 `~/Library/Application Support/Godot/app_userdata/Animanager/Library`。
 
-这是一份本地便携测试原型，尚未制作安装器、数字签名和自动更新。基准人体属于 Epic 模板内容，来源记录随包保留在 `BuiltinAssets/Baselines`；此包不作为公开分发成品。
+macOS Beta 使用临时签名，未经 Apple 公证。若首次打开被系统拦截，可在「系统设置 → 隐私与安全性」中为该应用选择「仍要打开」。Cascadeur 接收插件目前面向 Windows。
+
+FBX 导出需要另装 Blender。可设置环境变量 `BLENDER_BIN` 指向 Blender 可执行文件，或在控制台执行 `pipeline blender "可执行文件绝对路径"`。macOS 会尝试查找 `/Applications/Blender.app/Contents/MacOS/Blender`。
 
 ## 构建
 
-开发机需要 Godot 4.7.2 Mono、同版本导出模板、.NET 8 SDK 和项目 NuGet 依赖。使用 PowerShell：
+开发机需要 Godot 4.7.2 Mono 及同版本 Mono 导出模板，以及 .NET SDK 8.0.422 和 10.0.404。将 `GODOT_MONO_BIN` 设为 Mono 版 Godot 的可执行文件。
 
 ```powershell
-.\Test.ps1 -Suite All
-.\Build.ps1 -Zip
+./Build.ps1 -Zip                    # Windows x64
+./Build.ps1 -Platform MacArm64 -Zip  # Apple Silicon，使用 macOS 上的 PowerShell 7
+./Build.ps1 -Platform MacX64 -Zip    # Intel，使用 macOS 上的 PowerShell 7
 ```
 
-`Build.ps1` 在 `Builds/Animanager-win-x64-时间/` 创建新目录，构建 C#、导入资源、导出 release、附带原始资产 / Blender 脚本 / 文档和许可，再运行**导出的 EXE** 的冒烟检查。成功才输出 `BUILD_READY` 并生成 ZIP。`-SkipSmoke` 仅供开发诊断，不应将其视为经过验证的包。
+构建脚本在 `Builds/` 下创建带版本与时间戳的目录。独立应用冒烟报告在 `SMOKE-RESULTS.txt`，导入器自测报告在 `CUE-SELF-TEST.json`。ZIP 保留应用所需的目录与权限。
 
-内置资产与脚本通过 EXE 目录定位，与当前工作目录无关。SQLite 索引、任务报告、导出缓存和界面设置进入用户库。可以用 `Animanager.exe -- --data-dir="绝对路径"` 指定其他库；不允许两个应用进程同时写同一个库。
+GitHub Actions 的 `Desktop Beta` 工作流从同一源码提交构建 Windows x64、macOS Apple Silicon 和 macOS Intel，逐个平台执行包内检查并保存 ZIP。
 
-冒烟检查覆盖独立程序中的外部脚本定位、Console 导入内置基准、原生 FBX 预览、GLB 导出回读；已配置 Blender 时增加 FBX 导出回读。检查报告复制到包内 `SMOKE-RESULTS.txt`。完整源代码回归为 109 项。干净 Windows 虚拟机和无开发环境机器的部署验证仍待补充。
+内置 Epic 人体基准来自 Unreal Engine 安装目录的官方模板，来源与 SHA-256 随包保留。有关模板示例的再分发条款见 [Unreal Engine EULA §5(b)](https://www.unrealengine.com/eula/unreal)。

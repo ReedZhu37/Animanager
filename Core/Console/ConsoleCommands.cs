@@ -83,6 +83,14 @@ public partial class ConsoleCommands : Node
         Info("Ready. Press ` or F12. Run: app commands");
     }
     private void Bind(string command,string method,string description)=>_console.Call("register_command",new Callable(this,method),command,description);
+    internal void BindPreview(Preview3DViewport preview)
+    {
+        if (_preview == preview) return;
+        _preview.Bones.Notice -= Write;
+        _preview = preview;
+        _preview.Bones.Notice += Write;
+        ForgetSelection();
+    }
     private void Write(string value)
     {
         if(_closing)return;

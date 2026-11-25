@@ -1,4 +1,7 @@
-param([string]$Output)
+param(
+    [string]$Output,
+    [ValidateSet('win-x64','osx-arm64','osx-x64')][string]$RuntimeIdentifier = 'win-x64'
+)
 $ErrorActionPreference='Stop'
 $workspace=Split-Path $PSScriptRoot -Parent
 $revision='d05e5859ad240be10c9d5c8344f5de7c072123d0'
@@ -23,10 +26,9 @@ if(-not $Output){$Output=Join-Path $workspace '.runtime\cue-importer'}
 $Output=[IO.Path]::GetFullPath($Output)
 $env:DOTNET_CLI_HOME=Join-Path $workspace '.runtime\dotnet'
 $env:DOTNET_CLI_TELEMETRY_OPTOUT='1'
-$env:NUGET_PACKAGES=Join-Path $env:USERPROFILE '.nuget\packages'
 Push-Location (Join-Path $PSScriptRoot 'CueImporter')
 try {
-    dotnet publish CueImporter.csproj -c Release -r win-x64 --self-contained true -p:CUE4PARSE_SKIP_NATIVE=true -o $Output --nologo -v:q
+    dotnet publish CueImporter.csproj -c Release -r $RuntimeIdentifier --self-contained true -p:CUE4PARSE_SKIP_NATIVE=true -o $Output --nologo -v:q
     if($LASTEXITCODE -ne 0){throw 'CUE importer publish failed'}
 } finally {Pop-Location}
 Copy-Item (Join-Path $source 'LICENSE') (Join-Path $Output 'CUE4Parse-LICENSE.txt')

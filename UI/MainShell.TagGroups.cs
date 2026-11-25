@@ -91,6 +91,7 @@ public partial class MainShell
     {
         var tags = _tagSections.FirstOrDefault(section => section.GroupId == id).Tags;
         if (tags is not { Length: > 0 }) return;
+        RememberPageBeforeTagFilter();
         _selectedTags.Clear();
         _selectedTags.UnionWith(tags.Select(tag => tag.Name));
         _tagMatchMode.Select(1);

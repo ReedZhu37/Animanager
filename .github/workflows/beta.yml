@@ -1,0 +1,106 @@
+name: Desktop Beta
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-beta
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: win-x64
+            runner: windows-2025
+            platform: Windows
+            engine: win64.zip
+            sha256: a2a48473a7414c5f19fab690518caebb738c09ef9601f6bd2388676a7f53b3c0
+          - label: macos-arm64
+            runner: macos-15
+            platform: MacArm64
+            engine: macos.universal.zip
+            sha256: 8af3977b60d2c59802f7c8ff1914b3ca02a5e294f7381fc1104ee777e33cbbd8
+          - label: macos-x64
+            runner: macos-15-intel
+            platform: MacX64
+            engine: macos.universal.zip
+            sha256: 8af3977b60d2c59802f7c8ff1914b3ca02a5e294f7381fc1104ee777e33cbbd8
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.422
+            10.0.404
+      - name: Install Godot Mono and export templates
+        shell: pwsh
+        env:
+          GODOT_ARCHIVE: ${{ matrix.engine }}
+          GODOT_SHA256: ${{ matrix.sha256 }}
+        run: |
+          $version = '4.7.2-stable'
+          $download = "https://github.com/godotengine/godot-builds/releases/download/$version"
+          $name = "Godot_v${version}_mono"
+          $engineZip = Join-Path $env:RUNNER_TEMP 'godot.zip'
+          $templateZip = Join-Path $env:RUNNER_TEMP 'godot-templates.zip'
+          curl -fsSL --retry 3 "$download/${name}_$env:GODOT_ARCHIVE" -o $engineZip
+          if ($LASTEXITCODE -ne 0) { throw 'Godot download failed' }
+          curl -fsSL --retry 3 "$download/${name}_export_templates.tpz" -o $templateZip
+          if ($LASTEXITCODE -ne 0) { throw 'Export template download failed' }
+          if ((Get-FileHash $engineZip).Hash -ne $env:GODOT_SHA256) { throw 'Godot checksum mismatch' }
+          if ((Get-FileHash $templateZip).Hash -ne '92f8681e349ef1f90891b792da95e3b2b0bd1ed610b78018c58feb2d87e15a9d') {
+            throw 'Export template checksum mismatch'
+          }
+          $godot = New-Item -ItemType Directory (Join-Path $env:RUNNER_TEMP 'godot')
+          if ($IsMacOS) {
+            ditto -x -k $engineZip $godot.FullName
+            if ($LASTEXITCODE -ne 0) { throw 'Godot extraction failed' }
+            $app = Get-ChildItem $godot.FullName -Directory -Filter '*.app' | Select-Object -First 1
+            $engine = Join-Path $app.FullName 'Contents/MacOS/Godot'
+            $templateRoot = Join-Path $env:HOME 'Library/Application Support/Godot/export_templates'
+          } else {
+            Expand-Archive $engineZip $godot.FullName
+            $engine = (Get-ChildItem $godot.FullName -Recurse -File -Filter '*_console.exe' | Select-Object -First 1).FullName
+            $templateRoot = Join-Path $env:APPDATA 'Godot/export_templates'
+          }
+          if (-not (Test-Path -LiteralPath $engine -PathType Leaf)) { throw 'Godot Mono executable is missing' }
+          $templates = New-Item -ItemType Directory -Force (Join-Path $templateRoot '4.7.2.stable.mono')
+          tar -xf $templateZip -C $templates.FullName --strip-components 1
+          if ($LASTEXITCODE -ne 0) { throw 'Export template extraction failed' }
+          "GODOT_MONO_BIN=$engine" >> $env:GITHUB_ENV
+      - name: Package and smoke-test
+        shell: pwsh
+        env:
+          BUILD_PLATFORM: ${{ matrix.platform }}
+        run: |
+          try {
+            ./Build.ps1 -Platform $env:BUILD_PLATFORM -Zip
+          } catch {
+            Get-ChildItem .runtime -File -Filter '*.log' | ForEach-Object {
+              Write-Output $_.Name
+              Get-Content -LiteralPath $_.FullName -Tail 60
+            }
+            throw
+          }
+          $package = Get-ChildItem Builds -File -Filter '*.zip' | Select-Object -First 1
+          $fileName = $package.Name -replace '-\d{8}-\d{6}\.zip$', '.zip'
+          $release = New-Item -ItemType Directory (Join-Path $env:RUNNER_TEMP 'release')
+          Copy-Item $package.FullName (Join-Path $release.FullName $fileName)
+          "BETA_PACKAGE=$(Join-Path $release.FullName $fileName)" >> $env:GITHUB_ENV
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.label }}
+          path: ${{ env.BETA_PACKAGE }}
+          compression-level: 0
+          if-no-files-found: error

@@ -1,6 +1,8 @@
-# Animanager 0.4 · 可拖拽工作区原型
+# Animanager 0.5 Beta
 
-基于 Godot 4.7.2 Mono / .NET 8 的本地 3D 资产管理原型。
+基于 Godot 4.7.2 Mono / .NET 8 的本地 3D 动画资产管理工具。
+
+从 [GitHub Releases](https://github.com/ReedZhu37/Animanager/releases) 下载 Windows x64、macOS Apple Silicon 或 macOS Intel 的便携包。解压后运行 `Animanager.exe` 或 `Animanager.app`。macOS Beta 使用临时签名，可能需要在「系统设置 → 隐私与安全性」中允许首次启动。使用与构建说明见 [Docs/BUILD.md](Docs/BUILD.md)。
 
 P0 已接入多 Library 管理、资产整理和基础库维护。功能范围与验收入口见 [功能迭代计划](Docs/FUNCTIONAL_ROADMAP.md)。
 
@@ -42,11 +44,11 @@ UE4 / UE5 独立导入样例可双击 `OpenUEStandardCUE.cmd`，打开已验证�
 
 运行 `Test.ps1 -Suite LibraryP0` 验证 P0，测试在隔离目录运行。本地有 Nodachi 和 Movement 两个样例库时也会执行完整切库、备份和恢复流程。命令行入口见 [Limbo Console](Docs/CONSOLE.md#素材库与资产整理)。
 
-**0.4 已实现可拖拽工作区、统一控件、小窗口标签布局和 DPI 缩放。** 操作说明与当前边界见 [Docs/WORKSPACE.md](Docs/WORKSPACE.md)，原始路线图见 [Docs/INTERFACE_PLAN.md](Docs/INTERFACE_PLAN.md)。Limbo Console 完整保留：按 F12 或反引号打开，`app commands` 查看入口。完整命令样例见 [Docs/CONSOLE.md](Docs/CONSOLE.md)。
+工作区支持拖拽停靠、预览标签页、小窗口标签布局和 DPI 缩放。操作说明见 [Docs/WORKSPACE.md](Docs/WORKSPACE.md)。按 F12 或反引号打开 Limbo Console，运行 `app commands` 查看入口。完整命令样例见 [Docs/CONSOLE.md](Docs/CONSOLE.md)。
 
 骨骼检查已接入可停靠 UI：“面板 → 骨骼”打开，“工作区 → 动画检查”并排查看骨骼树和预览。支持名称搜索、点击选中高亮、聚焦、轨迹开关、世界 / 参考骨骼空间、30 / 60 次每秒采样，并与 Console 双向同步。骨骼树现支持 Ctrl / Shift 多选，固定轨迹列表提供逐条显隐和移除，Root Motion 区域提供根骨骼选择及显示开关；与 C# API / Console 共用状态。操作见 [骨骼面板说明](Docs/WORKSPACE.md#骨骼与轨迹面板)，命令和兼容边界见 [骨骼与轨迹说明](Docs/CONSOLE.md#骨骼树多选与固定轨迹)。
 
-独立 Windows 包解压后双击 `Animanager.exe`，保留同目录的 PCK、运行库和 BuiltinAssets；不需要用工程启动。FBX 导出需要单独安装 Blender，其他基础操作不需要。运行 `Build.ps1 -Zip` 生成带独立程序冒烟验证的便携包，详见 [打包说明](Docs/BUILD.md)。
+Windows 便携包需保留 EXE 同目录的 PCK、运行库和 BuiltinAssets。FBX 导出需要单独安装 Blender。构建脚本会对独立程序和随包导入器进行冒烟验证。详见 [打包说明](Docs/BUILD.md)。
 
 批量工具支持递归导入、JSON 文件清单、FBX / GLB / RES 导出计划、全搜索结果 / 收藏批量导出、顺序任务队列、逐文件日志、取消和失败项重试。计划与报告保存在库目录的 `jobs/` 中，重启后仍可查询。导出面板可处理当前资产、跨页多选或当前筛选的全部结果；Mesh、片段、时间范围和采样帧率配置随任务保存，重试沿用相同配置。
 
@@ -91,7 +93,7 @@ job status last
 - glTF 的外部 buffers / images 会一起复制；依赖必须位于 glTF 所在目录内。缺失依赖或越界依赖会明确报错，推荐先打包为 GLB。
 - FBX 使用 Godot 原生 FBXDocument 导入，Blender 5.2 后台导出。本次已验证标准人体的骨骼、动画及尺度往返；尚未在 UE 中回导验收，外部纹理打包和复杂资产兼容仍需后续测试。
 - `.res` 保存动画轨道，需要匹配的节点路径和骨架；启用 Retarget 时保存目标骨架轨道。标准 baseline 来源与 SHA-256 见 `BuiltinAssets/Baselines/provenance.json`；StudioBot 只保留为小型确定性测试 fixture。
-- 任意骨架 BoneMap、接触 IK、专门面向 UE 的复杂异构骨骼烘焙、S3 / MinIO 尚未实现。独立 Windows 便携原型已加入构建流程；安装器、签名、自动更新与正式发布尚未实现。
+- 任意骨架 BoneMap、接触 IK、专门面向 UE 的复杂异构骨骼烘焙、S3 / MinIO 尚未实现。Beta 以 ZIP 分发。
 - 文件扫描 / 复制 / 哈希在后台执行。Godot 场景解析当前仍在主线程，大型模型加载可能短暂停顿。当前按首个 AnimationPlayer 提取动画，复杂多动画播放器场景需后续扩展。
 - 启用 Compatibility 渲染器和低处理器占用模式；预览暂停时仅在视角、尺寸或姿态变化后请求重绘。实际占用依赖模型与驱动，尚未完成性能基准测试。
 

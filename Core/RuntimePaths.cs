@@ -2,7 +2,7 @@ using Godot;
 
 namespace Animanager.Core;
 
-/// <summary>Files consumed by .NET / Blender live beside the executable, outside the PCK.</summary>
+/// <summary>Resolves raw files consumed by .NET and Blender outside the PCK.</summary>
 public static class RuntimePaths
 {
     public static string? ExplicitLibraryRoot()
@@ -26,9 +26,17 @@ public static class RuntimePaths
         return ProjectSettings.GlobalizePath("user://Library");
     }
 
-    public static string Bundled(string relative)=>OS.HasFeature("editor")
-        ?ProjectSettings.GlobalizePath("res://"+relative)
-        :Path.GetFullPath(Path.Combine(Path.GetDirectoryName(OS.GetExecutablePath())!,relative));
+    public static string Bundled(string relative)
+    {
+        if (OS.HasFeature("editor"))
+            return ProjectSettings.GlobalizePath("res://" + relative);
+
+        var executableDirectory = Path.GetDirectoryName(OS.GetExecutablePath())!;
+        var bundleDirectory = OperatingSystem.IsMacOS()
+            ? Path.Combine(executableDirectory, "..", "Resources")
+            : executableDirectory;
+        return Path.GetFullPath(Path.Combine(bundleDirectory, relative));
+    }
     public static string Expand(string path)=>path.StartsWith("res://")?Bundled(path[6..])
         :path.StartsWith("user://")?ProjectSettings.GlobalizePath(path):Path.GetFullPath(path);
 }

@@ -78,6 +78,18 @@ public partial class BoneTreePanel : VBoxContainer
     }
     public override void _EnterTree(){if(_built){Bones.Changed+=OnChanged;QueueSync();}}
     public override void _ExitTree(){if(_built)Bones.Changed-=OnChanged;}
+    internal void BindPreview(Preview3DViewport preview)
+    {
+        if (Preview == preview) return;
+        bool connected = _built && IsInsideTree();
+        if (connected) Bones.Changed -= OnChanged;
+        Preview = preview;
+        _revision = -1;
+        _selectionQueued = false;
+        _error = "";
+        if (connected) Bones.Changed += OnChanged;
+        QueueSync();
+    }
     private CheckButton Toggle(Node parent,string text,string name,Action<bool> action)
     {
         var button=new CheckButton{Name=name,Text=text,TooltipText=text,ClipText=true,SizeFlagsHorizontal=SizeFlags.ExpandFill,FocusMode=FocusModeEnum.All};parent.AddChild(button);
@@ -97,9 +109,11 @@ public partial class BoneTreePanel : VBoxContainer
     private void QueueSelection()
     {
         if(_syncing||_selectionQueued)return;_selectionQueued=true;
-        long revision=Bones.ModelRevision;
+        var bones = Bones;
+        long revision=bones.ModelRevision;
         Callable.From(()=>
         {
+            if(bones!=Bones)return;
             if(!IsInsideTree()||revision!=Bones.ModelRevision){_selectionQueued=false;return;}
             CommitSelection();
         }).CallDeferred();

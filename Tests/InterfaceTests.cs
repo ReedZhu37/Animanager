@@ -571,41 +571,234 @@ public static class InterfaceTests
                 click.Pressed = false;
                 rows.ActiveView._GuiInput(click);
             }
+            var context = (PopupMenu)owner.FindChild("AssetContextMenu", true, false)!;
+            const string openHere = "在当前标签打开", openNew = "在新标签打开";
+            int MenuIndex(PopupMenu menu, string text) =>
+                Enumerable.Range(0, menu.ItemCount).FirstOrDefault(index => menu.GetItemText(index) == text, -1);
+            void ChooseMenuItem(PopupMenu menu, string text)
+            {
+                int index = MenuIndex(menu, text);
+                if (index < 0 || menu.IsItemDisabled(index))
+                    throw new InvalidOperationException("Menu action is unavailable: " + text);
+                menu.Hide();
+                menu.EmitSignal(PopupMenu.SignalName.IdPressed, menu.GetItemId(index));
+            }
+            void ShowCardMenu(string id)
+            {
+                int index = rows.IndexOf(id);
+                if (index < 0) throw new InvalidOperationException("Preview fixture is missing: " + id);
+                using var click = new InputEventMouseButton
+                {
+                    Position = rows.RowRect(index).GetCenter(), ButtonIndex = MouseButton.Right, Pressed = true
+                };
+                rows.ActiveView._GuiInput(click);
+            }
+            void OpenCardFromMenu(string id, string mode = openNew)
+            {
+                ShowCardMenu(id);
+                ChooseMenuItem(context, mode);
+            }
+            var previewTabs = (PreviewTabs)host.Panel("preview");
             var beforeClick = owner.PendingAssetPreview;
             ClickCard(run.Id);
             Check(owner.SelectedAssetIds.SequenceEqual([run.Id]) && owner.PendingAssetPreview == beforeClick && preview.Model == original,
                 "a single grid click selects without opening a preview");
             ClickCard(run.Id, doubleClick: true);
-            var pendingRun = owner.PendingAssetPreview;
-            Check(owner.SelectedAssetIds.SequenceEqual(new[] { run.Id }) && !pendingRun.IsCompleted && preview.Model == original,
-                "a double-click starts the preview while the previous scene remains visible");
+            var replacedRequest = owner.PendingAssetPreview;
+            Check(previewTabs.ActiveStage == stage && previewTabs.Stages.Count == 1 && preview.Model == original &&
+                !replacedRequest.IsCompleted, "a double-click prepares a replacement in the current tab");
             ClickCard(idle.Id, doubleClick: true);
+            await Task.WhenAll(replacedRequest, owner.PendingAssetPreview);
+            Check(commands.SelectedId == idle.Id && preview.CurrentClip == "StudioBot_Idle" &&
+                previewTabs.Stages.Count == 1 && ReferenceEquals(rows.Rows, page) && Camera() == adjustedCamera,
+                "rapid default opens replace one tab with the latest asset and preserve its camera");
+
+            rows.SetMode(AssetBrowser.ViewMode.List); await Frames();
+            rows.SelectIndex(rows.IndexOf(walk.Id));
+            rows.List.GrabFocus();
+            KeyPress(Key.Enter);
+            await owner.PendingAssetPreview;
+            Check(previewTabs.ActiveStage == stage && previewTabs.Stages.Count == 1 && preview.CurrentClip == "StudioBot_Walk" &&
+                rows.List.HasFocus(), "Enter replaces the current preview and keeps list focus");
+            rows.SetMode(AssetBrowser.ViewMode.Grid); await Frames();
+            rows.Selection.SetAll([walk.Id, idle.Id]);
+            ShowCardMenu(idle.Id);
+            Check(context.Visible && MenuIndex(context, openHere) >= 0 && MenuIndex(context, openNew) >= 0 &&
+                owner.SelectedAssetIds.ToHashSet().SetEquals([walk.Id, idle.Id]), "the asset context menu offers both opening modes");
+            ChooseMenuItem(context, openHere);
+            await owner.PendingAssetPreview;
+            Check(previewTabs.ActiveStage == stage && previewTabs.Stages.Count == 1 && preview.CurrentClip == "StudioBot_Idle" &&
+                owner.SelectedAssetIds.ToHashSet().SetEquals([walk.Id, idle.Id]), "Open in current tab opens the clicked asset and keeps multi-selection");
+            ClickCard(walk.Id, doubleClick: true);
+            await owner.PendingAssetPreview;
+            original = preview.Model;
+
+            OpenCardFromMenu(run.Id);
+            var pendingRun = owner.PendingAssetPreview;
+            var runStage = previewTabs.ActiveStage;
+            var runPreview = runStage.Viewport;
+            Check(owner.SelectedAssetIds.SequenceEqual(new[] { run.Id }) && !pendingRun.IsCompleted &&
+                preview.Model == original && !preview.IsVisibleInTree() && runPreview != preview,
+                "Open in new tab preserves the previous scene in the background");
+            OpenCardFromMenu(idle.Id);
+            var idleStage = previewTabs.ActiveStage;
+            var idlePreview = idleStage.Viewport;
             await Task.WhenAll(pendingRun, owner.PendingAssetPreview);
-            Check(commands.SelectedId == idle.Id && preview.CurrentClip == "StudioBot_Idle" && ReferenceEquals(rows.Rows, page),
-                "rapid openings show the latest animation without replacing the browser rows");
-            Check(Camera() == adjustedCamera, "switching animation cards preserves the viewing angle, pan, zoom and projection");
+            Check(commands.SelectedId == idle.Id && idlePreview.CurrentClip == "StudioBot_Idle" &&
+                runPreview.CurrentClip == "StudioBot_Run" && ReferenceEquals(rows.Rows, page),
+                "rapid openings load both tabs and keep focus on the latest animation");
+            Check(Camera() == adjustedCamera, "a background tab retains its viewing angle, pan, zoom and projection");
             resetCamera.ButtonPressed = true;
-            Check(Camera() == adjustedCamera, "enabling camera reset leaves the current view in place");
+            Check(Camera() == adjustedCamera && runPreview.ResetCameraOnAnimationChange, "camera reset applies to every tab on its next clip change");
             ClickCard(run.Id, doubleClick: true);
             await owner.PendingAssetPreview;
-            Check(preview.CurrentClip == "StudioBot_Run" && Camera() != adjustedCamera && preview.CameraTarget != adjustedCamera.Target,
-                "switching animation cards reframes the preview when camera reset is enabled");
+            Check(previewTabs.ActiveStage == runStage && previewTabs.Stages.Count == 3 && runPreview.CameraTarget != adjustedCamera.Target,
+                "reopening an existing animation focuses the same viewport without creating a duplicate");
+            runPreview.Seek(.1);
+            runPreview.TogglePlay();
 
             rows.SetMode(AssetBrowser.ViewMode.List); await Frames();
             int idleIndex = rows.IndexOf(idle.Id);
             rows.SelectIndex(idleIndex > 0 ? idleIndex - 1 : 1);
             rows.List.GrabFocus();
             KeyPress(idleIndex > 0 ? Key.Down : Key.Up);
-            Check(owner.SelectedAssetIds.SequenceEqual([idle.Id]) && preview.CurrentClip == "StudioBot_Run",
+            Check(owner.SelectedAssetIds.SequenceEqual([idle.Id]) && previewTabs.ActiveStage == runStage,
                 "an arrow key selects the next list item without replacing the preview");
             KeyPress(Key.Enter);
             await owner.PendingAssetPreview;
-            Check(preview.CurrentClip == "StudioBot_Idle" && rows.List.HasFocus(), "Enter opens the selected animation and keeps browsing focus");
+            double backgroundTime = runPreview.Playhead;
+            await Frames();
+            Check(previewTabs.ActiveStage == idleStage && rows.List.HasFocus(), "Enter focuses the selected animation and keeps browsing focus");
+            Check(!runPreview.CanProcess() && runPreview.View.RenderTargetUpdateMode == SubViewport.UpdateMode.Disabled &&
+                Math.Abs(runPreview.Playhead - backgroundTime) < .001, "background tabs suspend playback and rendering");
             KeyPress(Key.Space);
-            Check(preview.TransportPlaying && owner.SelectedAssetIds.SequenceEqual([idle.Id]), "Space plays the animation while the asset list has focus");
+            Check(idlePreview.TransportPlaying && owner.SelectedAssetIds.SequenceEqual([idle.Id]), "Space plays the animation while the asset list has focus");
             KeyPress(Key.Space);
-            Check(!preview.TransportPlaying, "pressing Space again pauses the animation");
+            Check(!idlePreview.TransportPlaying, "pressing Space again pauses the animation");
+
+            OpenCardFromMenu(rig.Id);
+            var rigStage = previewTabs.ActiveStage;
+            await owner.PendingAssetPreview;
+            previewTabs.Activate(idleStage);
+            var arrange = (MenuButton)previewTabs.FindChild("ArrangePreviews", true, false)!;
+            arrange.EmitSignal(MenuButton.SignalName.AboutToPopup);
+            var panes = arrange.GetPopup();
+            panes.EmitSignal(PopupMenu.SignalName.IdPressed, 2);
+            var priorLayout = host.Docking.Layout.Clone();
+            host.FocusPanel("preview"); await Frames();
+            Check(runPreview.IsVisibleInTree() && idlePreview.IsVisibleInTree() && runPreview.CanProcess() &&
+                Math.Abs(runPreview.Playhead - backgroundTime) > .001 && !idlePreview.TransportPlaying,
+                "checking a second pane resumes its playback independently of the paused focused pane");
+            previewTabs.Activate(runStage);
+            commands.Seek(.2);
+            runStage.SpeedControl.Value = 1.5;
+            Check(Math.Abs(runPreview.Playhead - .2) < .001 && runPreview.PlaybackSpeed == 1.5 &&
+                idlePreview.PlaybackSpeed == 1 && !idlePreview.TransportPlaying, "Console and transport changes only affect the focused pane");
+            var tabBar = (HBoxContainer)previewTabs.FindChild("PreviewTabBar", true, false)!;
+            void CloseTab(PreviewStage tab)
+            {
+                int index = previewTabs.Stages.ToList().IndexOf(tab);
+                ((Button)tabBar.GetChild(index).GetChild(1)).EmitSignal(BaseButton.SignalName.Pressed);
+            }
+            var tabContext = (PopupMenu)previewTabs.FindChild("PreviewTabContextMenu", true, false)!;
+            void ShowTabMenu(PreviewStage target)
+            {
+                int index = previewTabs.Stages.ToList().IndexOf(target);
+                var button = tabBar.GetChild(index).GetChild<Button>(0);
+                using var click = new InputEventMouseButton
+                {
+                    ButtonIndex = MouseButton.Right, Pressed = true, Position = button.Size * .5f
+                };
+                button.EmitSignal(Control.SignalName.GuiInput, click);
+                Check(tabContext.Visible, "right-clicking a preview tab opens its context menu");
+            }
+            if (DisplayServer.GetName() != "headless")
+            {
+                await Frames();
+                using var splitImage = owner.GetViewport().GetTexture().GetImage();
+                splitImage.SavePng(Path.Combine(root, "preview-tabs.png"));
+            }
+            panes.EmitSignal(PopupMenu.SignalName.IdPressed, 1);
+            panes.EmitSignal(PopupMenu.SignalName.IdPressed, 4);
+            await Frames();
+            Check(previewTabs.Stages.Count == 4 && previewTabs.Stages.All(pane => pane.Viewport.CanProcess()) &&
+                previewTabs.Stages.Select(pane => pane.Position.X).Distinct().Count() == 2 &&
+                previewTabs.Stages.Select(pane => pane.Position.Y).Distinct().Count() == 2,
+                "four checked tabs display in two rows and two columns");
+            ShowTabMenu(rigStage);
+            Check(tabContext.IsItemDisabled(MenuIndex(tabContext, "关闭右侧标签")), "the last tab has no tabs to its right");
+            tabContext.Hide();
+            ShowTabMenu(idleStage);
+            ChooseMenuItem(tabContext, "关闭右侧标签");
+            Check(previewTabs.Stages.SequenceEqual([stage, runStage, idleStage]) && previewTabs.ActiveStage == runStage,
+                "Close tabs to the right uses the clicked tab and preserves focus on the left");
+            var wideSize = window.Size;
+            window.Size = new(640, 410);
+            await Frames(30);
+            var paneScroll = (ScrollContainer)previewTabs.FindChild("PreviewPanes", true, false)!;
+            paneScroll.ScrollVertical = 0;
+            await Frames();
+            Check(idleStage.Position.X == stage.Position.X && idleStage.Position.Y > runStage.Position.Y &&
+                !idlePreview.CanProcess() && idlePreview.View.RenderTargetUpdateMode == SubViewport.UpdateMode.Disabled,
+                $"narrow layouts stack their panes and suspend the viewport outside the scroll area ({paneScroll.Size}, {idleStage.Position})");
+            previewTabs.Activate(idleStage);
+            await Frames();
+            Check(idlePreview.CanProcess() && !stage.Viewport.CanProcess() && !idlePreview.TransportPlaying,
+                "focusing a stacked pane reveals it and preserves its manual pause");
+            window.Size = wideSize;
+            await Frames(30);
+            previewTabs.Activate(runStage);
+            CloseTab(runStage);
+            Check(previewTabs.ActiveStage == idleStage && previewTabs.Stages.Count == 2, "closing the focused pane selects a visible neighbor");
+            ShowTabMenu(stage);
+            ChooseMenuItem(tabContext, "关闭其他标签");
+            Check(previewTabs.ActiveStage == stage && previewTabs.Stages.Count == 1 && preview.Model == original,
+                "closing the remaining new tab restores the original preview without reloading");
+            host.Docking.Restore(priorLayout);
             rows.SetMode(AssetBrowser.ViewMode.Grid); await Frames();
+            OpenCardFromMenu(rig.Id);
+            var canceledLoad = owner.PendingAssetPreview;
+            CloseTab(previewTabs.ActiveStage);
+            await canceledLoad;
+            Check(previewTabs.ActiveStage == stage && previewTabs.Stages.Count == 1 && preview.Model == original,
+                "closing a loading tab cancels its request without changing the remaining preview");
+            string rigPath = api.Storage.Resolve(rig.VirtualPath);
+            string unavailableRig = rigPath + ".retry-fixture";
+            File.Move(rigPath, unavailableRig);
+            try
+            {
+                OpenCardFromMenu(rig.Id);
+                var retryStage = previewTabs.ActiveStage;
+                await owner.PendingAssetPreview;
+                var retry = (Button)retryStage.FindChild("RetryPreview", true, false)!;
+                Check(retry.Visible && retryStage.Viewport.Model == null && preview.Model == original,
+                    "a load failure exposes a retry inside its tab and preserves other scenes");
+                File.Move(unavailableRig, rigPath);
+                retry.EmitSignal(BaseButton.SignalName.Pressed);
+                await owner.PendingAssetPreview;
+                Check(!retry.Visible && retryStage.Viewport.Model != null && preview.Model == original,
+                    "retry fills the same tab once its source is available");
+                KeyPress(Key.W, ctrl: true);
+                Check(previewTabs.ActiveStage == stage && previewTabs.Stages.Count == 1 && preview.Model == original,
+                    "Ctrl+W closes the focused preview tab");
+            }
+            finally
+            {
+                if (File.Exists(unavailableRig)) File.Move(unavailableRig, rigPath);
+            }
+            OpenCardFromMenu(run.Id);
+            await owner.PendingAssetPreview;
+            ShowTabMenu(stage);
+            ChooseMenuItem(tabContext, "关闭所有标签");
+            Check(previewTabs.Stages.Count == 1 && previewTabs.ActiveStage.Viewport.Model == null &&
+                tabBar.GetChildren().OfType<Control>().All(row => !row.Visible), "Close all tabs returns to the empty preview");
+            stage = previewTabs.ActiveStage;
+            preview = stage.Viewport;
+            resetCamera = stage.ResetCameraToggle;
+            locatePreview = preview.LocateAssetButton;
+            previewLocateMenu = (PopupMenu)preview.FindChild("PreviewLocateMenu", true, false)!;
+            ClickCard(walk.Id, doubleClick: true);
+            await owner.PendingAssetPreview;
 
             var multiClip = new Node3D();
             multiClip.AddChild(new MeshInstance3D { Mesh = new BoxMesh() });
@@ -640,6 +833,17 @@ public static class InterfaceTests
             var openComparison = (Button)preview.FindChild("OpenComparisonOrder", true, false)!;
             var orderPanel = (Control)preview.FindChild("ComparisonOrder", true, false)!;
             var orderRows = (VBoxContainer)orderPanel.FindChild("ComparisonOrderList", true, false)!;
+            void BindActivePreview()
+            {
+                stage = previewTabs.ActiveStage;
+                preview = stage.Viewport;
+                locatePreview = preview.LocateAssetButton;
+                previewLocateMenu = (PopupMenu)preview.FindChild("PreviewLocateMenu", true, false)!;
+                exitCompare = (Button)preview.FindChild("ExitAnimationComparison", true, false)!;
+                openComparison = (Button)preview.FindChild("OpenComparisonOrder", true, false)!;
+                orderPanel = (Control)preview.FindChild("ComparisonOrder", true, false)!;
+                orderRows = (VBoxContainer)orderPanel.FindChild("ComparisonOrderList", true, false)!;
+            }
             void RemoveComparisonRow(int index) => orderRows.GetChild(index).FindChild("RemoveComparisonRow", true, false)!
                 .EmitSignal(BaseButton.SignalName.Pressed);
             async Task DragComparisonRow(int source, int target, bool after)
@@ -651,7 +855,6 @@ public static class InterfaceTests
                     new(to.Position.X + 32, to.Position.Y + to.Size.Y * (after ? .75f : .25f)));
             }
             var dropHint = (Control)preview.FindChild("ComparisonDropHint", true, false)!;
-            var context=(PopupMenu)owner.FindChild("AssetContextMenu",true,false)!;
 
             ((Button)owner.FindChild("EditOverviewWeaponProfile", true, false)!).EmitSignal(BaseButton.SignalName.Pressed);
             var weaponDialog = (AcceptDialog)owner.FindChild("WeaponProfiles", true, false)!;
@@ -787,10 +990,13 @@ public static class InterfaceTests
             Check(preview.AssetComparison?.Count == 2, "the comparison also accepts a static model");
             ClickCard(walk.Id, doubleClick: true);
             Check(preview.AssetComparison != null, "double-clicking the open asset keeps the existing comparison");
-            ClickCard(run.Id, doubleClick: true);
+            OpenCardFromMenu(run.Id);
             await owner.PendingAssetPreview;
-            Check(preview.AssetComparison == null && preview.CurrentClip == "StudioBot_Run",
-                "double-clicking a different row opens it and closes the previous comparison");
+            Check(preview.AssetComparison != null && !preview.CanProcess() &&
+                previewTabs.ActiveStage.Viewport.CurrentClip == "StudioBot_Run",
+                "opening a new tab suspends an existing same-scene comparison");
+            if (previewTabs.ActiveStage != stage) CloseTab(stage);
+            BindActivePreview();
             window.Size = new(720, 400);
             await Frames(30);
             host.ShowPanel("assets");
@@ -816,27 +1022,27 @@ public static class InterfaceTests
             rows.Selection.Select(run.Id);
             var approval=(ConfirmationDialog)owner.FindChild("OperationApproval",true,false)!;
             var viewport=owner.GetViewport();
-            async Task ClickRow(int index,MouseButton button,bool ctrl=false,Vector2? at=null)
+            async Task ClickRow(int index,MouseButton button,Vector2? at=null)
             {
                 var point=rows.ActiveView.GetGlobalTransformWithCanvas()*(at ?? rows.RowRect(index).GetCenter());
                 if(DisplayServer.GetName()!="headless")
                 {
                     Input.WarpMouse(point*window.ContentScaleFactor);await Frames(4);Input.FlushBufferedEvents();
                 }
-                using var motion=new InputEventMouseMotion{Position=point,GlobalPosition=point,CtrlPressed=ctrl};
-                using var click=new InputEventMouseButton{Position=point,GlobalPosition=point,ButtonIndex=button,Pressed=true,CtrlPressed=ctrl};
+                using var motion=new InputEventMouseMotion{Position=point,GlobalPosition=point};
+                using var click=new InputEventMouseButton{Position=point,GlobalPosition=point,ButtonIndex=button,Pressed=true};
                 using var release=(InputEventMouseButton)click.Duplicate();release.Pressed=false;
                 viewport.PushInput(motion,true);viewport.PushInput(click,true);viewport.PushInput(release,true);
                 await Frames(8);
             }
 
-            await ClickRow(0,MouseButton.Left);
-            await ClickRow(1,MouseButton.Left,ctrl:true);
-            var selected=api.Search().Items.Take(2).Select(a=>a.Id).ToHashSet();
+            var selected = new[] { rows.Row(0)!.Id, rows.Row(1)!.Id }.ToHashSet();
+            rows.Selection.SetAll(selected);
             await ClickRow(1,MouseButton.Right);
-            Check(context.Visible&&context.GetItemText(0).Contains("移入回收站")&&selected.SetEquals(owner.SelectedAssetIds),
-                "right-click on a selected row shows Delete and keeps the entire selection");
-            context.Hide();context.EmitSignal(PopupMenu.SignalName.IdPressed,context.GetItemId(0));await Frames(8);
+            const string deleteAsset = "删除（移入回收站）…";
+            Check(context.Visible&&MenuIndex(context, deleteAsset)>=0&&selected.SetEquals(owner.SelectedAssetIds),
+                $"right-click on a selected row shows Delete and keeps the entire selection (menu {context.Visible}, selected {owner.SelectedAssetIds.Length})");
+            ChooseMenuItem(context, deleteAsset);await Frames(8);
             Check(approval.Visible&&api.Search(category:"Trash").Total==0,"Delete asks for confirmation before changing assets");
             approval.Hide();approval.EmitSignal(AcceptDialog.SignalName.Confirmed);await Frames(8);
             Check(api.Search(category:"Trash").Items.Select(a=>a.Id).ToHashSet().SetEquals(selected),"right-click Delete moves exactly the selected assets to Trash");
@@ -844,7 +1050,8 @@ public static class InterfaceTests
             var trash=(Button)host.Panel("navigation").FindChild("CategoryTrash",true,false)!;
             trash.EmitSignal(BaseButton.SignalName.Pressed);await Frames(8);
             await ClickRow(0,MouseButton.Right);
-            Check(context.Visible&&context.GetItemText(0).Contains("恢复")&&owner.SelectedAssetIds.Length==1,"right-click on an unselected Trash row selects it and offers Restore");
+            Check(context.Visible&&context.GetItemText(0).Contains("恢复")&&MenuIndex(context, openNew)<0&&owner.SelectedAssetIds.Length==1,
+                "right-click on a Trash row offers Restore and omits preview actions");
             var restoredId=owner.SelectedAssetIds.Single();
             context.Hide();context.EmitSignal(PopupMenu.SignalName.IdPressed,context.GetItemId(0));
             approval.Hide();approval.EmitSignal(AcceptDialog.SignalName.Confirmed);await Frames(8);
@@ -931,6 +1138,8 @@ public static class InterfaceTests
                 "intersection evaluates each asset independently and the per-library query returns its own matches");
 
             ClickCard(remoteKey, doubleClick: true); await owner.PendingAssetPreview;
+            if (previewTabs.ActiveStage != stage) CloseTab(stage);
+            BindActivePreview();
             Check(preview.CurrentClip == remoteClip && commands.SelectedId == null,
                 "activating a mounted asset reads from its own library even if its id exists in the working library");
             var sidebar = (SideBar)host.Panel("navigation");
@@ -1075,11 +1284,11 @@ public static class InterfaceTests
             rows.ScrollToIndex(rows.IndexOf(remoteKey));
             await Frames();
             await ClickRow(rows.IndexOf(remoteKey), MouseButton.Right);
-            Check(context.Visible && context.GetItemText(0) == removeFromCurrentCollection && !context.IsItemDisabled(0) &&
+            int removeFromCollection = MenuIndex(context, removeFromCurrentCollection);
+            Check(context.Visible && removeFromCollection >= 0 && !context.IsItemDisabled(removeFromCollection) &&
                 owner.SelectedAssetIds.SequenceEqual([remoteKey]),
                 "right-clicking a collection member offers removal from the current collection");
-            context.Hide();
-            context.EmitSignal(PopupMenu.SignalName.IdPressed, context.GetItemId(0));
+            ChooseMenuItem(context, removeFromCurrentCollection);
             Check(approval.Visible && collections.Read().Collections.Single(c => c.Id == child.Id).Members.Contains(link),
                 "removal waits for confirmation");
             approval.Hide();
@@ -1360,7 +1569,8 @@ public static class InterfaceTests
             for (int i = 0; i < 61; i++)
                 pageDatabase.Insert(remote with
                 {
-                    Id = $"page-return-{i}", FileHash = $"page-return-{i}", Name = $"PageReturnFixture {i:D2}", Tags = ""
+                    Id = $"page-return-{i}", FileHash = $"page-return-{i}", Name = $"PageReturnFixture {i:D2}",
+                    Tags = i == 0 ? "PageReturnScope PageReturnTag" : "PageReturnScope"
                 });
             search.Text = "PageReturnFixture";
             search.EmitSignal(LineEdit.SignalName.TextSubmitted, search.Text);
@@ -1371,8 +1581,68 @@ public static class InterfaceTests
             var lastPageAsset = rows.Rows.Single().Id;
             var firstPageButton = (Button)assetPanel.FindChild("AssetPageFirst", true, false)!;
             Check(!firstPageButton.Disabled, "the filtered result is on its second page");
+            Button SidebarTag(string tag) => Preview3DViewport.Descendants(sidebar).OfType<Button>()
+                .Single(button => button.TooltipText.StartsWith(tag + " "));
+            var pageReturnTag = SidebarTag("PageReturnTag");
+            pageReturnTag.EmitSignal(BaseButton.SignalName.Pressed);
+            await owner.PendingBrowse;
+            Check(firstPageButton.Disabled && lastPage.Disabled && rows.Rows.Single().Name == "PageReturnFixture 00",
+                "applying a tag from the second page opens the first page of tag matches");
+            pageReturnTag.EmitSignal(BaseButton.SignalName.Pressed);
+            await owner.PendingBrowse;
+            Check(!firstPageButton.Disabled && rows.Rows.Single().Id == lastPageAsset,
+                "clicking the last selected tag again restores the page before tag filtering");
+
+            owner.DisplayScale.SetScale(1);
+            host.RestorePanels();
+            await Frames(30);
+            SidebarTag("PageReturnScope").EmitSignal(BaseButton.SignalName.Pressed);
+            await owner.PendingBrowse;
+            var firstPageSelection = rows.Rows.Take(2).Select(row => row.Id).ToArray();
+            rows.Selection.SetAll(firstPageSelection);
+            lastPage.EmitSignal(BaseButton.SignalName.Pressed);
+            await owner.PendingBrowse;
+            rows.Selection.Toggle(lastPageAsset);
+            bool HasPageReturnTag(int i) => WorkspaceApi.ParseTags(pageDatabase.Find($"page-return-{i}")!.Tags)
+                .Contains("PageReturnTag");
+            var undoTagDrop = (Button)host.Status.FindChild("StatusAction", true, false)!;
+            sidebarScroll.EnsureControlVisible(pageReturnTag);
+            await Frames();
+            await DragBrowserAsset(lastPageAsset, pageReturnTag, cancel: true, duringDrag: () =>
+                Check(pageReturnTag.GetChildren().OfType<Panel>().Any(panel => panel.Visible) &&
+                    host.Status.MessageLabel.Text == "给 3 个资产添加「PageReturnTag」",
+                    "dragging onto a tag highlights it and shows the cross-page selection count"));
+            Check(!HasPageReturnTag(1) && !HasPageReturnTag(60) && !undoTagDrop.Visible &&
+                !pageReturnTag.GetChildren().OfType<Panel>().Any(panel => panel.Visible),
+                "canceling a tag drop removes the highlight without saving tags");
+
+            await DragBrowserAsset(lastPageAsset, pageReturnTag);
+            await owner.PendingBrowse;
+            Check(HasPageReturnTag(0) && HasPageReturnTag(1) && HasPageReturnTag(60) && !HasPageReturnTag(2) &&
+                undoTagDrop.Visible && host.Status.MessageLabel.Text.Contains("2 个资产"),
+                "dropping a cross-page selection saves the tag only for selected assets that needed it");
+            Check(SidebarTag("PageReturnScope").ButtonPressed && !SidebarTag("PageReturnTag").ButtonPressed &&
+                search.Text == "PageReturnFixture" && !firstPageButton.Disabled && rows.Rows.Single().Id == lastPageAsset &&
+                owner.SelectedAssetIds.ToHashSet().SetEquals(firstPageSelection.Append(lastPageAsset)),
+                "dragging to a tag keeps the current filter, page and selection");
+
+            pageReturnTag = SidebarTag("PageReturnTag");
+            sidebarScroll.EnsureControlVisible(pageReturnTag);
+            await Frames();
+            await DragBrowserAsset(lastPageAsset, pageReturnTag);
+            Check(undoTagDrop.Visible && host.Status.MessageLabel.Text.Contains("已有"),
+                "dropping onto the same tag again keeps the last undo action");
+            undoTagDrop.EmitSignal(BaseButton.SignalName.Pressed);
+            await owner.PendingBrowse;
+            Check(HasPageReturnTag(0) && !HasPageReturnTag(1) && !HasPageReturnTag(60) && !undoTagDrop.Visible &&
+                SidebarTag("PageReturnScope").ButtonPressed && !firstPageButton.Disabled && rows.Rows.Single().Id == lastPageAsset,
+                "undo removes only the tags added by the last drop and keeps the current filtered page");
+            SidebarTag("PageReturnScope").EmitSignal(BaseButton.SignalName.Pressed);
+            await owner.PendingBrowse;
+
             ClickCard(lastPageAsset, doubleClick: true);
             await owner.PendingAssetPreview;
+            BindActivePreview();
             firstPageButton.EmitSignal(BaseButton.SignalName.Pressed);
             await owner.PendingBrowse;
             Check(rows.IndexOf(lastPageAsset) < 0, "the open animation can be on a different results page");

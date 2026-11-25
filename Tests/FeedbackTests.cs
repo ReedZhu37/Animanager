@@ -139,7 +139,7 @@ public static class FeedbackTests
             var imported = api.Jobs.Get(api.Jobs.LatestId!);
             Check(imported.Failed == 0 && imported.Items.Sum(item => item.ExcludedWithoutAnimationAssets) == 2 &&
                 owner.Characters.List().Length == characters, "ordinary import skips an unrigged mesh in both libraries");
-            var stage = (PreviewStage)owner.Workspace.Panel("preview");
+            var stage = ((PreviewTabs)owner.Workspace.Panel("preview")).ActiveStage;
             stage.SpeedControl.Value = 1.35;
             Check(Math.Abs(preview.Player!.SpeedScale - 1.35) < .001, "continuous speed slider controls actual player");
             Check(preview.TotalFrames == 61 && preview.CurrentFrame == 1, "source 60 FPS retains 61 samples including endpoint after retarget");

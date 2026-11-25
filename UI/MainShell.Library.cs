@@ -43,6 +43,7 @@ public partial class MainShell
     private const int AddAssetTagsAction = 5, RemoveAssetTagsAction = 6;
     private const int RemoveCurrentCollectionMembersAction = 15;
     private const int OpenCollectionSourceAction = 16, RemoveClosedCollectionMemberAction = 17;
+    private const int OpenInCurrentPreviewAction = 18, OpenInNewPreviewAction = 19;
     private string? _assetContextKey;
     private const string TrashAssetsLabel = "删除（移入回收站）…";
     private const string RemoveCurrentCollectionMembersLabel = "从当前集合移出…";
@@ -68,6 +69,13 @@ public partial class MainShell
 
     private static string SelectionAssetId(string key) => key.StartsWith(LibraryKeyPrefix, StringComparison.Ordinal)
         ? key[(key.IndexOf(':', LibraryKeyPrefix.Length) + 1)..] : key;
+
+    private LibraryAssetRow? FindLiveAsset(string key)
+    {
+        var library = SelectionLibrary(key);
+        var id = SelectionAssetId(key);
+        return library?.Api.Database.Find(id) is { Trashed: false } asset && asset.Id == id ? new(library, new(asset, null)) : null;
+    }
 
     private bool CanEditAssetSelection() => !_libraryLoading && _assetSelection.Count > 0 &&
         _assetSelection.All(key => SelectionLibrary(key) != null);
@@ -163,7 +171,7 @@ public partial class MainShell
     private Task SwitchLibraryAsync(Func<Task<LibrarySession>> open) => RunLibraryLoadAsync("正在打开资产库…", async () =>
     {
         BeforeLibrarySwitch();
-        await Task.WhenAll(PendingAssetPreview, PendingRetargetPreview, PendingAnimationComparison, _pendingRetargetSource, StopLibraryPreviewWarmupAsync());
+        await Task.WhenAll(CancelPreviewLoads(), PendingRetargetPreview, PendingAnimationComparison, _pendingRetargetSource, StopLibraryPreviewWarmupAsync());
         if (_closing) return;
         var session = await open();
         if (_closing) return;
@@ -198,9 +206,11 @@ public partial class MainShell
         _search.Text = "";
         _assetSearch.Text = "";
         _assetContextMenu.Hide();
-        ClearAssetPreview();
+        foreach (var stage in _previewTabs.Stages) stage.Viewport.EndAnimationComparison();
         _plainAssetKeyLibrary = session;
         SyncConsoleLibrary();
+        RefreshPreviewTabs();
+        SyncFocusedPreviewSelection();
         _browseLibraryRevision++;
         RememberOpenLibraries();
         LoadAssetRetargetConfiguration();
@@ -608,12 +618,13 @@ public partial class MainShell
             throw new InvalidOperationException("请等待此库的任务完成，或在任务面板取消后再移出。");
         var comparison = PendingAnimationComparison;
         if (_comparisonLoadingLibrary == library) _comparisonRequest?.Cancel();
-        if (_selectedLibrary == library || (_previewAssetId.Length > 0 && SelectionLibrary(_previewAssetId) == library))
+        var loads = CancelPreviewLoads(library);
+        if (_activePreviewTab.Library == library || _activePreviewTab.DisplayedLibrary == library)
         {
-            ClearAssetPreview();
-            await Task.WhenAll(PendingAssetPreview, PendingRetargetPreview, comparison, _pendingRetargetSource);
+            BeforeLibrarySwitch();
+            await Task.WhenAll(loads, PendingRetargetPreview, comparison, _pendingRetargetSource);
         }
-        else if (_comparisonLoadingLibrary == library) await comparison;
+        else await Task.WhenAll(loads, comparison);
         if (_libraryPreviewWarmup?.Library == library) await StopLibraryPreviewWarmupAsync();
         else await _previewWarmupCleanup;
         if (_closing) return;
@@ -621,6 +632,8 @@ public partial class MainShell
         string id = library.Identity.Id;
         if (_motionReference?.Library == library) ClearMotionFilter();
         else if (_motionStart?.Library == library) _motionStart = null;
+        foreach (var tab in _previewTabsByStage.Values.Where(t => t.Library == library || t.DisplayedLibrary == library).ToArray())
+            ClosePreviewTab(tab);
         _libraries.CloseLibrary(id);
         if (_plainAssetKeyLibrary == library) _plainAssetKeyLibrary = null;
         if (_assetLibraryFilter == id) _assetLibraryFilter = null;
@@ -634,6 +647,7 @@ public partial class MainShell
     {
         _browseLibraryRevision++;
         SyncConsoleLibrary();
+        SyncFocusedPreviewSelection();
         SyncLibraryJobs();
         RememberOpenLibraries();
         if (CurrentCollection == null)
@@ -873,11 +887,7 @@ public partial class MainShell
     private void SetAssetCategory(string category, int page)
     {
         _searchTimer.Stop();
-        if (_category == "Trash" ^ category == "Trash")
-        {
-            ClearAssetSelection();
-            if (!AnimationComparisonActive) ClearAssetPreview();
-        }
+        if (_category == "Trash" ^ category == "Trash") ClearAssetSelection();
         _category = category;
         _page = page;
         _browser.Scroll.ScrollVertical = 0;
@@ -916,6 +926,12 @@ public partial class MainShell
         }
         else
         {
+            if (index < _browseRows.Length && !_browseRows[index].Asset.Trashed)
+            {
+                _assetContextMenu.AddItem("在当前标签打开", OpenInCurrentPreviewAction);
+                _assetContextMenu.AddItem("在新标签打开", OpenInNewPreviewAction);
+                _assetContextMenu.AddSeparator();
+            }
             if (CurrentCollection is { } collection)
                 Add(RemoveCurrentCollectionMembersLabel, RemoveCurrentCollectionMembersAction, SelectedCollectionLinks(collection).Any());
             Add(TrashAssetsLabel, TrashAssetsAction);
@@ -944,40 +960,17 @@ public partial class MainShell
         _assetAnchor = null;
     }
 
-    private void ClearAssetPreview()
-    {
-        EndAnimationComparison();
-        StopRequest(ref _retargetSourceRequest);
-        _previewGeneration++;
-        _retargetCancellation?.Cancel();
-        if (_retargetEnabled != null) _retargetEnabled.ButtonPressed = false;
-        _selected = null;
-        _selectedLibrary = null;
-        _selectedKey = null;
-        _previewAssetId = "";
-        _preview.Clear();
-        _stage.SetClips([],null);
-        _stage.SetLoadStatus("");
-        _title.Text = _previewName.Text = "双击资产以打开预览";
-        _detail.Text = "格式、骨架与动画信息显示在这里。";
-        _tags.Text = "";
-        _exportSummary.Text = "导出当前选中的资产。";
-        _commands?.ForgetSelection();
-        UpdateTransport();
-    }
-
     private void RefreshCurrentAsset()
     {
-        if (_selected == null || _selectedLibrary == null) return;
-        var current = _selectedLibrary.Api.Database.Find(_selected.Id);
-        if (current == null) { ClearAssetPreview(); return; }
-        if (current.Tags != _selected.Tags) _tags.Text = current.Tags;
+        RefreshPreviewTabs();
+        if (_activePreviewTab.Asset is not { } current) return;
+        if (current.Tags != _selected?.Tags) _tags.Text = current.Tags;
         _selected = current;
         _title.Text = current.Name;
         _inspectorStamp="";SyncInspector();
         if (_previewAssetId == _selectedKey)
         {
-            _previewName.Text = current.Name;
+            _stage.TitleLabel.Text = current.Name;
             _exportSummary.Text = "导出资产：" + current.Name;
         }
     }
@@ -1037,6 +1030,13 @@ public partial class MainShell
 
     private void AssetAction(int action)
     {
+        if (action is OpenInCurrentPreviewAction or OpenInNewPreviewAction)
+        {
+            if (!_closing && !_libraryLoading && _category != "Trash" &&
+                _assetContextKey is { } assetKey && FindLiveAsset(assetKey) is { } row)
+                OpenAssetInPreview(row.Library, row.Asset, inNewTab: action == OpenInNewPreviewAction);
+            return;
+        }
         if (action is OpenCollectionSourceAction or RemoveClosedCollectionMemberAction)
         {
             if (_assetContextKey is { } key && CurrentCollection is { } collection &&

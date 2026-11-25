@@ -58,8 +58,7 @@ public partial class MainShell
                 int i = _characterChoice.ItemCount - 1; _characterChoice.SetItemDisabled(i, !entry.Compatible);
                 _characterChoice.SetItemTooltip(i, entry.Compatible ? $"{entry.Bones} 骨骼 · {entry.Family}" : entry.Reason);
             }
-            _characterChoice.Select(Math.Max(0, Array.FindIndex(_characterEntries, c => c.Id == _previewCharacterId) + 1));
-            _characterStatus.Text = _previewCharacterId.Length == 0 ? "使用动画自带的角色" : "选择动画后自动应用 · " + _characterEntries.First(c => c.Id == _previewCharacterId).Name;
+            SyncPreviewCharacterControl();
         }
         if (_retargetTarget != null)
         {
@@ -72,6 +71,17 @@ public partial class MainShell
                 if (entry.Id == selectedId) _retargetTarget.Select(index);
             }
         }
+    }
+    private void SyncPreviewCharacterControl()
+    {
+        if (_characterChoice == null) return;
+        var applied = _preview?.AppliedRetarget;
+        string id = applied?.Character?.Id ?? applied?.TargetRig ??
+            (_activePreviewTab.DisplayedAsset == null ? _previewCharacterId : "");
+        int index = Array.FindIndex(_characterEntries, entry => entry.Id == id);
+        _characterChoice.Select(index + 1);
+        _characterStatus.Text = _activePreviewTab.CharacterStatus.Length > 0 ? _activePreviewTab.CharacterStatus :
+            index < 0 ? "使用动画自带的角色" : "预览角色 · " + _characterEntries[index].Name;
     }
     private CharacterEntry RetargetCharacter
     {

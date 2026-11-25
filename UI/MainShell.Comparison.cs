@@ -16,13 +16,14 @@ public partial class MainShell
         _comparisonRequest is { IsCancellationRequested: false };
     internal Task PendingAnimationComparison { get; private set; } = Task.CompletedTask;
 
-    private void BuildPreviewLocateMenu()
+    private void BuildPreviewLocateMenu(Preview3DViewport viewport)
     {
-        var button = _preview.LocateAssetButton;
+        var button = viewport.LocateAssetButton;
         var menu = new PopupMenu { Name = "PreviewLocateMenu", AllowSearch = true };
-        _preview.AddChild(menu);
+        viewport.AddChild(menu);
         button.Pressed += () => LibraryAction(() =>
         {
+            _previewTabs.Activate((PreviewStage)viewport.GetParent(), reveal: false);
             if (_previewAssetId.Length == 0) return;
             if (_preview.AssetComparison is not { } comparison)
             {
@@ -37,7 +38,7 @@ public partial class MainShell
             {
                 string key = entry.Key ?? _previewAssetId;
                 string name = entry.Label.Text;
-                if (duplicateNames.Contains(name) && FindComparisonAsset(key) is { } row)
+                if (duplicateNames.Contains(name) && FindLiveAsset(key) is { } row)
                     name += " · " + row.Asset.VirtualPath;
                 int index = menu.ItemCount;
                 menu.AddItem(Typography.Fit(Typography.Regular, name, Shell.Type.Body, 360));
@@ -51,6 +52,7 @@ public partial class MainShell
         });
         menu.IndexPressed += index => LibraryAction(() =>
         {
+            if (_preview != viewport) return;
             string key = menu.GetItemMetadata((int)index).AsString();
             if (_preview.AssetComparison is { } comparison && (key == _previewAssetId || comparison.Contains(key)))
                 LocatePreviewAsset(key);
@@ -88,13 +90,6 @@ public partial class MainShell
         }
     }
 
-    private LibraryAssetRow? FindComparisonAsset(string key)
-    {
-        var library = SelectionLibrary(key);
-        var id = SelectionAssetId(key);
-        return library?.Api.Database.Find(id) is { Trashed: false } asset && asset.Id == id ? new(library, new(asset, null)) : null;
-    }
-
     private bool CanCompareAsset(string key) =>
         !_closing && !_libraryLoading && _comparisonRequest == null && _category != "Trash" &&
         _selectedKey != null && _selectedKey == _previewAssetId && key != _selectedKey &&
@@ -106,7 +101,7 @@ public partial class MainShell
         var candidates = keys.Distinct().Where(CanCompareAsset).ToArray();
         if (candidates.Length == 0) return;
         if (!_workspace.IsPanelVisible("preview")) _workspace.ShowPanel("preview");
-        PendingAnimationComparison = LoadComparisonAssets(candidates);
+        PendingAnimationComparison = Task.WhenAll(PendingAnimationComparison, LoadComparisonAssets(candidates));
     }
 
     private async Task LoadComparisonAssets(string[] keys)
@@ -129,7 +124,7 @@ public partial class MainShell
             foreach (var key in keys)
             {
                 if (!Current()) return;
-                if (FindComparisonAsset(key) is not { } row) continue;
+                if (FindLiveAsset(key) is not { } row) continue;
                 string name = showLibrary ? row.Library.Identity.Name + " · " + row.Asset.Name : row.Asset.Name;
                 _comparisonLoadingLibrary = row.Library;
                 try
@@ -152,14 +147,14 @@ public partial class MainShell
                         try
                         {
                             if (!Current()) return;
-                            if (FindComparisonAsset(key) == null) continue;
+                            if (FindLiveAsset(key) == null) continue;
                             _preview.AddComparisonAsset(primaryName, key, name, result.Root);
                         }
                         finally { if (result.Root.GetParent() == null) result.Root.Free(); }
                     }
                     else
                     {
-                        if (FindComparisonAsset(key) == null) continue;
+                        if (FindLiveAsset(key) == null) continue;
                         _preview.AddComparisonAsset(primaryName, key, name, source.Root);
                         source.TakeRoot();
                     }
@@ -194,9 +189,17 @@ public partial class MainShell
 
     private void RefreshComparisonAssets()
     {
-        if (_preview.AssetComparison is not { } comparison) return;
-        foreach (var (key, _) in comparison.ComparedAssets.ToArray())
-            if (FindComparisonAsset(key) == null) RemoveComparisonAsset(key);
+        foreach (var stage in _previewTabs.Stages)
+        {
+            var viewport = stage.Viewport;
+            if (viewport.AssetComparison is not { } comparison) continue;
+            foreach (var (key, _) in comparison.ComparedAssets.ToArray())
+                if (FindLiveAsset(key) == null)
+                {
+                    if (viewport == _preview) RemoveComparisonAsset(key);
+                    else viewport.RemoveComparisonAsset(key);
+                }
+        }
     }
 
     private void RemoveComparisonAsset(string key)

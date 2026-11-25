@@ -183,6 +183,14 @@ public partial class StatusBar : PanelContainer
     private readonly Label _message;
     private readonly Label _context;
     private readonly Label _scale;
+    private readonly Button _action = new()
+    {
+        Name = "StatusAction", ThemeTypeVariation = "GhostButton", Visible = false,
+        SizeFlagsVertical = SizeFlags.ShrinkCenter
+    };
+    private Action? _actionCallback;
+    private string _reportedMessage = "就绪";
+    private string? _dropHint;
 
     public StatusBar()
     {
@@ -197,11 +205,15 @@ public partial class StatusBar : PanelContainer
         _dot = new StatusDot(10);
         row.AddChild(_dot);
 
-        _message = Type.Build("就绪", Typography.Regular, Type.Caption, Tokens.Text2);
+        _message = Type.Build(_reportedMessage, Typography.Regular, Type.Caption, Tokens.Text2);
         _message.SizeFlagsHorizontal = SizeFlags.ExpandFill;
         _message.VerticalAlignment = VerticalAlignment.Center;
         _message.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
         row.AddChild(_message);
+
+        _action.AddThemeFontSizeOverride("font_size", Type.Caption);
+        _action.Pressed += () => _actionCallback?.Invoke();
+        row.AddChild(_action);
 
         _context = Type.MonoLabel("", Tokens.Text3);
         _context.VerticalAlignment = VerticalAlignment.Center;
@@ -222,10 +234,26 @@ public partial class StatusBar : PanelContainer
 
     public void Report(string message, Color? severity = null, string? context = null)
     {
-        _message.Text = message;
-        _message.TooltipText = message;
+        _reportedMessage = message;
+        UpdateMessage();
         _dot.SetTint(severity ?? Tokens.Success);
         if (context != null) _context.Text = context;
+    }
+
+    internal void SetDropHint(string? hint)
+    {
+        _dropHint = hint;
+        UpdateMessage();
+    }
+
+    private void UpdateMessage() => _message.Text = _message.TooltipText = _dropHint ?? _reportedMessage;
+
+    internal void SetAction(string text, string tooltip, Action? callback)
+    {
+        _actionCallback = callback;
+        _action.Text = text;
+        _action.TooltipText = tooltip;
+        _action.Visible = callback != null;
     }
 
     public void SetScaleLabel(string text) => _scale.Text = text;

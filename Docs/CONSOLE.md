@@ -1,4 +1,4 @@
-# Animanager hacking API · v0.4
+# Animanager hacking API · 0.5 Beta
 
 工作区与 Console 共用功能 API。按 **F12** 或反引号打开实际的 **Limbo Console 0.8.0**，支持命令帮助、Tab 补全与历史。打开后键盘输入由 Console 接收，关闭后恢复原控件焦点。插件来源：本机已有的 upstream 插件副本；[上游仓库](https://github.com/limbonaut/limbo_console)，MIT 许可位于 `addons/limbo_console/LICENSE.md`。未复制其社区 C# wrapper，直接使用 Godot Callable 注册带类型的 C# 方法。
 

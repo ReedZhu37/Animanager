@@ -27,7 +27,7 @@ public static class ShellVisualTests
             api.RenameAsset(walk.Id, "中文名称测试_角色行走动画_需要截断但可以完整查看的长名称");
             commands.Load(walk.Id); await commands.PendingTask; await owner.PendingBrowse;
             var browser = (AssetBrowser)owner.FindChild("AssetBrowser", true, false)!;
-            var stage = (PreviewStage)owner.Workspace.Panel("preview");
+            var stage = ((PreviewTabs)owner.Workspace.Panel("preview")).ActiveStage;
             stage.Viewport.Seek(.3);
             var instance = stage.Viewport.Model!.GetInstanceId();
             owner.GetWindow().Mode = Window.ModeEnum.Windowed;

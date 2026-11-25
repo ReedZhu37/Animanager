@@ -545,7 +545,7 @@ public static class AssetBrowseTests
         search.Text = asset.Name;
         commands.Load(asset.Id);
         await commands.PendingTask;
-        var preview = ((Animanager.UI.Shell.PreviewStage)owner.Workspace.Panel("preview")).Viewport;
+        var preview = ((Animanager.UI.Shell.PreviewTabs)owner.Workspace.Panel("preview")).ActiveStage.Viewport;
         var previewModel = preview.Model!.GetInstanceId();
         double playhead = Math.Min(.2, preview.Duration * .5);
         preview.Seek(playhead);

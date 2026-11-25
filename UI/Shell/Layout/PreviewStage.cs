@@ -25,7 +25,22 @@ public partial class PreviewStage : Control
     };
     private readonly Label _loadStatus = new() { Name = "PreviewLoadStatus", AutowrapMode = TextServer.AutowrapMode.WordSmart, MaxLinesVisible = 2, Visible = false };
     public event Action? SettingsPressed;
-    public void SetLoadStatus(string text) { _loadStatus.Text = text; _loadStatus.TooltipText = text; _loadStatus.Visible = text.Length > 0; }
+    private readonly Button _retry = new() { Name = "RetryPreview", Text = "重试", Visible = false };
+    private readonly PanelContainer _paneHeader = new() { Visible = false, MouseFilter = MouseFilterEnum.Ignore };
+    private readonly Label _paneTitle = Type.CaptionLabel("", Tokens.Text);
+    private bool _showPaneHeader;
+    private bool _paneActive;
+    private string[]? _transportClips;
+
+    public void SetLoadStatus(string text, Action? retry = null)
+    {
+        _loadStatus.Text = text; _loadStatus.TooltipText = text; _loadStatus.Visible = text.Length > 0;
+        _retryAction = retry;
+        _retry.Visible = retry != null;
+        _loadStatus.OffsetRight = retry == null ? -16 : -82;
+    }
+
+    private Action? _retryAction;
 
     public event Action? PlayPressed;
     public event Action<double>? SpeedChanged;
@@ -42,6 +57,8 @@ public partial class PreviewStage : Control
     private readonly Label _time;
     private readonly IconButton _play;
     private readonly IconButton _loop;
+    private readonly CheckButton _clay = new() { Text = "粘土材质", ButtonPressed = true };
+    private readonly CheckButton _grid = new() { Text = "地面网格", ButtonPressed = true };
     private readonly HSlider _timeline;
     private readonly HSlider _speed;
     private readonly VBoxContainer _clipList;
@@ -78,10 +95,8 @@ public partial class PreviewStage : Control
         settingsColumn.AddChild(_title); settingsColumn.AddChild(_badges); settingsColumn.AddChild(CharacterSlot);
         settingsColumn.AddChild(WeaponSlot);
         settingsColumn.AddChild(new HSeparator());
-        var clay = new CheckButton { Text = "粘土材质", ButtonPressed = true };
-        clay.Toggled += _ => ClayToggled?.Invoke(); settingsColumn.AddChild(clay);
-        var grid = new CheckButton { Text = "地面网格", ButtonPressed = true };
-        grid.Toggled += Viewport.SetGridVisible; settingsColumn.AddChild(grid);
+        _clay.Toggled += _ => ClayToggled?.Invoke(); settingsColumn.AddChild(_clay);
+        _grid.Toggled += Viewport.SetGridVisible; settingsColumn.AddChild(_grid);
         settingsColumn.AddChild(ResetCameraToggle);
         var projection = new Button { Text = "切换透视 / 正交" };
         projection.Pressed += Viewport.ToggleProjection; settingsColumn.AddChild(projection);
@@ -94,6 +109,9 @@ public partial class PreviewStage : Control
         AddChild(_loadStatus); _loadStatus.SetAnchorsPreset(LayoutPreset.BottomWide);
         _loadStatus.OffsetLeft = 16; _loadStatus.OffsetRight = -16; _loadStatus.OffsetTop = -120; _loadStatus.OffsetBottom = -88;
         _loadStatus.AddThemeColorOverride("font_color", Tokens.Warn);
+        AddChild(_retry); _retry.SetAnchorsPreset(LayoutPreset.BottomRight);
+        _retry.OffsetLeft = -76; _retry.OffsetRight = -12;
+        _retry.Pressed += () => _retryAction?.Invoke();
         AddChild(_compactClip); _compactClip.SetAnchorsPreset(LayoutPreset.BottomRight);
         _compactClip.OffsetLeft = -152; _compactClip.OffsetRight = -12; _compactClip.OffsetTop = -114; _compactClip.OffsetBottom = -88;
         _compactClip.ItemSelected += index => ClipSelected?.Invoke(_compactClip.GetItemText((int)index));
@@ -138,6 +156,12 @@ public partial class PreviewStage : Control
         clipColumn.AddChild(clipScroll);
 
         BuildTransport(out _play, out _timeline, out _time, out _speed, out _loop);
+        AddChild(_paneHeader);
+        _paneHeader.SetAnchorsPreset(LayoutPreset.TopWide);
+        _paneHeader.OffsetBottom = 24;
+        _paneTitle.MouseFilter = MouseFilterEnum.Ignore;
+        _paneTitle.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
+        _paneHeader.AddChild(_paneTitle);
         Resized += AdaptHeight;
     }
 
@@ -145,15 +169,44 @@ public partial class PreviewStage : Control
     {
         bool compact = Size.Y < 240;
         Viewport.CustomMinimumSize = new(160, compact ? 24 : 120);
-        Viewport.OffsetTop = 0;
+        Viewport.OffsetTop = _showPaneHeader ? 24 : 0;
         Viewport.OffsetBottom = compact ? -64 : -84;
-        _clipPanel.OffsetTop = 8;
+        _clipPanel.OffsetTop = _showPaneHeader ? 32 : 8;
         _clipPanel.OffsetBottom = compact ? -64 : -84;
         _transport.OffsetTop = compact ? -58 : -76;
         _transport.OffsetBottom = compact ? -4 : -8;
         _loadStatus.OffsetTop = compact ? -110 : -120;
         _loadStatus.OffsetBottom = compact ? -64 : -84;
+        _retry.OffsetTop = compact ? -96 : -116;
+        _retry.OffsetBottom = compact ? -68 : -88;
         AdaptClips();
+    }
+
+    internal void SetPaneTitle(string title) => _paneTitle.Text = title;
+
+    internal void ResetPreviewSettings()
+    {
+        _clay.SetPressedNoSignal(true);
+        _grid.SetPressedNoSignal(true);
+        Viewport.SetClay(true);
+        Viewport.SetGridVisible(true);
+        Viewport.SetLoop(true);
+        SetLoop(true);
+        Viewport.SetSpeed(1);
+        _speed.Value = 1;
+        if (Viewport.Orthographic) Viewport.ToggleProjection();
+        Viewport.FrameModel();
+    }
+
+    internal void SetPanePresentation(bool multiple, bool active)
+    {
+        if (_showPaneHeader == multiple && _paneActive == active) return;
+        _showPaneHeader = multiple;
+        _paneActive = active;
+        _paneHeader.Visible = multiple;
+        _paneHeader.AddThemeStyleboxOverride("panel", Surfaces.Fill(active ? Tokens.AccentWash : Tokens.Panel,
+            padX: 8, border: active ? Tokens.Accent : Tokens.Line));
+        AdaptHeight();
     }
     private void AdaptClips()
     {
@@ -279,6 +332,29 @@ public partial class PreviewStage : Control
         for (int i = 0; i < _compactClip.ItemCount; i++) if (_compactClip.GetItemText(i) == current) _compactClip.Select(i);
         foreach (var child in _clipList.GetChildren())
             if (child is ClipButton button) button.SetActive(button.Clip == current);
+    }
+
+    internal void SyncTransport()
+    {
+        if (!Mathf.IsEqualApprox(_speed.Value, Viewport.PlaybackSpeed)) _speed.Value = Viewport.PlaybackSpeed;
+        if (!ReferenceEquals(_transportClips, Viewport.Clips))
+        {
+            _transportClips = Viewport.Clips;
+            SetClips(Viewport.Clips, Viewport.CurrentClip);
+        }
+        SetCurrentClip(Viewport.CurrentClip);
+        SetComparing(Viewport.AssetComparison != null);
+        SetPlaying(Viewport.TransportPlaying);
+        _play.Disabled = Viewport.TransportDuration <= 0;
+        _timeline.Editable = Viewport.TransportDuration > 0;
+        if (Viewport.AssetComparison is { } comparison) SetComparisonTime(comparison.Playhead, comparison.Duration);
+        else SetTime(Viewport.Playhead, Viewport.Duration, Viewport.DisplayFps);
+    }
+
+    internal void SyncSettings()
+    {
+        _clay.SetPressedNoSignal(Viewport.ClayEnabled);
+        _grid.SetPressedNoSignal(Viewport.GridVisible);
     }
 
     public void SetTitle(string title, string badges)

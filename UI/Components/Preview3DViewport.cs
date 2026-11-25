@@ -35,6 +35,9 @@ public partial class Preview3DViewport : SubViewportContainer
     private bool PreserveAnimationCamera => CurrentClip.Length > 0 && !ResetCameraOnAnimationChange;
     private bool _loop=true;
     private bool _clay=true;
+    private bool _presentationVisible = true;
+    internal double PlaybackSpeed => _speed;
+    internal bool LoopEnabled => _loop;
     private BoneAttachment3D[] _attachments=[];
     private BoneScreenLabels? _screenLabels;
     public Vector2? ProjectLabel(Vector3 position)
@@ -73,8 +76,24 @@ public partial class Preview3DViewport : SubViewportContainer
         _screenLabels = new BoneScreenLabels { Name = "BoneScreenLabels", Preview = this, MouseFilter = MouseFilterEnum.Ignore, ClipContents = true };
         AddChild(_screenLabels); _screenLabels.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         BuildNavigation();
-        UpdateCamera();GuiInput+=HandleInput;Resized+=UpdateCamera;VisibilityChanged+=()=>{if(IsVisibleInTree())UpdateCamera();};
+        UpdateCamera();GuiInput+=HandleInput;Resized+=UpdateCamera;
+        VisibilityChanged += () =>
+        {
+            if (IsVisibleInTree() && _presentationVisible) UpdateCamera();
+            else View.RenderTargetUpdateMode = SubViewport.UpdateMode.Disabled;
+        };
         SetProcess(false);
+    }
+
+    internal void SetPresentationVisible(bool visible)
+    {
+        if (_presentationVisible != visible)
+        {
+            _presentationVisible = visible;
+            ProcessMode = visible ? ProcessModeEnum.Inherit : ProcessModeEnum.Disabled;
+            if (visible && View != null) UpdateCamera();
+        }
+        if (!visible && View != null) View.RenderTargetUpdateMode = SubViewport.UpdateMode.Disabled;
     }
     public void Clear()
     {
@@ -183,7 +202,8 @@ public partial class Preview3DViewport : SubViewportContainer
         }
         UpdateWeaponPreviewPose();
         _screenLabels?.QueueRedraw();
-        if (View != null) View.RenderTargetUpdateMode = IsVisibleInTree() ? SubViewport.UpdateMode.Once : SubViewport.UpdateMode.Disabled;
+        if (View != null) View.RenderTargetUpdateMode = IsVisibleInTree() && _presentationVisible
+            ? SubViewport.UpdateMode.Once : SubViewport.UpdateMode.Disabled;
     }
     public void Zoom(float multiplier){_distance=Mathf.Clamp(_distance*multiplier,.05f,5000);UpdateCamera();}
     public void FocusPoint(Vector3 point){_target=point;UpdateCamera();}

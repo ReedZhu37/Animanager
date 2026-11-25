@@ -20,6 +20,7 @@ public partial class SideBar : PanelContainer
     public event Action<string>? EditTagGroup;
     public event Action<string>? TagSelected;
     public event Action<string>? TagGroupSelected;
+    internal event Action<string, string[]>? AssetsDroppedOnTag;
     private readonly VBoxContainer _collections = new();
     private readonly VBoxContainer _openLibraries = new() { Name = "OpenLibrariesList", Visible = false };
     private readonly MenuButton _collectionRail = new() { Text = "集合", TooltipText = "选择集合" };
@@ -210,6 +211,7 @@ public partial class SideBar : PanelContainer
 
     internal void SetTagSections((string GroupId, string Group, (string Name, int Count)[] Tags)[] sections)
     {
+        HighlightDrop(null);
         _foldedTagGroups.IntersectWith(sections.Select(section => section.GroupId));
         _tagButtons.Clear();
         foreach (var child in _tags.GetChildren())
@@ -267,11 +269,14 @@ public partial class SideBar : PanelContainer
                 var chip = new Button
                 {
                     Text = Typography.Fit(Typography.Regular, label, Type.Caption, 140),
-                    TooltipText = label + "\n点击加入或移除标签筛选", ToggleMode = true,
+                    TooltipText = label + "\n点击切换筛选，拖入资产可添加标签", ToggleMode = true,
                     CustomMinimumSize = new Vector2(0, 22), ThemeTypeVariation = "Chip"
                 };
                 chip.AddThemeFontSizeOverride("font_size", Type.Caption);
                 chip.Pressed += () => TagSelected?.Invoke(name);
+                // Saving can rebuild the tag chips, so wait until Godot finishes dispatching the drop.
+                EnableEditableAssetDrop(chip, keys => Callable.From(() => AssetsDroppedOnTag?.Invoke(name, keys)).CallDeferred(),
+                    assets => $"给 {assets} 个资产添加「{name}」");
                 flow.AddChild(chip);
                 _tagButtons.Add((name, chip));
             }

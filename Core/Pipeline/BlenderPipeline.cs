@@ -12,6 +12,8 @@ public sealed class BlenderPipeline
         ScriptPath=scriptPath;
         Executable=Environment.GetEnvironmentVariable("BLENDER_BIN")??"";
         if(!Available && File.Exists(@"D:\Blender\5.2\blender.exe"))Executable=@"D:\Blender\5.2\blender.exe";
+        if(!Available && OperatingSystem.IsMacOS() && File.Exists("/Applications/Blender.app/Contents/MacOS/Blender"))
+            Executable="/Applications/Blender.app/Contents/MacOS/Blender";
     }
     public void Configure(string path)
     {

@@ -13,6 +13,69 @@ public partial class MainShell
     private Label _assetTagScope = null!, _assetTagError = null!;
     private (LibrarySession Library, string[] Ids)[] _assetTagTargets = [];
     private Dictionary<string, (string Name, int Usage)> _assetTagChoices = new(TagComparer);
+    private (string Tag, Dictionary<string, string[]> Libraries)? _lastAssetTagDrop;
+
+    private void DropAssetsOnTag(string tag, string[] keys)
+    {
+        var groups = DraggedAssetGroups(keys);
+        if (groups.Length == 0) return;
+
+        var additions = new Dictionary<string, string[]>();
+        try
+        {
+            foreach (var (library, ids) in groups)
+            {
+                var added = library.Api.ChangeAssetTag(ids, tag, add: true);
+                if (added.Length > 0) additions.Add(library.Identity.Id, added);
+            }
+        }
+        finally
+        {
+            if (additions.Count > 0)
+            {
+                _lastAssetTagDrop = (tag, additions);
+                SyncAssetTagDropUndo();
+                Refresh();
+            }
+        }
+
+        int count = additions.Values.Sum(ids => ids.Length);
+        SetStatus(count > 0 ? $"已为 {count} 个资产添加「{tag}」" : $"所拖动的资产已有「{tag}」");
+    }
+
+    private void UndoAssetTagDrop()
+    {
+        if (_closing || _libraryLoading || _lastAssetTagDrop is not { } undo) return;
+
+        int count = 0;
+        try
+        {
+            foreach (var (libraryId, ids) in undo.Libraries.ToArray())
+            {
+                if (_libraries.FindOpenLibrary(libraryId) is not { } library) continue;
+                var live = library.Api.Database.ExistingIds(ids, trash: false);
+                if (live.Length > 0) count += library.Api.ChangeAssetTag(live, undo.Tag, add: false).Length;
+                undo.Libraries.Remove(libraryId);
+            }
+        }
+        finally
+        {
+            if (undo.Libraries.Count == 0) _lastAssetTagDrop = null;
+            SyncAssetTagDropUndo();
+            if (count > 0) Refresh();
+        }
+
+        SetStatus(undo.Libraries.Count > 0 ? $"已从 {count} 个资产撤销「{undo.Tag}」 · 请打开其他来源库后继续撤销"
+            : $"已撤销打标 · 从 {count} 个资产移除「{undo.Tag}」");
+    }
+
+    private void SyncAssetTagDropUndo()
+    {
+        if (_lastAssetTagDrop is { } undo)
+            _workspace.Status.SetAction("撤销打标", $"撤销为 {undo.Libraries.Values.Sum(ids => ids.Length)} 个资产添加「{undo.Tag}」",
+                () => LibraryAction(UndoAssetTagDrop));
+        else _workspace.Status.SetAction("", "", null);
+    }
 
     private void BuildAssetTagDialog()
     {

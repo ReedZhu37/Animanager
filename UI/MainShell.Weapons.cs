@@ -11,6 +11,8 @@ public partial class MainShell
     {
         var library = new WeaponProfileLibrary(Path.Combine(Path.GetDirectoryName(_preferencesPath)!, "Weapons"));
         WeaponProfile active = WeaponProfile.Reference;
+        WeaponProfile defaultProfile = active;
+        var observedViewport = _preview;
         WeaponProfile[] entries = [];
         var overviewHeader = Row(overview);
         var overviewLabel = Label("武器 Profile", true, 13);
@@ -25,7 +27,7 @@ public partial class MainShell
             Name = "WeaponTrailHeatmap", Text = "速度热力模式",
             TooltipText = "按武器尖端速度着色。蓝色慢，黄色居中，红色快。当前对比共用同一色标。"
         };
-        heatmap.Toggled += _preview.SetWeaponHeatmap;
+        heatmap.Toggled += value => _preview.SetWeaponHeatmap(value);
         overview.AddChild(heatmap);
         var coverage = Wrapped("");
         coverage.Name = "OverviewWeaponStatus";
@@ -98,7 +100,7 @@ public partial class MainShell
         meshPreview.SetClay(false);
         var actions = Row(form);
         var showBox = new CheckButton { Name = "ShowWeaponTrailBox", Text = "显示拖尾盒" };
-        showBox.Toggled += _preview.SetWeaponBoxVisible;
+        showBox.Toggled += value => _preview.SetWeaponBoxVisible(value);
         actions.AddChild(showBox);
         var status = Wrapped("");
         form.AddChild(status);
@@ -247,6 +249,7 @@ public partial class MainShell
         {
             enabled.SetPressedNoSignal(_preview.WeaponPreviewEnabled);
             heatmap.SetPressedNoSignal(_preview.WeaponHeatmapEnabled);
+            showBox.SetPressedNoSignal(_preview.WeaponBoxVisible);
             coverage.Text = _preview.CanPreviewWeapons && _preview.AvailableWeaponCount < active.Weapons.Length
                 ? $"{_preview.AvailableWeaponCount}/{active.Weapons.Length} 件可挂接 · 请检查挂点" : "";
             coverage.Visible = coverage.Text.Length > 0;
@@ -263,7 +266,7 @@ public partial class MainShell
         {
             _preview.ApplyWeaponProfile(profile, library.ModelPath, show);
             library.Use(profile);
-            active = profile;
+            active = defaultProfile = profile;
             ReloadOverview();
         }
         void Handle(Action action)
@@ -285,8 +288,21 @@ public partial class MainShell
             PopupFit(dialog, new(660, 720));
         }
 
-        _preview.WeaponPreviewChanged += UpdateOverview;
-        enabled.Toggled += _preview.SetWeaponPreviewEnabled;
+        observedViewport.WeaponPreviewChanged += UpdateOverview;
+        FocusedViewportChanged += () =>
+        {
+            observedViewport.WeaponPreviewChanged -= UpdateOverview;
+            observedViewport = _preview;
+            active = _preview.AppliedWeaponProfile ?? defaultProfile;
+            if (_preview.AppliedWeaponProfile == null)
+            {
+                try { _preview.ApplyWeaponProfile(active, library.ModelPath, enable: false); }
+                catch (Exception error) { GD.PushWarning("无法恢复武器 Profile：" + error.Message); }
+            }
+            observedViewport.WeaponPreviewChanged += UpdateOverview;
+            ReloadOverview();
+        };
+        enabled.Toggled += value => _preview.SetWeaponPreviewEnabled(value);
         overviewChoice.ItemSelected += index =>
         {
             try { Apply(entries[(int)index], show: false); }
@@ -336,7 +352,7 @@ public partial class MainShell
 
         try
         {
-            active = library.Active();
+            active = defaultProfile = library.Active();
             ReloadOverview();
             _preview.ApplyWeaponProfile(active, library.ModelPath, enable: false);
         }

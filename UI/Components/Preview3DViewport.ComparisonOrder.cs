@@ -47,7 +47,7 @@ public partial class Preview3DViewport
     private void FitComparisonOrder()
     {
         if (!_comparisonOrder.Visible) return;
-        _comparisonOrder.Position = new Vector2(8, Size.Y >= 200 ? 76 : 38);
+        _comparisonOrder.Position = new Vector2(8, Size.Y >= 296 ? 76 : 38);
         _comparisonOrder.Size = new Vector2(Math.Min(372, Size.X - 16), Math.Min(288, Size.Y - _comparisonOrder.Position.Y - 8));
     }
 

@@ -6,7 +6,9 @@ namespace Animanager.Core.Pipeline;
 /// <summary>Isolated local parser. Never starts Unreal or uploads source files.</summary>
 public sealed class UassetPipeline
 {
-    public string Executable {get;}=RuntimePaths.Bundled(Godot.OS.HasFeature("editor")?".runtime/cue-importer/CueImporter.exe":"Importers/Cue4Parse/CueImporter.exe");
+    public string Executable {get;}=RuntimePaths.Bundled(
+        (Godot.OS.HasFeature("editor") ? ".runtime/cue-importer/" : "Importers/Cue4Parse/") +
+        (OperatingSystem.IsWindows() ? "CueImporter.exe" : "CueImporter"));
     public bool Available=>File.Exists(Executable);
     public const string Profile="auto";
     public async Task<UassetReport> ConvertAsync(string input,string output,bool inspect,IProgress<string>? progress,CancellationToken ct)

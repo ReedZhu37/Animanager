@@ -1,3 +1,5 @@
+using Animanager.Core.Storage;
+
 namespace Animanager.Core;
 
 public sealed partial class WorkspaceApi
@@ -64,9 +66,26 @@ public sealed partial class WorkspaceApi
     {
         var tags = ParseTags(text).ToArray();
         if (tags.Length == 0) throw new ArgumentException("请输入至少一个标签。");
-        Edit(ids, a => a with { Tags = add ? MergeTags(a.Tags, tags)
-            : string.Join(" ", ParseTags(a.Tags).Except(tags, StringComparer.OrdinalIgnoreCase)) });
+        Edit(ids, asset => asset with { Tags = ChangeTagText(asset.Tags, tags, add) });
     }
+
+    internal string[] ChangeAssetTag(string[] ids, string tag, bool add)
+    {
+        if (!AssetDatabase.IsTagToken(tag)) throw new ArgumentException("包含无效的标签。");
+        string[] tags = [tag];
+        var changed = new List<string>();
+        Edit(ids, asset =>
+        {
+            if (ParseTags(asset.Tags).Contains(tag, StringComparer.OrdinalIgnoreCase) == add) return asset;
+            changed.Add(asset.Id);
+            return asset with { Tags = ChangeTagText(asset.Tags, tags, add) };
+        });
+        return changed.ToArray();
+    }
+
+    private static string ChangeTagText(string current, string[] tags, bool add) => add
+        ? MergeTags(current, tags)
+        : string.Join(" ", ParseTags(current).Except(tags, StringComparer.OrdinalIgnoreCase));
 
     internal void AddAssetTags(IReadOnlyDictionary<string, string[]> additions) =>
         Edit(additions.Keys.ToArray(), asset => asset with { Tags = MergeTags(asset.Tags, additions[asset.Id]) });

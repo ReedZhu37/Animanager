@@ -21,6 +21,7 @@ public partial class MainShell
     private Button _attributeToggle = null!;
     private VBoxContainer _attributePanel = null!;
     private readonly HashSet<string> _selectedTags = new(StringComparer.OrdinalIgnoreCase);
+    private (TagFilterContext Context, int Page)? _pageBeforeTagFilter;
     private OptionButton _tagMatchMode = null!;
     private MenuButton _tagPicker = null!;
     private OptionButton _skeletonFilter = null!;
@@ -54,6 +55,8 @@ public partial class MainShell
         internal Task<AssetItem[]> Assets { get; } = assets;
         internal int Next;
     }
+    private readonly record struct TagFilterContext(string Category, string? Library, int LibraryRevision, string Query,
+        AssetAttributeFilter Filter, AssetSort Sort, (MotionReference Reference, double Window, double Minimum)? Motion);
     private AssetThumbnailRenderer? _thumbnailRenderer;
     private Task _pendingBrowse = Task.CompletedTask;
     private LibrarySession[] _durationProgressLibraries = [];
@@ -267,8 +270,10 @@ public partial class MainShell
 
     private void ToggleAssetTag(string tag)
     {
+        RememberPageBeforeTagFilter();
         if (!_selectedTags.Add(tag)) _selectedTags.Remove(tag);
-        RefreshAfterFilterChange();
+        if (_selectedTags.Count == 0) RestorePageAfterTagFilter();
+        else RefreshAfterFilterChange();
     }
 
     private void BrowseByTag(string tag)
@@ -277,9 +282,28 @@ public partial class MainShell
         ToggleAssetTag(tag);
     }
 
-    private void RefreshAfterFilterChange()
+    private TagFilterContext CurrentTagFilterContext => new(_category, _assetLibraryFilter, _browseLibraryRevision,
+        _search.Text, _attributeFilter, _sort, _motionReference is { } motion ? (motion, _motionWindow.Value, _motionMinimum.Value) : null);
+
+    private void RememberPageBeforeTagFilter()
     {
-        _page = 0;
+        if (_selectedTags.Count == 0 && _page > 0 && _publishedBrowseScope.Query == _search.Text)
+            _pageBeforeTagFilter = (CurrentTagFilterContext, _page);
+    }
+
+    private int PageBeforeTagFilter() =>
+        _pageBeforeTagFilter is { } previous && previous.Context == CurrentTagFilterContext ? previous.Page : 0;
+
+    private void RestorePageAfterTagFilter()
+    {
+        int page = PageBeforeTagFilter();
+        _pageBeforeTagFilter = null;
+        RefreshAfterFilterChange(page);
+    }
+
+    private void RefreshAfterFilterChange(int page = 0)
+    {
+        _page = page;
         _browser.Scroll.ScrollVertical = 0;
         Refresh();
     }
@@ -316,7 +340,10 @@ public partial class MainShell
 
     private void ResetAssetFilters(bool refresh)
     {
-        var changed = _attributeFilter.IsActive || _selectedTags.Count > 0 || _motionReference != null;
+        bool otherFiltersActive = _attributeFilter.IsActive || _motionReference != null;
+        bool changed = otherFiltersActive || _selectedTags.Count > 0;
+        int page = refresh && !otherFiltersActive ? PageBeforeTagFilter() : 0;
+        _pageBeforeTagFilter = null;
         ClearMotionFilter();
         _customMotionWindow = false;
         _motionWindow.SetValueNoSignal(1);
@@ -327,7 +354,7 @@ public partial class MainShell
         _durationFilter.Text = _fpsFilter.Text = "";
         _skeletonFilter.Select(0);
         SetAttributeHint("");
-        if (changed && refresh) RefreshAfterFilterChange();
+        if (changed && refresh) RefreshAfterFilterChange(page);
         else SyncFilterChips();
     }
 
@@ -340,7 +367,8 @@ public partial class MainShell
                 break;
             case "tags":
                 _selectedTags.Clear();
-                break;
+                RestorePageAfterTagFilter();
+                return;
             case "skeleton":
                 _skeletonFilter.Select(0);
                 _attributeFilter = _attributeFilter with { SkeletonId = null, UnknownSkeleton = false };
